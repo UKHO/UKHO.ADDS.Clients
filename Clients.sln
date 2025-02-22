@@ -19,6 +19,16 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "UKHO.ADDS.Clients.PermitSer
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "UKHO.ADDS.Clients.SalesCatalogueService.Tests", "test\UKHO.ADDS.Clients.SalesCatalogueService.Tests\UKHO.ADDS.Clients.SalesCatalogueService.Tests.csproj", "{B0A88348-1E24-483F-BAFE-58945972122C}"
 EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "@RemoveWhenNuGetAvailable", "@RemoveWhenNuGetAvailable", "{64C3D312-17EE-408C-A187-0AC1896DD194}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "UKHO.ADDS.Infrastructure.Results", "temp\UKHO.ADDS.Infrastructure.Results\UKHO.ADDS.Infrastructure.Results.csproj", "{06A7C139-C3E9-4C6E-845D-CDC29421E111}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "UKHO.ADDS.Infrastructure.Serialization", "temp\UKHO.ADDS.Infrastructure.Serialization\UKHO.ADDS.Infrastructure.Serialization.csproj", "{3B0A1B20-EE25-4AA0-B990-67AB6ECBE879}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "UKHO.ADDS.Clients.FileShareService.Admin", "src\UKHO.ADDS.Clients.FileShareService.Admin\UKHO.ADDS.Clients.FileShareService.Admin.csproj", "{774DA6DD-B70F-4822-8C55-A26A3C3BA260}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "UKHO.ADDS.Clients.FileShareService.Admin.Tests", "test\UKHO.ADDS.Clients.FileShareService.Admin.Tests\UKHO.ADDS.Clients.FileShareService.Admin.Tests.csproj", "{B419FD3A-6C4D-4098-998F-E649060C3DCF}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -53,6 +63,22 @@ Global
 		{B0A88348-1E24-483F-BAFE-58945972122C}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{B0A88348-1E24-483F-BAFE-58945972122C}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{B0A88348-1E24-483F-BAFE-58945972122C}.Release|Any CPU.Build.0 = Release|Any CPU
+		{06A7C139-C3E9-4C6E-845D-CDC29421E111}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{06A7C139-C3E9-4C6E-845D-CDC29421E111}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{06A7C139-C3E9-4C6E-845D-CDC29421E111}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{06A7C139-C3E9-4C6E-845D-CDC29421E111}.Release|Any CPU.Build.0 = Release|Any CPU
+		{3B0A1B20-EE25-4AA0-B990-67AB6ECBE879}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{3B0A1B20-EE25-4AA0-B990-67AB6ECBE879}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{3B0A1B20-EE25-4AA0-B990-67AB6ECBE879}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{3B0A1B20-EE25-4AA0-B990-67AB6ECBE879}.Release|Any CPU.Build.0 = Release|Any CPU
+		{774DA6DD-B70F-4822-8C55-A26A3C3BA260}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{774DA6DD-B70F-4822-8C55-A26A3C3BA260}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{774DA6DD-B70F-4822-8C55-A26A3C3BA260}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{774DA6DD-B70F-4822-8C55-A26A3C3BA260}.Release|Any CPU.Build.0 = Release|Any CPU
+		{B419FD3A-6C4D-4098-998F-E649060C3DCF}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{B419FD3A-6C4D-4098-998F-E649060C3DCF}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{B419FD3A-6C4D-4098-998F-E649060C3DCF}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{B419FD3A-6C4D-4098-998F-E649060C3DCF}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -61,5 +87,8 @@ Global
 		{FB248CD7-435C-443F-8B40-237DA8F2FBDF} = {D8F713D6-4ADB-4F17-A8AC-75135F64B219}
 		{853E4968-390A-4F28-B550-3CCB1E0BAA3E} = {D8F713D6-4ADB-4F17-A8AC-75135F64B219}
 		{B0A88348-1E24-483F-BAFE-58945972122C} = {D8F713D6-4ADB-4F17-A8AC-75135F64B219}
+		{06A7C139-C3E9-4C6E-845D-CDC29421E111} = {64C3D312-17EE-408C-A187-0AC1896DD194}
+		{3B0A1B20-EE25-4AA0-B990-67AB6ECBE879} = {64C3D312-17EE-408C-A187-0AC1896DD194}
+		{B419FD3A-6C4D-4098-998F-E649060C3DCF} = {D8F713D6-4ADB-4F17-A8AC-75135F64B219}
 	EndGlobalSection
 EndGlobal

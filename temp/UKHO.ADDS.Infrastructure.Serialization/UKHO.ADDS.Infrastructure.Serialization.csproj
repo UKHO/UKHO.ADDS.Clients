@@ -1,0 +1,11 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net8.0</TargetFramework>
+    <Title>UKHO Infrastructure Serialization</Title>
+    <PackageId>$(AssemblyName)</PackageId>
+    <Authors>Abzu</Authors>
+    <GeneratePackageOnBuild>True</GeneratePackageOnBuild>
+  </PropertyGroup>
+
+</Project>

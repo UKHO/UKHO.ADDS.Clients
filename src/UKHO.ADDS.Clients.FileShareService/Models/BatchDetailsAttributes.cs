@@ -2,7 +2,7 @@ using System.Runtime.Serialization;
 using System.Text;
 using UKHO.ADDS.Infrastructure.Serialization.Json;
 
-namespace UKHO.FileShareClient.Models
+namespace UKHO.ADDS.Clients.FileShareService.Models
 {
     [DataContract]
     public class BatchDetailsAttributes : IEquatable<BatchDetailsAttributes>

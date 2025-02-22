@@ -1,6 +1,6 @@
 ﻿using UKHO.ADDS.Infrastructure.Serialization.Json;
 
-namespace UKHO.FileShareClient.Internal
+namespace UKHO.ADDS.Clients.FileShareService.Extensions
 {
     internal static class HttpResponseMessageExtensions
     {

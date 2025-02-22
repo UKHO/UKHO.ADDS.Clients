@@ -1,7 +1,7 @@
 ﻿using System.Text;
 using System.Text.Json.Serialization;
 
-namespace UKHO.FileShareClient.Models
+namespace UKHO.ADDS.Clients.FileShareService.Models
 {
     public class BatchAttributesSearchResponse
     {

@@ -2,7 +2,7 @@ using System.Text;
 using System.Text.Json.Serialization;
 using UKHO.ADDS.Infrastructure.Serialization.Json;
 
-namespace UKHO.FileShareClient.Models
+namespace UKHO.ADDS.Clients.FileShareService.Models
 {
     public class BatchSearchResponse : IEquatable<BatchSearchResponse>
     {

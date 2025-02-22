@@ -2,11 +2,11 @@
 using System.Text;
 using System.Text.Encodings.Web;
 using UKHO.ADDS.Clients.FileShareService.Authentication;
+using UKHO.ADDS.Clients.FileShareService.Extensions;
 using UKHO.ADDS.Clients.FileShareService.Factories;
-using UKHO.FileShareClient.Internal;
-using UKHO.FileShareClient.Models;
+using UKHO.ADDS.Clients.FileShareService.Models;
 
-namespace UKHO.FileShareClient
+namespace UKHO.ADDS.Clients.FileShareService
 {
     public interface IFileShareApiClient
     {

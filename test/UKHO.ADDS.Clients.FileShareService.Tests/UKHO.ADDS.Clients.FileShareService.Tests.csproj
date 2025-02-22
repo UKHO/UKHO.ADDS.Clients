@@ -26,4 +26,8 @@
     <ProjectReference Include="..\..\src\UKHO.ADDS.Clients.FileShareService\UKHO.ADDS.Clients.FileShareService.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <InternalsVisibleTo Include="UKHO.ADDS.Clients.FileShareService.Admin.Tests"/>
+  </ItemGroup>
+
 </Project>

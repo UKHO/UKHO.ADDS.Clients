@@ -1,10 +1,9 @@
 using System.Net;
-using FileShareClientTestsCommon.Helpers;
 using NUnit.Framework;
-using UKHO.FileShareClient;
-using UKHO.FileShareClient.Models;
+using UKHO.ADDS.Clients.FileShareService.Models;
+using UKHO.ADDS.Clients.FileShareService.Tests.Helpers;
 
-namespace FileShareClientTests
+namespace UKHO.ADDS.Clients.FileShareService.Tests
 {
     public class GetBatchStatusTests
     {

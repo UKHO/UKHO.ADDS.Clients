@@ -1,11 +1,10 @@
 using System.Collections.Concurrent;
 using System.Net;
 using System.Text;
-using FileShareClientTestsCommon.Helpers;
 using NUnit.Framework;
-using UKHO.FileShareClient;
+using UKHO.ADDS.Clients.FileShareService.Tests.Helpers;
 
-namespace FileShareClientTests
+namespace UKHO.ADDS.Clients.FileShareService.Tests
 {
     public class DownloadFilesTests
     {

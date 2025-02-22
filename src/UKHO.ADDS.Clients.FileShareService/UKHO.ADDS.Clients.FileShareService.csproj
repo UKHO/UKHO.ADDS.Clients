@@ -18,7 +18,9 @@
   </ItemGroup>
 
   <ItemGroup>
+    <InternalsVisibleTo Include="UKHO.ADDS.Clients.FileShareService.Admin" />
     <InternalsVisibleTo Include="UKHO.ADDS.Clients.FileShareService.Tests" />
+    <InternalsVisibleTo Include="UKHO.ADDS.Clients.FileShareService.Admin.Tests" />
   </ItemGroup>
 
 </Project>

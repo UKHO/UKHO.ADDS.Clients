@@ -18,7 +18,7 @@ namespace UKHO.ADDS.Infrastructure.Serialization.Json
                 DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull,
                 Converters =
                 {
-                    new JsonStringEnumConverter(JsonNamingPolicy.CamelCase, true)
+                    new JsonStringEnumConverter(JsonNamingPolicy.CamelCase, true),
                 }
             };
 

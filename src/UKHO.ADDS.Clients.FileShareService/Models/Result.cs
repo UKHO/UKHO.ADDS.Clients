@@ -1,6 +1,6 @@
-﻿using UKHO.FileShareClient.Internal;
+﻿using UKHO.ADDS.Clients.FileShareService.Extensions;
 
-namespace UKHO.FileShareClient.Models
+namespace UKHO.ADDS.Clients.FileShareService.Models
 {
     public class Result<T> : IResult<T>
     {

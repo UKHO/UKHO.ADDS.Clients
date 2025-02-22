@@ -1,8 +1,8 @@
 ﻿using System.Diagnostics.CodeAnalysis;
 using NUnit.Framework;
-using UKHO.FileShareClient.Models;
+using UKHO.ADDS.Clients.FileShareService.Models;
 
-namespace FileShareClientTests.Models
+namespace UKHO.ADDS.Clients.FileShareService.Tests.Models
 {
     public class BatchSearchResponseTests
     {

@@ -1,7 +1,7 @@
 ﻿using System.Net.Http.Headers;
 using UKHO.ADDS.Clients.FileShareService.Authentication;
 
-namespace UKHO.FileShareClient.Internal
+namespace UKHO.ADDS.Clients.FileShareService.Extensions
 {
     internal static class HttpClientExtensions
     {

@@ -1,4 +1,4 @@
-﻿namespace FileShareClientTestsCommon.Helpers
+﻿namespace UKHO.ADDS.Clients.FileShareService.Tests.Helpers
 {
     public static class DateTimeExtensions
     {

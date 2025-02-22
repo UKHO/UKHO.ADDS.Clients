@@ -1,9 +1,9 @@
 ﻿using System.Net;
 using NUnit.Framework;
+using UKHO.ADDS.Clients.FileShareService.Models;
 using UKHO.ADDS.Infrastructure.Serialization.Json;
-using UKHO.FileShareClient.Models;
 
-namespace FileShareClientTests
+namespace UKHO.ADDS.Clients.FileShareService.Tests
 {
     [TestFixture]
     public class ResultTests

@@ -2,7 +2,7 @@
 using System.Text;
 using System.Text.Json;
 
-namespace FileShareClientTestsCommon.Helpers
+namespace UKHO.ADDS.Clients.FileShareService.Tests.Helpers
 {
     public class FakeFssHttpClientFactory : DelegatingHandler, IHttpClientFactory
     {

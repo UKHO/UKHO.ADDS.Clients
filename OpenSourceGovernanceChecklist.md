@@ -2,7 +2,7 @@
 
 ## Identifer
 
-ERP Facade
+UKHO.ADDS.Clients
 
 ## Technical owner
 
@@ -18,11 +18,10 @@ See README.md.
 
 Has application code been scanned with security tooling and issues corrected?
 > The project pipeline will be configured to apply scanning using:
-> 1. Coverity - the UKHO adopted static analysis tool
-> 2. OWASP Dependency Checker - the UKHO adopted dependency checking tool
+> 1. Snyk for static analysis and dependency checking
 
 Has the application been threat modelled during development and the evidence captured within TFS (or similar)?
-> The standard secure development practice is applied to this development, every PBI will be threat modelled as part of its development and evidence captured as part of the PBI.
+> The standard secure development practice is applied to this development.
 
 Has the code been double-checked for security credentials, keys etc.?
 > All code submitted to this Repo will be checked using a PR for security credentials, keys etc

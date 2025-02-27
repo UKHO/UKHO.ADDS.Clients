@@ -7,13 +7,9 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "UKHO.ADDS.Clients.Common", 
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "UKHO.ADDS.Clients.PermitService", "src\UKHO.ADDS.Clients.PermitService\UKHO.ADDS.Clients.PermitService.csproj", "{D5D24B9F-4DC4-40AB-B081-EFB427A39B49}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "UKHO.ADDS.Clients.FileShareService", "src\UKHO.ADDS.Clients.FileShareService\UKHO.ADDS.Clients.FileShareService.csproj", "{C32B0923-382F-41FA-8E0D-81705A81B121}"
-EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "UKHO.ADDS.Clients.SalesCatalogueService", "src\UKHO.ADDS.Clients.SalesCatalogueService\UKHO.ADDS.Clients.SalesCatalogueService.csproj", "{799C4212-8A34-413F-BD0C-9FC690192EC4}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Tests", "Tests", "{D8F713D6-4ADB-4F17-A8AC-75135F64B219}"
-EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "UKHO.ADDS.Clients.FileShareService.Tests", "test\UKHO.ADDS.Clients.FileShareService.Tests\UKHO.ADDS.Clients.FileShareService.Tests.csproj", "{FB248CD7-435C-443F-8B40-237DA8F2FBDF}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "UKHO.ADDS.Clients.PermitService.Tests", "test\UKHO.ADDS.Clients.PermitService.Tests\UKHO.ADDS.Clients.PermitService.Tests.csproj", "{853E4968-390A-4F28-B550-3CCB1E0BAA3E}"
 EndProject
@@ -25,9 +21,13 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "UKHO.ADDS.Infrastructure.Re
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "UKHO.ADDS.Infrastructure.Serialization", "temp\UKHO.ADDS.Infrastructure.Serialization\UKHO.ADDS.Infrastructure.Serialization.csproj", "{3B0A1B20-EE25-4AA0-B990-67AB6ECBE879}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "UKHO.ADDS.Clients.FileShareService.Admin", "src\UKHO.ADDS.Clients.FileShareService.Admin\UKHO.ADDS.Clients.FileShareService.Admin.csproj", "{774DA6DD-B70F-4822-8C55-A26A3C3BA260}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "UKHO.ADDS.Clients.FileShareService.ReadOnly", "src\UKHO.ADDS.Clients.FileShareService.ReadOnly\UKHO.ADDS.Clients.FileShareService.ReadOnly.csproj", "{B5BF31B3-DAEC-4029-A535-091BFA8DA645}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "UKHO.ADDS.Clients.FileShareService.Admin.Tests", "test\UKHO.ADDS.Clients.FileShareService.Admin.Tests\UKHO.ADDS.Clients.FileShareService.Admin.Tests.csproj", "{B419FD3A-6C4D-4098-998F-E649060C3DCF}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "UKHO.ADDS.Clients.FileShareService.ReadWrite", "src\UKHO.ADDS.Clients.FileShareService.ReadWrite\UKHO.ADDS.Clients.FileShareService.ReadWrite.csproj", "{E7F88D83-ACC2-43F0-B49A-24BB4B658AA1}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "UKHO.ADDS.Clients.FileShareService.Readonly.Tests", "test\UKHO.ADDS.Clients.FileShareService.Readonly.Tests\UKHO.ADDS.Clients.FileShareService.Readonly.Tests.csproj", "{EFDB2371-1C1A-4E39-AFB3-C19466E5E1C6}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "UKHO.ADDS.Clients.FileShareService.ReadWrite.Tests", "test\UKHO.ADDS.Clients.FileShareService.ReadWrite.Tests\UKHO.ADDS.Clients.FileShareService.ReadWrite.Tests.csproj", "{7AD40F55-D00F-4259-901F-D9A64DE03BBF}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -43,18 +43,10 @@ Global
 		{D5D24B9F-4DC4-40AB-B081-EFB427A39B49}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{D5D24B9F-4DC4-40AB-B081-EFB427A39B49}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{D5D24B9F-4DC4-40AB-B081-EFB427A39B49}.Release|Any CPU.Build.0 = Release|Any CPU
-		{C32B0923-382F-41FA-8E0D-81705A81B121}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{C32B0923-382F-41FA-8E0D-81705A81B121}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{C32B0923-382F-41FA-8E0D-81705A81B121}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{C32B0923-382F-41FA-8E0D-81705A81B121}.Release|Any CPU.Build.0 = Release|Any CPU
 		{799C4212-8A34-413F-BD0C-9FC690192EC4}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{799C4212-8A34-413F-BD0C-9FC690192EC4}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{799C4212-8A34-413F-BD0C-9FC690192EC4}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{799C4212-8A34-413F-BD0C-9FC690192EC4}.Release|Any CPU.Build.0 = Release|Any CPU
-		{FB248CD7-435C-443F-8B40-237DA8F2FBDF}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{FB248CD7-435C-443F-8B40-237DA8F2FBDF}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{FB248CD7-435C-443F-8B40-237DA8F2FBDF}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{FB248CD7-435C-443F-8B40-237DA8F2FBDF}.Release|Any CPU.Build.0 = Release|Any CPU
 		{853E4968-390A-4F28-B550-3CCB1E0BAA3E}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{853E4968-390A-4F28-B550-3CCB1E0BAA3E}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{853E4968-390A-4F28-B550-3CCB1E0BAA3E}.Release|Any CPU.ActiveCfg = Release|Any CPU
@@ -71,24 +63,32 @@ Global
 		{3B0A1B20-EE25-4AA0-B990-67AB6ECBE879}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{3B0A1B20-EE25-4AA0-B990-67AB6ECBE879}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{3B0A1B20-EE25-4AA0-B990-67AB6ECBE879}.Release|Any CPU.Build.0 = Release|Any CPU
-		{774DA6DD-B70F-4822-8C55-A26A3C3BA260}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{774DA6DD-B70F-4822-8C55-A26A3C3BA260}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{774DA6DD-B70F-4822-8C55-A26A3C3BA260}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{774DA6DD-B70F-4822-8C55-A26A3C3BA260}.Release|Any CPU.Build.0 = Release|Any CPU
-		{B419FD3A-6C4D-4098-998F-E649060C3DCF}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{B419FD3A-6C4D-4098-998F-E649060C3DCF}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{B419FD3A-6C4D-4098-998F-E649060C3DCF}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{B419FD3A-6C4D-4098-998F-E649060C3DCF}.Release|Any CPU.Build.0 = Release|Any CPU
+		{B5BF31B3-DAEC-4029-A535-091BFA8DA645}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{B5BF31B3-DAEC-4029-A535-091BFA8DA645}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{B5BF31B3-DAEC-4029-A535-091BFA8DA645}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{B5BF31B3-DAEC-4029-A535-091BFA8DA645}.Release|Any CPU.Build.0 = Release|Any CPU
+		{E7F88D83-ACC2-43F0-B49A-24BB4B658AA1}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{E7F88D83-ACC2-43F0-B49A-24BB4B658AA1}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{E7F88D83-ACC2-43F0-B49A-24BB4B658AA1}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{E7F88D83-ACC2-43F0-B49A-24BB4B658AA1}.Release|Any CPU.Build.0 = Release|Any CPU
+		{EFDB2371-1C1A-4E39-AFB3-C19466E5E1C6}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{EFDB2371-1C1A-4E39-AFB3-C19466E5E1C6}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{EFDB2371-1C1A-4E39-AFB3-C19466E5E1C6}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{EFDB2371-1C1A-4E39-AFB3-C19466E5E1C6}.Release|Any CPU.Build.0 = Release|Any CPU
+		{7AD40F55-D00F-4259-901F-D9A64DE03BBF}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{7AD40F55-D00F-4259-901F-D9A64DE03BBF}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{7AD40F55-D00F-4259-901F-D9A64DE03BBF}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{7AD40F55-D00F-4259-901F-D9A64DE03BBF}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
 	EndGlobalSection
 	GlobalSection(NestedProjects) = preSolution
-		{FB248CD7-435C-443F-8B40-237DA8F2FBDF} = {D8F713D6-4ADB-4F17-A8AC-75135F64B219}
 		{853E4968-390A-4F28-B550-3CCB1E0BAA3E} = {D8F713D6-4ADB-4F17-A8AC-75135F64B219}
 		{B0A88348-1E24-483F-BAFE-58945972122C} = {D8F713D6-4ADB-4F17-A8AC-75135F64B219}
 		{06A7C139-C3E9-4C6E-845D-CDC29421E111} = {64C3D312-17EE-408C-A187-0AC1896DD194}
 		{3B0A1B20-EE25-4AA0-B990-67AB6ECBE879} = {64C3D312-17EE-408C-A187-0AC1896DD194}
-		{B419FD3A-6C4D-4098-998F-E649060C3DCF} = {D8F713D6-4ADB-4F17-A8AC-75135F64B219}
+		{EFDB2371-1C1A-4E39-AFB3-C19466E5E1C6} = {D8F713D6-4ADB-4F17-A8AC-75135F64B219}
+		{7AD40F55-D00F-4259-901F-D9A64DE03BBF} = {D8F713D6-4ADB-4F17-A8AC-75135F64B219}
 	EndGlobalSection
 EndGlobal

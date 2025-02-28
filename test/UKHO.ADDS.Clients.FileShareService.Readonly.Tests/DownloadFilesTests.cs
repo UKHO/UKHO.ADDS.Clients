@@ -11,7 +11,7 @@ namespace UKHO.ADDS.Clients.FileShareService.Readonly.Tests
     {
         private const string DUMMY_ACCESS_TOKEN = "ACarefullyEncodedSecretAccessToken";
         private FakeFssHttpClientFactory _fakeFssHttpClientFactory;
-        private FileShareApiClient _fileShareApiClient;
+        private FileShareReadOnlyClient _fileShareApiClient;
         private Uri _lastRequestUri;
         private ConcurrentQueue<object> _nextResponses;
         private HttpStatusCode _nextResponseStatusCode;
@@ -38,7 +38,7 @@ namespace UKHO.ADDS.Clients.FileShareService.Readonly.Tests
                 throw new Exception("Failed to dequeue next response");
             });
 
-            _fileShareApiClient = new FileShareApiClient(_fakeFssHttpClientFactory, @"https://fss-tests.net/basePath/", DUMMY_ACCESS_TOKEN);
+            _fileShareApiClient = new FileShareReadOnlyClient(_fakeFssHttpClientFactory, @"https://fss-tests.net/basePath/", DUMMY_ACCESS_TOKEN);
         }
 
         [TearDown]

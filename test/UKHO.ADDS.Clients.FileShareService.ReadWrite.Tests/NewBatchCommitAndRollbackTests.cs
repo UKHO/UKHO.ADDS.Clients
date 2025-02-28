@@ -8,7 +8,7 @@ namespace UKHO.ADDS.Clients.FileShareService.ReadWrite.Tests
     internal class NewBatchCommitAndRollbackTests
     {
         private object _nextResponse;
-        private FileShareApiAdminClient _fileShareApiAdminClient;
+        private FileShareReadWriteClient _fileShareApiAdminClient;
         private HttpStatusCode _nextResponseStatusCode;
         private List<(HttpMethod HttpMethod, Uri Uri)> _lastRequestUris;
         private List<string> _lastRequestBodies;
@@ -39,7 +39,7 @@ namespace UKHO.ADDS.Clients.FileShareService.ReadWrite.Tests
             _nextResponseStatusCode = HttpStatusCode.Created;
             _lastRequestUris = new List<(HttpMethod HttpMethod, Uri Uri)>();
             _lastRequestBodies = new List<string>();
-            _fileShareApiAdminClient = new FileShareApiAdminClient(_fakeFssHttpClientFactory, @"https://fss-tests.net", DUMMY_ACCESS_TOKEN, MaxBlockSize);
+            _fileShareApiAdminClient = new FileShareReadWriteClient(_fakeFssHttpClientFactory, @"https://fss-tests.net", DUMMY_ACCESS_TOKEN, MaxBlockSize);
         }
 
         [TearDown]

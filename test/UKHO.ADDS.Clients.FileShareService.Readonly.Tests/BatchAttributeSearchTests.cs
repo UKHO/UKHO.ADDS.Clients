@@ -10,7 +10,7 @@ namespace UKHO.ADDS.Clients.FileShareService.Readonly.Tests
     {
         private const string DUMMY_ACCESS_TOKEN = "ACarefullyEncodedSecretAccessToken";
         private FakeFssHttpClientFactory _fakeFssHttpClientFactory;
-        private FileShareApiClient _fileShareApiClient;
+        private FileShareReadOnlyClient _fileShareApiClient;
         private Uri _lastRequestUri;
         private object _nextResponse;
         private HttpStatusCode _nextResponseStatusCode;
@@ -26,7 +26,7 @@ namespace UKHO.ADDS.Clients.FileShareService.Readonly.Tests
 
             _nextResponse = new object();
             _nextResponseStatusCode = HttpStatusCode.OK;
-            _fileShareApiClient = new FileShareApiClient(_fakeFssHttpClientFactory, @"https://fss-tests.net/basePath/", DUMMY_ACCESS_TOKEN);
+            _fileShareApiClient = new FileShareReadOnlyClient(_fakeFssHttpClientFactory, @"https://fss-tests.net/basePath/", DUMMY_ACCESS_TOKEN);
         }
 
         [TearDown]

@@ -1,48 +1,26 @@
-﻿using System.Diagnostics.CodeAnalysis;
-using System.Text;
+﻿using System.Text;
 using System.Text.Encodings.Web;
-using UKHO.ADDS.Clients.FileShareService.ReadOnly.Authentication;
+using UKHO.ADDS.Clients.Common.Authentication;
+using UKHO.ADDS.Clients.Common.Factories;
 using UKHO.ADDS.Clients.FileShareService.ReadOnly.Extensions;
-using UKHO.ADDS.Clients.FileShareService.ReadOnly.Factories;
 using UKHO.ADDS.Clients.FileShareService.ReadOnly.Models;
 
 namespace UKHO.ADDS.Clients.FileShareService.ReadOnly
 {
-    public interface IFileShareApiClient
-    {
-        Task<BatchStatusResponse> GetBatchStatusAsync(string batchId);
-        Task<BatchSearchResponse> SearchAsync(string searchQuery);
-        Task<BatchSearchResponse> SearchAsync(string searchQuery, int? pageSize);
-        Task<BatchSearchResponse> SearchAsync(string searchQuery, int? pageSize, int? start);
-        Task<IResult<BatchSearchResponse>> SearchAsync(string searchQuery, int? pageSize, int? start, CancellationToken cancellationToken);
-        Task<IResult<BatchAttributesSearchResponse>> BatchAttributeSearchAsync(string searchQuery, CancellationToken cancellationToken);
-        Task<IResult<BatchAttributesSearchResponse>> BatchAttributeSearchAsync(string searchQuery, int maxAttributeValueCount, CancellationToken cancellationToken);
-        Task<Stream> DownloadFileAsync(string batchId, string filename);
-        Task<IResult<DownloadFileResponse>> DownloadFileAsync(string batchId, string fileName, Stream destinationStream, long fileSizeInBytes = 0, CancellationToken cancellationToken = default);
-        Task<IEnumerable<string>> GetUserAttributesAsync();
-        Task<IResult<Stream>> DownloadZipFileAsync(string batchId, CancellationToken cancellationToken);
-    }
-
-    public class FileShareApiClient : IFileShareApiClient
+    public class FileShareReadOnlyClient : IFileShareReadOnlyClient
     {
         private readonly int _maxDownloadBytes = 10485760;
-        protected readonly IAuthenticationTokenProvider authTokenProvider;
-        protected readonly IHttpClientFactory httpClientFactory;
+        private readonly IAuthenticationTokenProvider _authTokenProvider;
+        private readonly IHttpClientFactory _httpClientFactory;
 
-        public FileShareApiClient(IHttpClientFactory httpClientFactory, string baseAddress, IAuthenticationTokenProvider authTokenProvider)
+        public FileShareReadOnlyClient(IHttpClientFactory httpClientFactory, string baseAddress, IAuthenticationTokenProvider authTokenProvider)
         {
-            this.httpClientFactory = new SetBaseAddressHttpClientFactory(httpClientFactory, new Uri(baseAddress));
-            this.authTokenProvider = authTokenProvider;
+            _httpClientFactory = new SetBaseAddressHttpClientFactory(httpClientFactory, new Uri(baseAddress));
+            _authTokenProvider = authTokenProvider;
         }
 
-        public FileShareApiClient(IHttpClientFactory httpClientFactory, string baseAddress, string accessToken) :
+        public FileShareReadOnlyClient(IHttpClientFactory httpClientFactory, string baseAddress, string accessToken) :
             this(httpClientFactory, baseAddress, new DefaultAuthenticationTokenProvider(accessToken))
-        {
-        }
-
-        [ExcludeFromCodeCoverage] //This constructor is intended for external use with a real HTTP Client.
-        public FileShareApiClient(string baseAddress, string accessToken) :
-            this(new DefaultHttpClientFactory(), baseAddress, accessToken)
         {
         }
 
@@ -59,6 +37,10 @@ namespace UKHO.ADDS.Clients.FileShareService.ReadOnly
                 return status;
             }
         }
+
+        protected IAuthenticationTokenProvider AuthenticationTokenProvider => _authTokenProvider;
+
+        protected IHttpClientFactory HttpClientFactory => _httpClientFactory;
 
         public async Task<BatchSearchResponse> SearchAsync(string searchQuery) => await SearchAsync(searchQuery, null, null);
 
@@ -208,8 +190,8 @@ namespace UKHO.ADDS.Clients.FileShareService.ReadOnly
 
         protected async Task<HttpClient> GetAuthenticationHeaderSetClient()
         {
-            var httpClient = httpClientFactory.CreateClient();
-            await httpClient.SetAuthenticationHeaderAsync(authTokenProvider);
+            var httpClient = _httpClientFactory.CreateClient();
+            await httpClient.SetAuthenticationHeaderAsync(_authTokenProvider);
             return httpClient;
         }
 

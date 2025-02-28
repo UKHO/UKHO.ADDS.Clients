@@ -5,7 +5,7 @@ using UKHO.ADDS.Clients.FileShareService.ReadWrite.Models.Response;
 
 namespace UKHO.ADDS.Clients.FileShareService.ReadWrite
 {
-    public interface IFileShareApiAdminClient : IFileShareApiClient
+    public interface IFileShareReadWriteClient : IFileShareReadOnlyClient
     {
         Task<IResult<AppendAclResponse>> AppendAclAsync(string batchId, Acl acl, CancellationToken cancellationToken = default);
         Task<IBatchHandle> CreateBatchAsync(BatchModel batchModel);

@@ -1,5 +1,5 @@
 ﻿using System.Net.Http.Headers;
-using UKHO.ADDS.Clients.FileShareService.ReadOnly.Authentication;
+using UKHO.ADDS.Clients.Common.Authentication;
 
 namespace UKHO.ADDS.Clients.FileShareService.ReadOnly.Extensions
 {

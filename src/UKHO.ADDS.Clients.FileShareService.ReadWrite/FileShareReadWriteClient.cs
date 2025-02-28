@@ -1,8 +1,8 @@
 ﻿using System.Net.Http.Headers;
 using System.Security.Cryptography;
 using System.Text;
+using UKHO.ADDS.Clients.Common.Authentication;
 using UKHO.ADDS.Clients.FileShareService.ReadOnly;
-using UKHO.ADDS.Clients.FileShareService.ReadOnly.Authentication;
 using UKHO.ADDS.Clients.FileShareService.ReadOnly.Extensions;
 using UKHO.ADDS.Clients.FileShareService.ReadOnly.Models;
 using UKHO.ADDS.Clients.FileShareService.ReadWrite.Models;
@@ -11,22 +11,18 @@ using UKHO.ADDS.Infrastructure.Serialization.Json;
 
 namespace UKHO.ADDS.Clients.FileShareService.ReadWrite
 {
-    public class FileShareApiAdminClient : FileShareApiClient, IFileShareApiAdminClient
+    public class FileShareReadWriteClient : FileShareReadOnlyClient, IFileShareReadWriteClient
     {
         private const int DefaultMaxFileBlockSize = 4194304;
         private readonly int _maxFileBlockSize;
 
-        public FileShareApiAdminClient(string baseAddress, string accessToken) : base(baseAddress, accessToken) => _maxFileBlockSize = DefaultMaxFileBlockSize;
+        public FileShareReadWriteClient(IHttpClientFactory httpClientFactory, string baseAddress, string accessToken) : base(httpClientFactory, baseAddress, accessToken) => _maxFileBlockSize = DefaultMaxFileBlockSize;
 
-        public FileShareApiAdminClient(string baseAddress, string accessToken, int maxFileBlockSize) : base(baseAddress, accessToken) => _maxFileBlockSize = maxFileBlockSize;
+        public FileShareReadWriteClient(IHttpClientFactory httpClientFactory, string baseAddress, string accessToken, int maxFileBlockSize) : base(httpClientFactory, baseAddress, accessToken) => _maxFileBlockSize = maxFileBlockSize;
 
-        public FileShareApiAdminClient(IHttpClientFactory httpClientFactory, string baseAddress, string accessToken) : base(httpClientFactory, baseAddress, accessToken) => _maxFileBlockSize = DefaultMaxFileBlockSize;
+        public FileShareReadWriteClient(IHttpClientFactory httpClientFactory, string baseAddress, IAuthenticationTokenProvider authTokenProvider) : base(httpClientFactory, baseAddress, authTokenProvider) => _maxFileBlockSize = DefaultMaxFileBlockSize;
 
-        public FileShareApiAdminClient(IHttpClientFactory httpClientFactory, string baseAddress, string accessToken, int maxFileBlockSize) : base(httpClientFactory, baseAddress, accessToken) => _maxFileBlockSize = maxFileBlockSize;
-
-        public FileShareApiAdminClient(IHttpClientFactory httpClientFactory, string baseAddress, IAuthenticationTokenProvider authTokenProvider) : base(httpClientFactory, baseAddress, authTokenProvider) => _maxFileBlockSize = DefaultMaxFileBlockSize;
-
-        public FileShareApiAdminClient(IHttpClientFactory httpClientFactory, string baseAddress, IAuthenticationTokenProvider authTokenProvider, int maxFileBlockSize) : base(httpClientFactory, baseAddress, authTokenProvider) => _maxFileBlockSize = maxFileBlockSize;
+        public FileShareReadWriteClient(IHttpClientFactory httpClientFactory, string baseAddress, IAuthenticationTokenProvider authTokenProvider, int maxFileBlockSize) : base(httpClientFactory, baseAddress, authTokenProvider) => _maxFileBlockSize = maxFileBlockSize;
 
         public async Task<IResult<AppendAclResponse>> AppendAclAsync(string batchId, Acl acl, CancellationToken cancellationToken = default)
             => await SendResult<Acl, AppendAclResponse>($"batch/{batchId}/acl", HttpMethod.Post, acl, cancellationToken);

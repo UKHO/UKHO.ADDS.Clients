@@ -1,4 +1,4 @@
-﻿namespace UKHO.ADDS.Clients.FileShareService.ReadOnly.Authentication
+﻿namespace UKHO.ADDS.Clients.Common.Authentication
 {
     public interface IAuthenticationTokenProvider
     {

@@ -7,6 +7,8 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\..\temp\UKHO.ADDS.Infrastructure.Results\UKHO.ADDS.Infrastructure.Results.csproj" />
+    <ProjectReference Include="..\..\temp\UKHO.ADDS.Infrastructure.Serialization\UKHO.ADDS.Infrastructure.Serialization.csproj" />
     <ProjectReference Include="..\UKHO.ADDS.Clients.Common\UKHO.ADDS.Clients.Common.csproj" />
   </ItemGroup>
 

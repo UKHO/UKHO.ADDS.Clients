@@ -82,6 +82,44 @@ stages:
           **/*.Tests.csproj
         testRunTitle: UnitTests
         workingDirectory: '$(Build.SourcesDirectory)'
+
+    - task: DotNetCoreCLI@2
+      displayName: Build integration tests - FileShareService.ReadOnly
+      inputs:
+        command: build
+        projects: |
+          **/UKHO.ADDS.Clients.FileShareService.ReadOnly.IntegrationTests.csproj
+        arguments: '--configuration $(BuildConfiguration) --output $(Build.BinariesDirectory)\IntegrationTests\FileShareService.ReadOnly --no-restore'
+
+    - task: DotNetCoreCLI@2
+      displayName: Build integration tests - FileShareService.ReadWrite
+      inputs:
+        command: build
+        projects: |
+          **/UKHO.ADDS.Clients.FileShareService.ReadWrite.IntegrationTests.csproj
+        arguments: '--configuration $(BuildConfiguration) --output $(Build.BinariesDirectory)\IntegrationTests\FileShareService.ReadWrite --no-restore'
+
+    - task: DotNetCoreCLI@2
+      displayName: Build integration tests - PermitService
+      inputs:
+        command: build
+        projects: |
+          **/UKHO.ADDS.Clients.PermitService.IntegrationTests.csproj
+        arguments: '--configuration $(BuildConfiguration) --output $(Build.BinariesDirectory)\IntegrationTests\PermitService --no-restore'
+
+    - task: DotNetCoreCLI@2
+      displayName: Build integration tests - SalesCatalogueService
+      inputs:
+        command: build
+        projects: |
+          **/UKHO.ADDS.Clients.SalesCatalogueService.IntegrationTests.csproj
+        arguments: '--configuration $(BuildConfiguration) --output $(Build.BinariesDirectory)\IntegrationTests\SalesCatalogueService --no-restore'
+
+    - task: PublishPipelineArtifact@1
+      displayName: Publish integration tests artifact
+      inputs:
+        path: $(Build.BinariesDirectory)\IntegrationTests
+        artifact: IntegrationTests
     
     - task: DotNetCoreCLI@2
       displayName: Pack libraries
@@ -97,8 +135,59 @@ stages:
         path: $(Build.ArtifactStagingDirectory)/packages
         artifact: NuGetPackages
 
+  - job:
+    dependsOn: MainBuild
+    displayName: Integration tests
+    # variables:
+    # - group: clients-integration-tests
+    steps:
+    - checkout: none
+  
+    - download: current
+      displayName: Download integration tests
+      artifact: IntegrationTests
+
+    # - task: FileTransform@2
+    #   displayName: File transform - FileShareService.ReadOnly
+    #   inputs:
+    #     folderPath: $(Pipeline.Workspace)\IntegrationTests\FileShareService.ReadOnly
+    #     xmlTransformationRules:
+    #     jsonTargetFiles: 'appsettings.json'
+
+    # - task: FileTransform@2
+    #   displayName: File transform - FileShareService.ReadWrite
+    #   inputs:
+    #     folderPath: $(Pipeline.Workspace)\IntegrationTests\FileShareService.ReadWrite
+    #     xmlTransformationRules:
+    #     jsonTargetFiles: 'appsettings.json'
+
+    # - task: FileTransform@2
+    #   displayName: File transform - PermitService
+    #   inputs:
+    #     folderPath: $(Pipeline.Workspace)\IntegrationTests\PermitService
+    #     xmlTransformationRules:
+    #     jsonTargetFiles: 'appsettings.json'
+
+    # - task: FileTransform@2
+    #   displayName: File transform - SalesCatalogueService
+    #   inputs:
+    #     folderPath: $(Pipeline.Workspace)\IntegrationTests\SalesCatalogueService
+    #     xmlTransformationRules:
+    #     jsonTargetFiles: 'appsettings.json'
+
+    - task: DotNetCoreCLI@2
+      displayName: Run integration tests
+      inputs:
+        command: test
+        projects: |
+          '$(Pipeline.Workspace)\IntegrationTests\FileShareService.ReadOnly\UKHO.ADDS.Clients.FileShareService.ReadOnly.IntegrationTests.dll'
+          '$(Pipeline.Workspace)\IntegrationTests\FileShareService.ReadWrite\UKHO.ADDS.Clients.FileShareService.ReadWrite.IntegrationTests.dll'
+          '$(Pipeline.Workspace)\IntegrationTests\PermitService\UKHO.ADDS.Clients.PermitService.IntegrationTests.dll'
+          '$(Pipeline.Workspace)\IntegrationTests\SalesCatalogueService\UKHO.ADDS.Clients.SalesCatalogueService.IntegrationTests.dll'
+        testRunTitle: IntegrationTests
+
 - stage: ProGet
-  #condition: and(succeeded(), eq(variables['Build.SourceBranch'], 'refs/heads/main'))
+  condition: and(succeeded(), eq(variables['Build.SourceBranch'], 'refs/heads/main'))
   variables:
   - group: nuget-deployment-vars
   jobs:

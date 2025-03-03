@@ -6,4 +6,8 @@
     <Nullable>enable</Nullable>
   </PropertyGroup>
 
+  <ItemGroup>
+    <PackageReference Include="UKHO.ADDS.Clients.SalesCatalogueService" Version="0.0.50303-alpha.10" />
+  </ItemGroup>
+
 </Project>

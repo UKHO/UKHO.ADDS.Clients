@@ -5,7 +5,7 @@
     <Title>UKHO Infrastructure Serialization</Title>
     <PackageId>$(AssemblyName)</PackageId>
     <Authors>Abzu</Authors>
-    <GeneratePackageOnBuild>True</GeneratePackageOnBuild>
+    <GeneratePackageOnBuild>False</GeneratePackageOnBuild>
   </PropertyGroup>
 
 </Project>

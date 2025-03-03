@@ -97,32 +97,32 @@ stages:
         path: $(Build.ArtifactStagingDirectory)/packages
         artifact: NuGetPackages
 
-# - stage: ProGet
-#   condition: and(succeeded(), eq(variables['Build.SourceBranch'], 'refs/heads/main'))
-#   variables:
-#   - group: nuget-deployment-vars
-#   jobs:
-#   - deployment: Publish_To_ProGetCloud
-#     displayName: Publish To ProGetCloud
-#     pool:
-#       name: NautilusRelease
-#     environment: UKHO-ADDS-Clients-ProGet
-#     workspace:
-#       clean: all
-#     strategy:
-#       runOnce:
-#         deploy:
-#           steps:
-#           - task: UseDotNet@2
-#             displayName: 'Use .NET $(SdkVersion) sdk'
-#             inputs:
-#               packageType: sdk
-#               version: $(SdkVersion)
+- stage: ProGet
+  condition: and(succeeded(), eq(variables['Build.SourceBranch'], 'refs/heads/main'))
+  variables:
+  - group: nuget-deployment-vars
+  jobs:
+  - deployment: Publish_To_ProGetCloud
+    displayName: Publish To ProGetCloud
+    pool:
+      name: NautilusRelease
+    environment: UKHO-ADDS-Clients-ProGet
+    workspace:
+      clean: all
+    strategy:
+      runOnce:
+        deploy:
+          steps:
+          - task: UseDotNet@2
+            displayName: 'Use .NET $(SdkVersion) sdk'
+            inputs:
+              packageType: sdk
+              version: $(SdkVersion)
 
-#           - download: current
-#             artifact: NuGetPackages
+          - download: current
+            artifact: NuGetPackages
 
-#           - powershell: Get-ChildItem "$(Pipeline.Workspace)/NuGetPackages/*.nupkg" -File | Foreach {dotnet nuget push $_.fullname -k $(progetApiKey) -s https://progetcloud.ukho.gov.uk/nuget/ukho.trusted/v3/index.json }
-#             env:
-#               progetApiKey : $(progetApiKey)
-#             displayName: Publish Package
+          - powershell: Get-ChildItem "$(Pipeline.Workspace)/NuGetPackages/*.nupkg" -File | Foreach {dotnet nuget push $_.fullname -k $(progetApiKey) -s https://progetcloud.ukho.gov.uk/nuget/ukho.trusted/v3/index.json }
+            env:
+              progetApiKey : $(progetApiKey)
+            displayName: Publish Package

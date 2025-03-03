@@ -6,7 +6,7 @@
     <Title>UKHO Infrastructure Results</Title>
     <PackageId>$(AssemblyName)</PackageId>
     <Authors>Abzu</Authors>
-    <GeneratePackageOnBuild>True</GeneratePackageOnBuild>
+    <GeneratePackageOnBuild>False</GeneratePackageOnBuild>
     <IsTestProject>true</IsTestProject>
   </PropertyGroup>
 

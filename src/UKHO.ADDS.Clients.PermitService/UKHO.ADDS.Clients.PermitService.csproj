@@ -5,8 +5,8 @@
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
     <PackageLicenseExpression>MIT</PackageLicenseExpression>
-    <PackageProjectUrl>https://github.com/UKHO/UKHO.ADDS.Infrastructure</PackageProjectUrl>
-    <RepositoryUrl>https://github.com/UKHO/UKHO.ADDS.Infrastructure</RepositoryUrl>
+    <PackageProjectUrl>https://github.com/UKHO/UKHO.ADDS.Clients</PackageProjectUrl>
+    <RepositoryUrl>https://github.com/UKHO/UKHO.ADDS.Clients</RepositoryUrl>
   </PropertyGroup>
 
   <ItemGroup>

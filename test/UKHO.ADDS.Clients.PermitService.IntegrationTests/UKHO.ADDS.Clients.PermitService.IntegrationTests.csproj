@@ -6,8 +6,4 @@
     <Nullable>enable</Nullable>
   </PropertyGroup>
 
-  <ItemGroup>
-    <ProjectReference Include="..\..\src\UKHO.ADDS.Clients.PermitService\UKHO.ADDS.Clients.PermitService.csproj" />
-  </ItemGroup>
-
 </Project>

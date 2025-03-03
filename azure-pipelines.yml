@@ -125,7 +125,12 @@ stages:
       displayName: Pack libraries
       inputs:
         command: pack
-        packagesToPack: '**/UKHO.ADDS.Clients.FileShareService.ReadOnly.csproj;**/UKHO.ADDS.Clients.FileShareService.ReadWrite.csproj;**/UKHO.ADDS.Clients.PermitService.csproj;**/UKHO.ADDS.Clients.SalesCatalogueService.csproj'
+        packagesToPack: >
+          **/UKHO.ADDS.Clients.Common.csproj;
+          **/UKHO.ADDS.Clients.FileShareService.ReadOnly.csproj;
+          **/UKHO.ADDS.Clients.FileShareService.ReadWrite.csproj;
+          **/UKHO.ADDS.Clients.PermitService.csproj;
+          **/UKHO.ADDS.Clients.SalesCatalogueService.csproj
         packDirectory: $(Build.ArtifactStagingDirectory)/packages
         arguments:  '--configuration $(BuildConfiguration)'
           

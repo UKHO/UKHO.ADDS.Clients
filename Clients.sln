@@ -39,7 +39,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Pipeline", "Pipeline", "{02
 		BuildNuget.config = BuildNuget.config
 	EndProjectSection
 EndProject
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "deployment", "deployment", "{2D0CCB8E-7846-44DD-988D-701326C2C7A2}"
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Deployment", "Deployment", "{596A0DB9-2056-4788-A518-AE735F3C84EA}"
 	ProjectSection(SolutionItems) = preProject
 		deployment\AddProjectReferences.ps1 = deployment\AddProjectReferences.ps1
 		deployment\Apply-AssemblyVersionAndDefaults.ps1 = deployment\Apply-AssemblyVersionAndDefaults.ps1
@@ -117,7 +117,7 @@ Global
 		{0A37F8E7-5B56-4F83-9A94-A34C7F452878} = {D8F713D6-4ADB-4F17-A8AC-75135F64B219}
 		{A52A91B9-46D5-4D35-8B6E-6D71F26A618E} = {2DE2F378-6ACB-4FF1-A382-54475C4E03DA}
 		{B6DD8A91-E006-4065-A9D0-38F76ACFB99A} = {2DE2F378-6ACB-4FF1-A382-54475C4E03DA}
-		{2D0CCB8E-7846-44DD-988D-701326C2C7A2} = {02EA681E-C7D8-13C7-8484-4AC65E1B71E8}
+		{596A0DB9-2056-4788-A518-AE735F3C84EA} = {02EA681E-C7D8-13C7-8484-4AC65E1B71E8}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {167AB8EC-098E-4189-B92D-BEE77911725F}

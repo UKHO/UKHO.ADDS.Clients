@@ -33,14 +33,19 @@ if ($itemGroup -is [array]) {
     $itemGroup = $itemGroup[0]
 }
 
-$packageNode = $itemGroup.ProjectReference | Where-Object { $_.Include -Like "*UKHO.ADDS.Clients.FileShareService.ReadOnly*" }
+$newPackageReference = $xmlContent.CreateElement("PackageReference", $xmlContent.DocumentElement.NamespaceURI)
+$newPackageReference.SetAttribute("Include", $PackageName)
+$newPackageReference.SetAttribute("Version", $NuGetVersion)
+$itemGroup.AppendChild($newPackageReference) | Out-Null
 
-if ($packageNode -eq $null) {
-    throw "Error - unable to find " + $PackageName + " reference"
-} else {
-    $packageNode.SetAttribute("Include", $PackageName)
-    $packageNode.SetAttribute("Version", $NuGetVersion)
-}
+#$packageNode = $itemGroup.ProjectReference | Where-Object { $_.Include -Like "*$PackageName*" }
+
+#if ($packageNode -eq $null) {
+#    throw "Error - unable to find " + $PackageName + " reference"
+#} else {
+#    $packageNode.SetAttribute("Include", $PackageName)
+#    $packageNode.SetAttribute("Version", $NuGetVersion)
+#}
 
 $xmlContent.Save($CsProjPath)
 

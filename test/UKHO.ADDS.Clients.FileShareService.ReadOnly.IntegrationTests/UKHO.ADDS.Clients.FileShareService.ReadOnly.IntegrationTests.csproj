@@ -7,7 +7,7 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="UKHO.ADDS.Clients.FileShareService.ReadOnly" Version="0.0.50303-alpha.10" />
+    <ProjectReference Include="..\..\src\UKHO.ADDS.Clients.FileShareService.ReadOnly\UKHO.ADDS.Clients.FileShareService.ReadOnly.csproj" />
   </ItemGroup>
 
 </Project>

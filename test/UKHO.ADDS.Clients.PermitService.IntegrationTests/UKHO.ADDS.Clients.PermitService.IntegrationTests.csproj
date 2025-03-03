@@ -7,7 +7,7 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="UKHO.ADDS.Clients.PermitService" Version="0.0.50303-alpha.10" />
+    <ProjectReference Include="..\..\src\UKHO.ADDS.Clients.PermitService\UKHO.ADDS.Clients.PermitService.csproj" />
   </ItemGroup>
 
 </Project>

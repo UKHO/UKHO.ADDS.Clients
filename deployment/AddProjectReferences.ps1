@@ -1,15 +1,21 @@
-param (
-    [Parameter(Mandatory = $true)] [string] $SourcesDirectory,
-    [Parameter(Mandatory = $true)] [string] $NuGetVersion,
-    [Parameter(Mandatory = $true)] [string] $PackagePath
-)
+#param (
+#    [Parameter(Mandatory = $true)] [string] $CsProjPath,
+#    [Parameter(Mandatory = $true)] [string] $NuGetVersion,
+#    [Parameter(Mandatory = $true)] [string] $PackageSource,
+#    [Parameter(Mandatory = $true)] [string] $PackageName
+#)
 
-$csprojPath = $SourcesDirectory + "\Tests\IntegrationTests\FileShareClientIntegrationTests\FileShareClientIntegrationTests.csproj"
-Write-Host "Updating " $csprojPath
+$CsProjPath = "C:\Code\UKHO.ADDS.Clients\test\UKHO.ADDS.Clients.FileShareService.ReadOnly.IntegrationTests\UKHO.ADDS.Clients.FileShareService.ReadOnly.IntegrationTests.csproj"
+$NuGetVersion = "1.8.1253-alpha.4"
+$PackageSource = "C:\Code\packages"
+$PackageName = "UKHO.ADDS.Clients.FileShareService.ReadOnly"
+
+Write-Host "Updating " $CsProjPath
 Write-Host "Using version " $NuGetVersion
-Write-Host "Package source " $PackagePath
+Write-Host "Package source " $PackageSource
+Write-Host "Package name " $PackageName
 
-$xmlContent = [xml](Get-Content $csprojPath)
+$xmlContent = [xml](Get-Content $CsProjPath)
 
 $propertyGroup = $xmlContent.Project.PropertyGroup
 
@@ -18,7 +24,7 @@ if ($propertyGroup -is [array]) {
 }
 
 $newRestoreSources = $xmlContent.CreateElement("RestoreAdditionalProjectSources", $xmlContent.DocumentElement.NamespaceURI)
-$newRestoreSources.InnerText = $PackagePath
+$newRestoreSources.InnerText = $PackageSource
 $propertyGroup.AppendChild($newRestoreSources) | Out-Null
 
 $itemGroup = $xmlContent.Project.ItemGroup
@@ -27,23 +33,16 @@ if ($itemGroup -is [array]) {
     $itemGroup = $itemGroup[0]
 }
 
-$packageNode1 = $itemGroup.PackageReference | Where-Object { $_.Include -eq 'UKHO.FileShareClient' }
+$packageNode = $itemGroup.ProjectReference | Where-Object { $_.Include -Like "*UKHO.ADDS.Clients.FileShareService.ReadOnly*" }
 
-if ($packageNode1 -eq $null) {
-    throw "Error - unable to find UKHO.FileShareClient reference"
+if ($packageNode -eq $null) {
+    throw "Error - unable to find " + $PackageName + " reference"
 } else {
-    $packageNode1.SetAttribute("Version", $NuGetVersion)
+    $packageNode.SetAttribute("Include", $PackageName)
+    $packageNode.SetAttribute("Version", $NuGetVersion)
 }
 
-$packageNode2 = $itemGroup.PackageReference | Where-Object { $_.Include -eq 'UKHO.FileShareAdminClient' }
-
-if ($packageNode2 -eq $null) {
-    throw "Error - unable to find UKHO.FileShareAdminClient reference"
-} else {
-    $packageNode2.SetAttribute("Version", $NuGetVersion)
-}
-
-$xmlContent.Save($csprojPath)
+$xmlContent.Save($CsProjPath)
 
 Write-Host "Updated project file:"
-Get-Content $csprojPath
+Get-Content $CsProjPath

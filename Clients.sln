@@ -39,6 +39,13 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "UKHO.ADDS.Clients.FileShare
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "UKHO.ADDS.Clients.FileShareService.ReadWrite.IntegrationTests", "test\UKHO.ADDS.Clients.FileShareService.ReadWrite.IntegrationTests\UKHO.ADDS.Clients.FileShareService.ReadWrite.IntegrationTests.csproj", "{B6DD8A91-E006-4065-A9D0-38F76ACFB99A}"
 EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Pipeline", "Pipeline", "{02EA681E-C7D8-13C7-8484-4AC65E1B71E8}"
+	ProjectSection(SolutionItems) = preProject
+		Apply-AssemblyVersionAndDefaults.ps1 = Apply-AssemblyVersionAndDefaults.ps1
+		azure-pipelines.yml = azure-pipelines.yml
+		BuildNuget.config = BuildNuget.config
+	EndProjectSection
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU

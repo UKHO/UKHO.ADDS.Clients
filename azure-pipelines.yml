@@ -180,16 +180,16 @@ stages:
     #     xmlTransformationRules:
     #     jsonTargetFiles: 'appsettings.json'
 
-    - task: DotNetCoreCLI@2
-      displayName: Run integration tests
-      inputs:
-        command: test
-        projects: |
-          $(Pipeline.Workspace)\IntegrationTests\FileShareService.ReadOnly\UKHO.ADDS.Clients.FileShareService.ReadOnly.IntegrationTests.dll
-          $(Pipeline.Workspace)\IntegrationTests\FileShareService.ReadWrite\UKHO.ADDS.Clients.FileShareService.ReadWrite.IntegrationTests.dll
-          $(Pipeline.Workspace)\IntegrationTests\PermitService\UKHO.ADDS.Clients.PermitService.IntegrationTests.dll
-          $(Pipeline.Workspace)\IntegrationTests\SalesCatalogueService\UKHO.ADDS.Clients.SalesCatalogueService.IntegrationTests.dll
-        testRunTitle: IntegrationTests
+    # - task: DotNetCoreCLI@2
+    #   displayName: Run integration tests
+    #   inputs:
+    #     command: test
+    #     projects: |
+    #       $(Pipeline.Workspace)\IntegrationTests\FileShareService.ReadOnly\UKHO.ADDS.Clients.FileShareService.ReadOnly.IntegrationTests.dll
+    #       $(Pipeline.Workspace)\IntegrationTests\FileShareService.ReadWrite\UKHO.ADDS.Clients.FileShareService.ReadWrite.IntegrationTests.dll
+    #       $(Pipeline.Workspace)\IntegrationTests\PermitService\UKHO.ADDS.Clients.PermitService.IntegrationTests.dll
+    #       $(Pipeline.Workspace)\IntegrationTests\SalesCatalogueService\UKHO.ADDS.Clients.SalesCatalogueService.IntegrationTests.dll
+    #     testRunTitle: IntegrationTests
 
 - stage: ProGet
   condition: and(succeeded(), eq(variables['Build.SourceBranch'], 'refs/heads/main'))

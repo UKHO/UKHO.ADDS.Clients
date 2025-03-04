@@ -25,7 +25,8 @@ $versionPrefix = $UKHOAssemblyVersionPrefix + $Matches.2
 $versionSuffix = "alpha." + $Matches.3
 #$versionSuffix = "beta." + $Matches.3
 #$versionSuffix = $Matches.3
-$versionFull = $versionPrefix + "." + $Matches.3
+$assemblyVersion = $versionPrefix + "." + $Matches.3
+$versionFull = $versionPrefix + "." + $versionSuffix
 Write-Host "##vso[task.setvariable variable=NuGetVersion;isOutput=true]$($versionFull)"
 
 $assemblyValues = @{
@@ -33,8 +34,8 @@ $assemblyValues = @{
     "Copyright"         = $UKHOAssemblyCopyright;
     "Description"       = $UKHOAssemblyProduct;
     "Product"           = $UKHOAssemblyProduct;
-    "AssemblyVersion"   = $versionFull;
-    "FileVersion"       = $versionFull;
+    "AssemblyVersion"   = $assemblyVersion;
+    "FileVersion"       = $assemblyVersion;
     "VersionPrefix"     = $versionPrefix;
     "VersionSuffix"     = $versionSuffix;
     "SourceRevisionId"  = $SourceRevisionId;

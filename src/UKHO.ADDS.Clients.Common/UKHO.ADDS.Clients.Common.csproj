@@ -4,6 +4,9 @@
     <TargetFramework>net8.0</TargetFramework>
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
+    <PackageLicenseExpression>MIT</PackageLicenseExpression>
+    <PackageProjectUrl>https://github.com/UKHO/UKHO.ADDS.Clients</PackageProjectUrl>
+    <RepositoryUrl>https://github.com/UKHO/UKHO.ADDS.Clients</RepositoryUrl>
   </PropertyGroup>
 
   <ItemGroup>

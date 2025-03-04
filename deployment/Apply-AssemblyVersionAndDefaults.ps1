@@ -8,6 +8,7 @@ param (
     [Parameter(Mandatory = $true)] [string] $SourceRevisionId
 )
 
+# Example build number: UKHO.UKHO.ADDS.Clients_main_20250303.10
 Write-Host "Build number: " $buildNumber
 
 $buildNumberRegex = "(.+)_202([0-9]{3,5})\.([0-9]{1,2})"
@@ -22,6 +23,8 @@ if ($validBuildNumber -eq $false) {
 # Magic var $Matches comes from the above regex match statement: $buildNumber -match $buildNumberRegex
 $versionPrefix = $UKHOAssemblyVersionPrefix + $Matches.2
 $versionSuffix = "alpha." + $Matches.3
+#$versionSuffix = "beta." + $Matches.3
+#$versionSuffix = $Matches.3
 $versionFull = $versionPrefix + "." + $Matches.3
 Write-Host "##vso[task.setvariable variable=NuGetVersion;isOutput=true]$($versionFull)"
 

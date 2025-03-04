@@ -43,6 +43,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Deployment", "Deployment", 
 	ProjectSection(SolutionItems) = preProject
 		deployment\AddProjectReferences.ps1 = deployment\AddProjectReferences.ps1
 		deployment\Apply-AssemblyVersionAndDefaults.ps1 = deployment\Apply-AssemblyVersionAndDefaults.ps1
+		deployment\integration-test-build.yml = deployment\integration-test-build.yml
 	EndProjectSection
 EndProject
 Global

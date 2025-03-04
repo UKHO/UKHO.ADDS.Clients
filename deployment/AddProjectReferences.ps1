@@ -5,17 +5,17 @@ param (
     [Parameter(Mandatory = $true)] [string] $PackageName
 )
 
-#$CsProjPath = "C:\Code\UKHO.ADDS.Clients\test\UKHO.ADDS.Clients.FileShareService.ReadOnly.IntegrationTests\UKHO.ADDS.Clients.FileShareService.ReadOnly.IntegrationTests.csproj"
-#$NuGetVersion = "1.8.1253-alpha.4"
-#$PackageSource = "C:\Code\packages"
-#$PackageName = "UKHO.ADDS.Clients.FileShareService.ReadOnly"
-
 Write-Host "Updating " $CsProjPath
 Write-Host "Using version " $NuGetVersion
 Write-Host "Package source " $PackageSource
 Write-Host "Package name " $PackageName
 
 $xmlContent = [xml](Get-Content $CsProjPath)
+
+# This expects a csproj file containing a single PropertyGroup and two ItemGroup elements.
+# We'll add a RestoreAdditionalProjectSources element to PropertyGroup to point to the folder containing the newly produced package.
+# The first ItemGroup is expected to contain the PackageReference elements. We'll add an one for the newly built package in order to test it.
+# The second ItemGroup is expected to contain the ProjectReference elements. We'll remove it as this is used for local development and we're now testing the separate package instead.
 
 $propertyGroup = $xmlContent.Project.PropertyGroup
 

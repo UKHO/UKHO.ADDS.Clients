@@ -1,0 +1,22 @@
+parameters:
+- name: ProjectPartialName
+  type: string
+
+steps:
+- task: PowerShell@2
+  displayName: ${{ parameters.ProjectPartialName }} - update integration tests project file
+  inputs:
+    targetType: filePath
+    filePath: '$(Build.SourcesDirectory)\deployment\AddProjectReferences.ps1'
+    arguments: >
+      -CsProjPath "$(Build.SourcesDirectory)\test\UKHO.ADDS.Clients.${{ parameters.ProjectPartialName }}.IntegrationTests\UKHO.ADDS.Clients.${{ parameters.ProjectPartialName }}.IntegrationTests.csproj"
+      -NuGetVersion "$(SetAssemblyVersion.NuGetVersion)"
+      -PackageSource "$(Build.ArtifactStagingDirectory)\packages"
+      -PackageName "UKHO.ADDS.Clients.${{ parameters.ProjectPartialName }}"
+
+- task: DotNetCoreCLI@2
+  displayName: ${{ parameters.ProjectPartialName }} - build integration tests
+  inputs:
+    command: build
+    projects: '**/UKHO.ADDS.Clients.${{ parameters.ProjectPartialName }}.IntegrationTests.csproj'
+    arguments: '--configuration $(BuildConfiguration) --output $(Build.BinariesDirectory)\IntegrationTests\${{ parameters.ProjectPartialName }} --no-restore'

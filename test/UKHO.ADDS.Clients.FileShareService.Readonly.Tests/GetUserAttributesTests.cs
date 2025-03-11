@@ -1,9 +1,8 @@
 ﻿using System.Net;
 using NUnit.Framework;
-using UKHO.ADDS.Clients.FileShareService.ReadOnly;
-using UKHO.ADDS.Clients.FileShareService.Readonly.Tests.Helpers;
+using UKHO.ADDS.Clients.FileShareService.ReadOnly.Tests.Helpers;
 
-namespace UKHO.ADDS.Clients.FileShareService.Readonly.Tests
+namespace UKHO.ADDS.Clients.FileShareService.ReadOnly.Tests
 {
     public class GetUserAttributesTests
     {
@@ -36,10 +35,13 @@ namespace UKHO.ADDS.Clients.FileShareService.Readonly.Tests
         {
             _nextResponse = new List<string> { "One", "Two" };
 
-            var attributes = await _fileShareApiClient.GetUserAttributesAsync();
+            var attributesResult = await _fileShareApiClient.GetUserAttributesAsync();
+
+            var isSuccess = attributesResult.IsSuccess(out var attributes);
 
             Assert.Multiple(() =>
             {
+                Assert.That(isSuccess, Is.True);
                 Assert.That(_lastRequestUri?.AbsolutePath, Is.EqualTo("/basePath/attributes"));
                 Assert.That(_lastRequestUri?.Query, Is.EqualTo(""), "Should be no query query string for an empty search");
                 Assert.That(attributes, Is.EqualTo((List<string>)_nextResponse));
@@ -51,7 +53,9 @@ namespace UKHO.ADDS.Clients.FileShareService.Readonly.Tests
         {
             _nextResponse = new List<string>();
 
-            var attributes = await _fileShareApiClient.GetUserAttributesAsync();
+            var attributesResult = await _fileShareApiClient.GetUserAttributesAsync();
+
+            attributesResult.IsSuccess(out var attributes);
 
             Assert.Multiple(() =>
             {
@@ -62,17 +66,17 @@ namespace UKHO.ADDS.Clients.FileShareService.Readonly.Tests
         }
 
         [Test]
-        public void TestGetAttributesWhenServerReturnsError()
+        public async Task TestGetAttributesWhenServerReturnsError()
         {
             _nextResponseStatusCode = HttpStatusCode.ServiceUnavailable;
 
-            var exception = Assert.ThrowsAsync<HttpRequestException>(_fileShareApiClient.GetUserAttributesAsync);
+            var result = await _fileShareApiClient.GetUserAttributesAsync();
 
             Assert.Multiple(() =>
             {
                 Assert.That(_lastRequestUri?.AbsolutePath, Is.EqualTo("/basePath/attributes"));
                 Assert.That(_lastRequestUri?.Query, Is.EqualTo(""), "Should be no query query string for an empty search");
-                Assert.That(exception.Message, Is.EqualTo("Response status code does not indicate success: 503 (Service Unavailable)."));
+                Assert.That(result.IsFailure());
             });
         }
 

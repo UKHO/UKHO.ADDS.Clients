@@ -20,4 +20,9 @@
     <InternalsVisibleTo Include="UKHO.ADDS.Clients.SalesCatalogueService" />
   </ItemGroup>
 
+  <ItemGroup>
+    <ProjectReference Include="..\..\temp\UKHO.ADDS.Infrastructure.Results\UKHO.ADDS.Infrastructure.Results.csproj" />
+    <ProjectReference Include="..\..\temp\UKHO.ADDS.Infrastructure.Serialization\UKHO.ADDS.Infrastructure.Serialization.csproj" />
+  </ItemGroup>
+
 </Project>

@@ -1,10 +1,11 @@
 ﻿using System.Net;
 using NUnit.Framework;
-using UKHO.ADDS.Clients.FileShareService.ReadOnly;
 using UKHO.ADDS.Clients.FileShareService.ReadOnly.Models;
-using UKHO.ADDS.Clients.FileShareService.Readonly.Tests.Helpers;
+using UKHO.ADDS.Clients.FileShareService.ReadOnly.Tests.Helpers;
+using UKHO.ADDS.Infrastructure.Results;
+using UKHO.ADDS.Infrastructure.Results.Errors.Http;
 
-namespace UKHO.ADDS.Clients.FileShareService.Readonly.Tests
+namespace UKHO.ADDS.Clients.FileShareService.ReadOnly.Tests
 {
     public class BatchAttributeSearchTests
     {
@@ -51,7 +52,7 @@ namespace UKHO.ADDS.Clients.FileShareService.Readonly.Tests
                 Assert.That(_lastRequestUri?.Query, Is.EqualTo(""), "Should be no query string for an empty search");
             });
 
-            CheckResponseMatchesExpectedResponse(expectedResponse, response.Data);
+            CheckResponseMatchesExpectedResponse(expectedResponse, response);
         }
 
         [Test]
@@ -73,7 +74,7 @@ namespace UKHO.ADDS.Clients.FileShareService.Readonly.Tests
                 Assert.That(_lastRequestUri?.Query, Is.EqualTo("?$filter=$batch(key)%20eq%20%27value%27"));
             });
 
-            CheckResponseMatchesExpectedResponse(expectedResponse, response.Data);
+            CheckResponseMatchesExpectedResponse(expectedResponse, response);
         }
 
         [Test]
@@ -90,7 +91,7 @@ namespace UKHO.ADDS.Clients.FileShareService.Readonly.Tests
                 Assert.That(_lastRequestUri?.Query, Is.EqualTo("?$filter=$batch(key)%20eq%20%27value%27"));
             });
 
-            CheckResponseMatchesExpectedResponse(expectedResponse, response.Data);
+            CheckResponseMatchesExpectedResponse(expectedResponse, response);
         }
 
         [Test]
@@ -115,12 +116,15 @@ namespace UKHO.ADDS.Clients.FileShareService.Readonly.Tests
 
             var response = await _fileShareApiClient.BatchAttributeSearchAsync("$batch(key) eq 'value'", CancellationToken.None);
 
+            var isFailed = response.IsFailure(out var responseError);
+            var error = responseError as HttpError;
+
             Assert.Multiple(() =>
             {
                 Assert.That(_lastRequestUri?.AbsolutePath, Is.EqualTo("/basePath/attributes/search"));
                 Assert.That(_lastRequestUri?.Query, Is.EqualTo("?$filter=$batch(key)%20eq%20%27value%27"));
-                Assert.That(response.StatusCode, Is.EqualTo((int)_nextResponseStatusCode));
-                Assert.That(response.IsSuccess, Is.False);
+                Assert.That(error.StatusCode, Is.EqualTo(_nextResponseStatusCode));
+                Assert.That(isFailed, Is.True);
             });
         }
 
@@ -131,12 +135,15 @@ namespace UKHO.ADDS.Clients.FileShareService.Readonly.Tests
 
             var response = await _fileShareApiClient.BatchAttributeSearchAsync("$batch(key) eq 'value'", CancellationToken.None);
 
+            var isFailed = response.IsFailure(out var responseError);
+            var error = responseError as HttpError;
+
             Assert.Multiple(() =>
             {
                 Assert.That(_lastRequestUri?.AbsolutePath, Is.EqualTo("/basePath/attributes/search"));
                 Assert.That(_lastRequestUri?.Query, Is.EqualTo("?$filter=$batch(key)%20eq%20%27value%27"));
-                Assert.That(response.StatusCode, Is.EqualTo((int)_nextResponseStatusCode));
-                Assert.That(response.IsSuccess, Is.False);
+                Assert.That(error.StatusCode, Is.EqualTo(_nextResponseStatusCode));
+                Assert.That(isFailed, Is.True);
             });
         }
 
@@ -151,16 +158,18 @@ namespace UKHO.ADDS.Clients.FileShareService.Readonly.Tests
             Assert.That(attributeValues, Is.EqualTo("class BatchAttributesSearchAttribute {\n Key: Colour\n Values: red, blue\n}\n"));
         }
 
-        #region Private method
-
-        private static void CheckResponseMatchesExpectedResponse(BatchAttributesSearchResponse expectedResponse, BatchAttributesSearchResponse response)
+        private static void CheckResponseMatchesExpectedResponse(BatchAttributesSearchResponse expectedResponse, IResult<BatchAttributesSearchResponse> response)
         {
-            Assert.That(response.SearchBatchCount, Is.EqualTo(expectedResponse.SearchBatchCount));
+            var isValid = response.IsSuccess(out var responseData);
+
+            Assert.That(isValid, Is.True);
+
+            Assert.That(responseData!.SearchBatchCount, Is.EqualTo(expectedResponse.SearchBatchCount));
 
             for (var i = 0; i < expectedResponse.BatchAttributes.Count; i++)
             {
                 var expectedBatchAttribute = expectedResponse.BatchAttributes[i];
-                var actualBatchAttribute = response.BatchAttributes[i];
+                var actualBatchAttribute = responseData.BatchAttributes[i];
                 Assert.That(actualBatchAttribute.Key, Is.EqualTo(expectedBatchAttribute.Key));
 
                 for (var j = 0; j < expectedBatchAttribute.Values.Count; j++)
@@ -169,10 +178,6 @@ namespace UKHO.ADDS.Clients.FileShareService.Readonly.Tests
                 }
             }
         }
-
-        #endregion
-
-        #region BatchSearch with MaxAttributeValueCount
 
         [TestCase(-1)]
         [TestCase(0)]
@@ -192,22 +197,23 @@ namespace UKHO.ADDS.Clients.FileShareService.Readonly.Tests
         }
 
         [Test]
-        public async Task DoesBatchAttributeSearchReturnsBadRequestWithMaxAttributeValueCountZeroandFilter()
+        public async Task DoesBatchAttributeSearchReturnsBadRequestWithMaxAttributeValueCountZeroAndFilter()
         {
-            var MaxAttributeValueCount = 0;
+            var maxAttributeValueCount = 0;
             _nextResponseStatusCode = HttpStatusCode.BadRequest;
 
-            var response = await _fileShareApiClient.BatchAttributeSearchAsync("$batch(key) eq 'value'", MaxAttributeValueCount, CancellationToken.None);
+            var response = await _fileShareApiClient.BatchAttributeSearchAsync("$batch(key) eq 'value'", maxAttributeValueCount, CancellationToken.None);
+
+            var isFailed = response.IsFailure(out var responseError);
+            var error = responseError as HttpError;
 
             Assert.Multiple(() =>
             {
                 Assert.That(_lastRequestUri?.AbsolutePath, Is.EqualTo("/basePath/attributes/search"));
                 Assert.That(_lastRequestUri?.Query, Is.EqualTo("?$filter=$batch(key)%20eq%20%27value%27&maxAttributeValueCount=0"));
-                Assert.That(response.StatusCode, Is.EqualTo((int)_nextResponseStatusCode));
-                Assert.That(response.IsSuccess, Is.False);
+                Assert.That(error.StatusCode, Is.EqualTo(_nextResponseStatusCode));
+                Assert.That(isFailed, Is.True);
             });
         }
-
-        #endregion
     }
 }

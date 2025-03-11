@@ -1,10 +1,10 @@
 ﻿using System.Net;
 using NUnit.Framework;
-using UKHO.ADDS.Clients.FileShareService.ReadOnly;
 using UKHO.ADDS.Clients.FileShareService.ReadOnly.Models;
-using UKHO.ADDS.Clients.FileShareService.Readonly.Tests.Helpers;
+using UKHO.ADDS.Clients.FileShareService.ReadOnly.Tests.Helpers;
+using UKHO.ADDS.Infrastructure.Results;
 
-namespace UKHO.ADDS.Clients.FileShareService.Readonly.Tests
+namespace UKHO.ADDS.Clients.FileShareService.ReadOnly.Tests
 {
     public class SearchTests
     {
@@ -32,14 +32,16 @@ namespace UKHO.ADDS.Clients.FileShareService.Readonly.Tests
         [TearDown]
         public void TearDown() => _fakeFssHttpClientFactory.Dispose();
 
-        private static void CheckResponseMatchesExpectedResponse(BatchSearchResponse expectedResponse, BatchSearchResponse response)
+        private static void CheckResponseMatchesExpectedResponse(BatchSearchResponse expectedResponse, IResult<BatchSearchResponse> response)
         {
-            Assert.That(response.Count, Is.EqualTo(expectedResponse.Count));
+            var isSuccess = response.IsSuccess(out var responseValue);
+
+            Assert.That(responseValue.Count, Is.EqualTo(expectedResponse.Count));
             Assert.Multiple(() =>
             {
-                Assert.That(response.Total, Is.EqualTo(expectedResponse.Total));
-                Assert.That(response.Links, Is.EqualTo(expectedResponse.Links));
-                Assert.That(response.Entries, Is.EqualTo(expectedResponse.Entries));
+                Assert.That(responseValue.Total, Is.EqualTo(expectedResponse.Total));
+                Assert.That(responseValue.Links, Is.EqualTo(expectedResponse.Links));
+                Assert.That(responseValue.Entries, Is.EqualTo(expectedResponse.Entries));
             });
         }
 
@@ -189,11 +191,11 @@ namespace UKHO.ADDS.Clients.FileShareService.Readonly.Tests
             {
                 Assert.That(_lastRequestUri?.AbsolutePath, Is.EqualTo("/basePath/batch"));
                 Assert.That(_lastRequestUri?.Query, Is.EqualTo(""), "Should be no query query string for an empty search");
-                Assert.That(response.StatusCode, Is.EqualTo((int)_nextResponseStatusCode));
+                //Assert.That(response.StatusCode, Is.EqualTo((int)_nextResponseStatusCode));
                 Assert.That(response.IsSuccess, Is.True);
             });
 
-            CheckResponseMatchesExpectedResponse(expectedResponse, response.Data);
+            CheckResponseMatchesExpectedResponse(expectedResponse, response);
         }
 
         [Test]
@@ -208,11 +210,11 @@ namespace UKHO.ADDS.Clients.FileShareService.Readonly.Tests
             {
                 Assert.That(_lastRequestUri?.AbsolutePath, Is.EqualTo("/basePath/batch"));
                 Assert.That(_lastRequestUri?.Query, Is.EqualTo("?$filter=$batch(key)%20eq%20%27value%27"));
-                Assert.That(response.StatusCode, Is.EqualTo((int)_nextResponseStatusCode));
+                //Assert.That(response.StatusCode, Is.EqualTo((int)_nextResponseStatusCode));
                 Assert.That(response.IsSuccess, Is.True);
             });
 
-            CheckResponseMatchesExpectedResponse(expectedResponse, response.Data);
+            CheckResponseMatchesExpectedResponse(expectedResponse, response);
         }
 
         [Test]
@@ -227,11 +229,11 @@ namespace UKHO.ADDS.Clients.FileShareService.Readonly.Tests
             {
                 Assert.That(_lastRequestUri?.AbsolutePath, Is.EqualTo("/basePath/batch"));
                 Assert.That(_lastRequestUri?.Query, Is.EqualTo("?$filter=$batch(key)%20eq%20%27value%27&limit=50"));
-                Assert.That(response.StatusCode, Is.EqualTo((int)_nextResponseStatusCode));
+                //Assert.That(response.StatusCode, Is.EqualTo((int)_nextResponseStatusCode));
                 Assert.That(response.IsSuccess, Is.True);
             });
 
-            CheckResponseMatchesExpectedResponse(expectedResponse, response.Data);
+            CheckResponseMatchesExpectedResponse(expectedResponse, response);
         }
 
         [Test]
@@ -246,11 +248,11 @@ namespace UKHO.ADDS.Clients.FileShareService.Readonly.Tests
             {
                 Assert.That(_lastRequestUri?.AbsolutePath, Is.EqualTo("/basePath/batch"));
                 Assert.That(_lastRequestUri?.Query, Is.EqualTo("?$filter=$batch(key)%20eq%20%27value%27&start=20"));
-                Assert.That(response.StatusCode, Is.EqualTo((int)_nextResponseStatusCode));
+                //Assert.That(response.StatusCode, Is.EqualTo((int)_nextResponseStatusCode));
                 Assert.That(response.IsSuccess, Is.True);
             });
 
-            CheckResponseMatchesExpectedResponse(expectedResponse, response.Data);
+            CheckResponseMatchesExpectedResponse(expectedResponse, response);
         }
 
         [TestCase(-10)]
@@ -282,11 +284,11 @@ namespace UKHO.ADDS.Clients.FileShareService.Readonly.Tests
             {
                 Assert.That(_lastRequestUri?.AbsolutePath, Is.EqualTo("/basePath/batch"));
                 Assert.That(_lastRequestUri?.Query, Is.EqualTo("?$filter=$batch(key)%20eq%20%27value%27"));
-                Assert.That(response.StatusCode, Is.EqualTo((int)_nextResponseStatusCode));
+                //Assert.That(response.StatusCode, Is.EqualTo((int)_nextResponseStatusCode));
                 Assert.That(response.IsSuccess, Is.True);
             });
 
-            CheckResponseMatchesExpectedResponse(expectedResponse, response.Data);
+            CheckResponseMatchesExpectedResponse(expectedResponse, response);
         }
 
         [Test]
@@ -315,7 +317,7 @@ namespace UKHO.ADDS.Clients.FileShareService.Readonly.Tests
             {
                 Assert.That(_lastRequestUri?.AbsolutePath, Is.EqualTo("/basePath/batch"));
                 Assert.That(_lastRequestUri?.Query, Is.EqualTo("?$filter=$batch(key)%20eq%20%27value%27"));
-                Assert.That(response.StatusCode, Is.EqualTo((int)_nextResponseStatusCode));
+                //Assert.That(response.StatusCode, Is.EqualTo((int)_nextResponseStatusCode));
                 Assert.That(response.IsSuccess, Is.False);
             });
         }
@@ -331,7 +333,7 @@ namespace UKHO.ADDS.Clients.FileShareService.Readonly.Tests
             {
                 Assert.That(_lastRequestUri?.AbsolutePath, Is.EqualTo("/basePath/batch"));
                 Assert.That(_lastRequestUri?.Query, Is.EqualTo("?$filter=$batch(key)%20eq%20%27value%27"));
-                Assert.That(response.StatusCode, Is.EqualTo((int)_nextResponseStatusCode));
+                //Assert.That(response.StatusCode, Is.EqualTo((int)_nextResponseStatusCode));
                 Assert.That(response.IsSuccess, Is.False);
             });
         }

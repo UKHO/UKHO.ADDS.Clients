@@ -1,4 +1,4 @@
-﻿<Project Sdk="Microsoft.NET.Sdk">
+<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
     <TargetFramework>net8.0</TargetFramework>
@@ -10,11 +10,8 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="UKHO.ADDS.Infrastructure.Results" Version="0.0.50227-alpha.2" />
-    <PackageReference Include="UKHO.ADDS.Infrastructure.Serialization" Version="0.0.50227-alpha.2" />
-  </ItemGroup>
-
-  <ItemGroup>
+    <ProjectReference Include="..\..\temp\UKHO.ADDS.Infrastructure.Results\UKHO.ADDS.Infrastructure.Results.csproj" />
+    <ProjectReference Include="..\..\temp\UKHO.ADDS.Infrastructure.Serialization\UKHO.ADDS.Infrastructure.Serialization.csproj" />
     <ProjectReference Include="..\UKHO.ADDS.Clients.Common\UKHO.ADDS.Clients.Common.csproj" />
   </ItemGroup>
 

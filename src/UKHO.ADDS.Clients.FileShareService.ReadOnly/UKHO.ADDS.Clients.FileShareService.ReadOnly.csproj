@@ -7,6 +7,7 @@
     <PackageLicenseExpression>MIT</PackageLicenseExpression>
     <PackageProjectUrl>https://github.com/UKHO/UKHO.ADDS.Clients</PackageProjectUrl>
     <RepositoryUrl>https://github.com/UKHO/UKHO.ADDS.Clients</RepositoryUrl>
+    <PackageReadmeFile>README.md</PackageReadmeFile>
   </PropertyGroup>
 
   <ItemGroup>
@@ -24,6 +25,10 @@
     <InternalsVisibleTo Include="UKHO.ADDS.Clients.FileShareService.ReadWrite" />
     <InternalsVisibleTo Include="UKHO.ADDS.Clients.FileShareService.ReadOnly.Tests" />
     <InternalsVisibleTo Include="UKHO.ADDS.Clients.FileShareService.ReadWrite.Tests" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Include="..\..\README.md" Pack="true" PackagePath="\"/>
   </ItemGroup>
 
 </Project>

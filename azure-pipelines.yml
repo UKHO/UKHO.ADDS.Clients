@@ -176,7 +176,7 @@ stages:
     #     testRunTitle: IntegrationTests
 
 - stage: ProGet
-  condition: and(succeeded(), eq(variables['Build.SourceBranch'], 'refs/heads/main'))
+  #condition: and(succeeded(), eq(variables['Build.SourceBranch'], 'refs/heads/main'))
   variables:
   - group: nuget-deployment-vars
   jobs:
@@ -203,4 +203,34 @@ stages:
           - powershell: Get-ChildItem "$(Pipeline.Workspace)/NuGetPackages/*.nupkg" -File | Foreach {dotnet nuget push $_.fullname -k $(progetApiKey) -s https://progetcloud.ukho.gov.uk/nuget/ukho.trusted/v3/index.json }
             env:
               progetApiKey : $(progetApiKey)
+            displayName: Publish Package
+
+- stage: NuGet
+  #condition: and(succeeded(), eq(variables['Build.SourceBranch'], 'refs/heads/main'))
+  variables:
+  - group: nuget-deployment-vars
+  jobs:
+  - deployment: Publish_To_NuGet
+    displayName: Publish To NuGet
+    pool:
+      name: NautilusRelease
+    environment: UKHO-ADDS-Clients-NuGet
+    workspace:
+      clean: all
+    strategy:
+      runOnce:
+        deploy:
+          steps:
+          - task: UseDotNet@2
+            displayName: 'Use .NET $(SdkVersion) sdk'
+            inputs:
+              packageType: sdk
+              version: $(SdkVersion)
+
+          - download: current
+            artifact: NuGetPackages
+
+          - powershell: Get-ChildItem "$(Pipeline.Workspace)/NuGetPackages/*.nupkg" -File | Foreach {dotnet nuget push $_.fullname -k $(nugetapikey) -s https://api.nuget.org/v3/index.json --no-symbols}
+            env:
+              nugetApiKey : $(nugetapikey)
             displayName: Publish Package

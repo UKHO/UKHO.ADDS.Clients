@@ -1,8 +1,8 @@
 ﻿using System.Net;
 using System.Text;
-using System.Text.Json;
+using UKHO.ADDS.Infrastructure.Serialization.Json;
 
-namespace UKHO.ADDS.Clients.FileShareService.Readonly.Tests.Helpers
+namespace UKHO.ADDS.Clients.FileShareService.ReadOnly.Tests.Helpers
 {
     public class FakeFssHttpClientFactory : DelegatingHandler, IHttpClientFactory
     {
@@ -36,7 +36,7 @@ namespace UKHO.ADDS.Clients.FileShareService.Readonly.Tests.Helpers
                     response.Content = new StreamContent(stream);
                     break;
                 default:
-                    response.Content = new StringContent(JsonSerializer.Serialize(responseValue), Encoding.UTF8, "application/json");
+                    response.Content = new StringContent(JsonCodec.Encode(responseValue), Encoding.UTF8, "application/json");
                     break;
             }
 

@@ -1,22 +1,25 @@
-﻿using System.Text;
+﻿using System.Net;
+using System.Text;
 using System.Text.Encodings.Web;
 using UKHO.ADDS.Clients.Common.Authentication;
+using UKHO.ADDS.Clients.Common.Extensions;
 using UKHO.ADDS.Clients.Common.Factories;
-using UKHO.ADDS.Clients.FileShareService.ReadOnly.Extensions;
 using UKHO.ADDS.Clients.FileShareService.ReadOnly.Models;
+using UKHO.ADDS.Infrastructure.Results;
 
 namespace UKHO.ADDS.Clients.FileShareService.ReadOnly
 {
     public class FileShareReadOnlyClient : IFileShareReadOnlyClient
     {
         private readonly int _maxDownloadBytes = 10485760;
-        private readonly IAuthenticationTokenProvider _authTokenProvider;
-        private readonly IHttpClientFactory _httpClientFactory;
+
+        protected readonly IAuthenticationTokenProvider AuthTokenProvider;
+        protected readonly IHttpClientFactory HttpClientFactory;
 
         public FileShareReadOnlyClient(IHttpClientFactory httpClientFactory, string baseAddress, IAuthenticationTokenProvider authTokenProvider)
         {
-            _httpClientFactory = new SetBaseAddressHttpClientFactory(httpClientFactory, new Uri(baseAddress));
-            _authTokenProvider = authTokenProvider;
+            HttpClientFactory = new SetBaseAddressHttpClientFactory(httpClientFactory, new Uri(baseAddress));
+            AuthTokenProvider = authTokenProvider;
         }
 
         public FileShareReadOnlyClient(IHttpClientFactory httpClientFactory, string baseAddress, string accessToken) :
@@ -24,103 +27,120 @@ namespace UKHO.ADDS.Clients.FileShareService.ReadOnly
         {
         }
 
-        public async Task<BatchStatusResponse> GetBatchStatusAsync(string batchId)
+        public async Task<IResult<BatchStatusResponse>> GetBatchStatusAsync(string batchId)
         {
             var uri = $"batch/{batchId}/status";
 
-            using (var httpClient = await GetAuthenticationHeaderSetClient())
-            using (var httpRequestMessage = new HttpRequestMessage(HttpMethod.Get, uri))
+            try
             {
+                using var httpClient = await GetAuthenticationHeaderSetClient();
+                using var httpRequestMessage = new HttpRequestMessage(HttpMethod.Get, uri);
+
                 var response = await httpClient.SendAsync(httpRequestMessage, CancellationToken.None);
-                response.EnsureSuccessStatusCode();
-                var status = await response.ReadAsTypeAsync<BatchStatusResponse>();
-                return status;
+
+                return await response.CreateResultAsync<BatchStatusResponse>();
+            }
+            catch (Exception ex)
+            {
+                return Result.Failure<BatchStatusResponse>(ex.Message);
             }
         }
 
-        protected IAuthenticationTokenProvider AuthenticationTokenProvider => _authTokenProvider;
+        public async Task<IResult<BatchSearchResponse>> SearchAsync(string searchQuery) => await SearchAsync(searchQuery, null, null);
 
-        protected IHttpClientFactory HttpClientFactory => _httpClientFactory;
+        public async Task<IResult<BatchSearchResponse>> SearchAsync(string searchQuery, int? pageSize) => await SearchAsync(searchQuery, pageSize, null);
 
-        public async Task<BatchSearchResponse> SearchAsync(string searchQuery) => await SearchAsync(searchQuery, null, null);
-
-        public async Task<BatchSearchResponse> SearchAsync(string searchQuery, int? pageSize) => await SearchAsync(searchQuery, pageSize, null);
-
-        public async Task<BatchSearchResponse> SearchAsync(string searchQuery, int? pageSize, int? start)
-        {
-            var response = await SearchResponse(searchQuery, pageSize, start, CancellationToken.None);
-            response.EnsureSuccessStatusCode();
-            var searchResponse = await response.ReadAsTypeAsync<BatchSearchResponse>();
-            return searchResponse;
-        }
+        public async Task<IResult<BatchSearchResponse>> SearchAsync(string searchQuery, int? pageSize, int? start) => await SearchAsync(searchQuery, pageSize, start, CancellationToken.None);
 
         public async Task<IResult<BatchSearchResponse>> SearchAsync(string searchQuery, int? pageSize, int? start, CancellationToken cancellationToken)
         {
             var response = await SearchResponse(searchQuery, pageSize, start, cancellationToken);
-            return await Result.WithObjectData<BatchSearchResponse>(response);
+            return await response.CreateResultAsync<BatchSearchResponse, ErrorResponseModel>(TranslateErrors);
         }
 
-        public async Task<Stream> DownloadFileAsync(string batchId, string filename)
+        protected IError TranslateErrors(ErrorResponseModel errorResponseModel, HttpStatusCode status)
+        {
+            var errorProperties = ErrorFactory.CreateProperties(errorResponseModel.CorrelationId);
+
+            if (errorResponseModel.Errors.Any())
+            {
+                errorProperties.Add("inner", errorProperties);
+            }
+
+            return ErrorFactory.CreateError(status, errorProperties);
+        }
+
+        public async Task<IResult<Stream>> DownloadFileAsync(string batchId, string filename)
         {
             var uri = $"batch/{batchId}/files/{filename}";
 
-            using (var httpClient = await GetAuthenticationHeaderSetClient())
-            using (var httpRequestMessage = new HttpRequestMessage(HttpMethod.Get, uri))
+            try
             {
+                using var httpClient = await GetAuthenticationHeaderSetClient();
+                using var httpRequestMessage = new HttpRequestMessage(HttpMethod.Get, uri);
+
                 var response = await httpClient.SendAsync(httpRequestMessage, CancellationToken.None);
-                response.EnsureSuccessStatusCode();
-                var downloadedFileStream = await response.Content.ReadAsStreamAsync();
-                return downloadedFileStream;
+                return await response.CreateResultAsync<Stream>();
+            }
+            catch (Exception ex)
+            {
+                return Result.Failure<Stream>(ex.Message);
             }
         }
 
         public async Task<IResult<DownloadFileResponse>> DownloadFileAsync(string batchId, string fileName, Stream destinationStream, long fileSizeInBytes = 0, CancellationToken cancellationToken = default)
         {
-            long startByte = 0;
-            var endByte = fileSizeInBytes < _maxDownloadBytes ? fileSizeInBytes - 1 : _maxDownloadBytes - 1;
-            IResult<DownloadFileResponse> result = null;
-
-            while (startByte <= endByte)
+            try
             {
-                var rangeHeader = $"bytes={startByte}-{endByte}";
+                long startByte = 0;
+                var endByte = fileSizeInBytes < _maxDownloadBytes ? fileSizeInBytes - 1 : _maxDownloadBytes - 1;
 
-                var uri = $"batch/{batchId}/files/{fileName}";
-
-                using (var httpClient = await GetAuthenticationHeaderSetClient())
-                using (var httpRequestMessage = new HttpRequestMessage(HttpMethod.Get, uri))
+                while (startByte <= endByte)
                 {
-                    if (fileSizeInBytes != 0 && rangeHeader != null)
+                    var rangeHeader = $"bytes={startByte}-{endByte}";
+
+                    var uri = $"batch/{batchId}/files/{fileName}";
+
+                    using (var httpClient = await GetAuthenticationHeaderSetClient())
+                    using (var httpRequestMessage = new HttpRequestMessage(HttpMethod.Get, uri))
                     {
-                        httpRequestMessage.Headers.Add("Range", rangeHeader);
+                        if (fileSizeInBytes != 0 && rangeHeader != null)
+                        {
+                            httpRequestMessage.Headers.Add("Range", rangeHeader);
+                        }
+
+                        var response = await httpClient.SendAsync(httpRequestMessage, cancellationToken);
+                        var result = await response.CreateDefaultResultAsync<DownloadFileResponse>();
+
+                        if (!result.IsSuccess())
+                        {
+                            return result;
+                        }
+
+                        await using (var contentStream = await response.Content.ReadAsStreamAsync(cancellationToken))
+                        {
+                            await contentStream.CopyToAsync(destinationStream, cancellationToken);
+                        }
                     }
 
-                    var response = await httpClient.SendAsync(httpRequestMessage, cancellationToken);
-                    result = await Result.WithNullData<DownloadFileResponse>(response);
+                    startByte = endByte + 1;
+                    endByte += _maxDownloadBytes - 1;
 
-                    if (!result.IsSuccess)
+                    if (endByte > fileSizeInBytes - 1)
                     {
-                        return result;
-                    }
-
-                    using (var contentStream = await response.Content.ReadAsStreamAsync())
-                    {
-                        contentStream.CopyTo(destinationStream);
+                        endByte = fileSizeInBytes - 1;
                     }
                 }
 
-                startByte = endByte + 1;
-                endByte += _maxDownloadBytes - 1;
-
-                if (endByte > fileSizeInBytes - 1)
-                {
-                    endByte = fileSizeInBytes - 1;
-                }
+                return Result.Success(new DownloadFileResponse());
             }
-
-            return result;
+            catch (Exception ex)
+            {
+                return Result.Failure<DownloadFileResponse>(ex);
+            }
         }
 
-        public async Task<IEnumerable<string>> GetUserAttributesAsync()
+        public async Task<IResult<IEnumerable<string>>> GetUserAttributesAsync()
         {
             var uri = "attributes";
 
@@ -128,9 +148,8 @@ namespace UKHO.ADDS.Clients.FileShareService.ReadOnly
             using (var httpRequestMessage = new HttpRequestMessage(HttpMethod.Get, uri))
             {
                 var response = await httpClient.SendAsync(httpRequestMessage, CancellationToken.None);
-                response.EnsureSuccessStatusCode();
-                var attributes = await response.ReadAsTypeAsync<List<string>>();
-                return attributes;
+
+                return await response.CreateResultAsync<IEnumerable<string>>();
             }
         }
 
@@ -146,12 +165,11 @@ namespace UKHO.ADDS.Clients.FileShareService.ReadOnly
 
             uri = AddQueryString(uri, query);
 
-            using (var httpClient = await GetAuthenticationHeaderSetClient())
-            using (var httpRequestMessage = new HttpRequestMessage(HttpMethod.Get, uri))
-            {
-                var response = await httpClient.SendAsync(httpRequestMessage, cancellationToken);
-                return await Result.WithObjectData<BatchAttributesSearchResponse>(response);
-            }
+            using var httpClient = await GetAuthenticationHeaderSetClient();
+            using var httpRequestMessage = new HttpRequestMessage(HttpMethod.Get, uri);
+
+            var response = await httpClient.SendAsync(httpRequestMessage, cancellationToken);
+            return await response.CreateResultAsync<BatchAttributesSearchResponse, ErrorResponseModel>(TranslateErrors);
         }
 
         public async Task<IResult<BatchAttributesSearchResponse>> BatchAttributeSearchAsync(string searchQuery, int maxAttributeValueCount, CancellationToken cancellationToken)
@@ -168,30 +186,28 @@ namespace UKHO.ADDS.Clients.FileShareService.ReadOnly
 
             uri = AddQueryString(uri, query);
 
-            using (var httpClient = await GetAuthenticationHeaderSetClient())
-            using (var httpRequestMessage = new HttpRequestMessage(HttpMethod.Get, uri))
-            {
-                var response = await httpClient.SendAsync(httpRequestMessage, cancellationToken);
-                return await Result.WithObjectData<BatchAttributesSearchResponse>(response);
-            }
+            using var httpClient = await GetAuthenticationHeaderSetClient();
+            using var httpRequestMessage = new HttpRequestMessage(HttpMethod.Get, uri);
+
+            var response = await httpClient.SendAsync(httpRequestMessage, cancellationToken);
+            return await response.CreateResultAsync<BatchAttributesSearchResponse, ErrorResponseModel>(TranslateErrors);
         }
 
         public async Task<IResult<Stream>> DownloadZipFileAsync(string batchId, CancellationToken cancellationToken)
         {
             var uri = $"batch/{batchId}/files";
 
-            using (var httpClient = await GetAuthenticationHeaderSetClient())
-            using (var httpRequestMessage = new HttpRequestMessage(HttpMethod.Get, uri))
-            {
-                var response = await httpClient.SendAsync(httpRequestMessage, cancellationToken);
-                return await Result.WithStreamData(response);
-            }
+            using var httpClient = await GetAuthenticationHeaderSetClient();
+            using var httpRequestMessage = new HttpRequestMessage(HttpMethod.Get, uri);
+
+            var response = await httpClient.SendAsync(httpRequestMessage, cancellationToken);
+            return await response.CreateResultAsync<Stream>();
         }
 
         protected async Task<HttpClient> GetAuthenticationHeaderSetClient()
         {
-            var httpClient = _httpClientFactory.CreateClient();
-            await httpClient.SetAuthenticationHeaderAsync(_authTokenProvider);
+            var httpClient = HttpClientFactory.CreateClient();
+            await httpClient.SetAuthenticationHeaderAsync(AuthTokenProvider);
             return httpClient;
         }
 
@@ -227,36 +243,31 @@ namespace UKHO.ADDS.Clients.FileShareService.ReadOnly
 
             uri = AddQueryString(uri, query);
 
-            using (var httpClient = await GetAuthenticationHeaderSetClient())
-            using (var httpRequestMessage = new HttpRequestMessage(HttpMethod.Get, uri))
-            {
-                return await httpClient.SendAsync(httpRequestMessage, cancellationToken);
-            }
-        }
+            using var httpClient = await GetAuthenticationHeaderSetClient();
+            using var httpRequestMessage = new HttpRequestMessage(HttpMethod.Get, uri);
 
-        #region private methods
+            return await httpClient.SendAsync(httpRequestMessage, cancellationToken);
+        }
 
         private static string AddQueryString(string uri, IEnumerable<KeyValuePair<string, string>> queryString)
         {
-            var uriToBeAppended = uri;
-
-            var queryIndex = uriToBeAppended.IndexOf('?');
+            var queryIndex = uri.IndexOf('?');
             var hasQuery = queryIndex != -1;
 
             var sb = new StringBuilder();
-            sb.Append(uriToBeAppended);
+            sb.Append(uri);
+
             foreach (var parameter in queryString)
             {
                 sb.Append(hasQuery ? '&' : '?');
                 sb.Append(UrlEncoder.Default.Encode(parameter.Key));
                 sb.Append('=');
                 sb.Append(UrlEncoder.Default.Encode(parameter.Value));
+
                 hasQuery = true;
             }
 
             return sb.ToString();
         }
-
-        #endregion
     }
 }

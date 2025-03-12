@@ -1,7 +1,7 @@
 ﻿using System.Net.Http.Headers;
 using UKHO.ADDS.Clients.Common.Authentication;
 
-namespace UKHO.ADDS.Clients.FileShareService.ReadOnly.Extensions
+namespace UKHO.ADDS.Clients.Common.Extensions
 {
     internal static class HttpClientExtensions
     {

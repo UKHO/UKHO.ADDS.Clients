@@ -1,6 +1,6 @@
 ﻿namespace UKHO.ADDS.Clients.FileShareService.ReadOnly.Models
 {
-    internal class ErrorResponseModel
+    public class ErrorResponseModel
     {
         public string CorrelationId { get; set; }
         public List<Error> Errors { get; set; } = new();

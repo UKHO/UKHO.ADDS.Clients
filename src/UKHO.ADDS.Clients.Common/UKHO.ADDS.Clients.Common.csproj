@@ -20,4 +20,8 @@
     <InternalsVisibleTo Include="UKHO.ADDS.Clients.SalesCatalogueService" />
   </ItemGroup>
 
+  <ItemGroup>
+    <PackageReference Include="UKHO.ADDS.Infrastructure.Results" Version="0.0.50312-alpha.1" />
+    <PackageReference Include="UKHO.ADDS.Infrastructure.Serialization" Version="0.0.50312-alpha.1" />
+  </ItemGroup>
 </Project>

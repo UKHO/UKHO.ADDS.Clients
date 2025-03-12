@@ -1,10 +1,9 @@
 using System.Net;
 using NUnit.Framework;
-using UKHO.ADDS.Clients.FileShareService.ReadOnly;
 using UKHO.ADDS.Clients.FileShareService.ReadOnly.Models;
-using UKHO.ADDS.Clients.FileShareService.Readonly.Tests.Helpers;
+using UKHO.ADDS.Clients.FileShareService.ReadOnly.Tests.Helpers;
 
-namespace UKHO.ADDS.Clients.FileShareService.Readonly.Tests
+namespace UKHO.ADDS.Clients.FileShareService.ReadOnly.Tests
 {
     public class GetBatchStatusTests
     {
@@ -41,9 +40,12 @@ namespace UKHO.ADDS.Clients.FileShareService.Readonly.Tests
 
             var batchStatusResponse = await _fileShareApiClient.GetBatchStatusAsync(batchId);
 
+            var isSuccess = batchStatusResponse.IsSuccess(out var batchResponseData);
+
             Assert.Multiple(() =>
             {
-                Assert.That(batchStatusResponse.Status, Is.EqualTo(expectedBatchStatus));
+                Assert.That(isSuccess, Is.True);
+                Assert.That(batchResponseData!.Status, Is.EqualTo(expectedBatchStatus));
                 Assert.That(_lastRequestUri?.AbsolutePath, Is.EqualTo($"/basePath/batch/{batchId}/status"));
             });
         }
@@ -56,9 +58,9 @@ namespace UKHO.ADDS.Clients.FileShareService.Readonly.Tests
 
             try
             {
-                await _fileShareApiClient.GetBatchStatusAsync(batchId.ToString());
+                var result = await _fileShareApiClient.GetBatchStatusAsync(batchId.ToString());
 
-                Assert.Fail("Expected to throw an exception");
+                Assert.That(result.IsFailure);
             }
             catch (Exception e)
             {
@@ -76,9 +78,9 @@ namespace UKHO.ADDS.Clients.FileShareService.Readonly.Tests
 
             try
             {
-                await _fileShareApiClient.GetBatchStatusAsync(batchId.ToString());
+                var result = await _fileShareApiClient.GetBatchStatusAsync(batchId.ToString());
 
-                Assert.Fail("Expected to throw an exception");
+                Assert.That(result.IsFailure);
             }
             catch (Exception e)
             {

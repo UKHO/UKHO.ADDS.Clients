@@ -1,6 +1,6 @@
 ﻿using System.Security.Cryptography;
 
-namespace UKHO.ADDS.Clients.FileShareService.ReadOnly.Extensions
+namespace UKHO.ADDS.Clients.Common.Extensions
 {
     internal static class Md5HashCalculator
     {

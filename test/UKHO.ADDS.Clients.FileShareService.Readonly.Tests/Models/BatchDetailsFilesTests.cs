@@ -2,7 +2,7 @@
 using NUnit.Framework;
 using UKHO.ADDS.Clients.FileShareService.ReadOnly.Models;
 
-namespace UKHO.ADDS.Clients.FileShareService.Readonly.Tests.Models
+namespace UKHO.ADDS.Clients.FileShareService.ReadOnly.Tests.Models
 {
     public class BatchDetailsFilesTests
     {

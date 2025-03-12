@@ -21,8 +21,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\..\temp\UKHO.ADDS.Infrastructure.Results\UKHO.ADDS.Infrastructure.Results.csproj" />
-    <ProjectReference Include="..\..\temp\UKHO.ADDS.Infrastructure.Serialization\UKHO.ADDS.Infrastructure.Serialization.csproj" />
+    <PackageReference Include="UKHO.ADDS.Infrastructure.Results" Version="0.0.50312-alpha.1" />
+    <PackageReference Include="UKHO.ADDS.Infrastructure.Serialization" Version="0.0.50312-alpha.1" />
   </ItemGroup>
-
 </Project>

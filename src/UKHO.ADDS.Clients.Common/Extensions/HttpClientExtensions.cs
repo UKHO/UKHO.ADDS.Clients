@@ -1,5 +1,6 @@
 ﻿using System.Net.Http.Headers;
 using UKHO.ADDS.Clients.Common.Authentication;
+using UKHO.ADDS.Clients.Common.Constants;
 
 namespace UKHO.ADDS.Clients.Common.Extensions
 {
@@ -14,7 +15,18 @@ namespace UKHO.ADDS.Clients.Common.Extensions
         public static async Task SetAuthenticationHeaderAsync(this HttpClient httpClient, IAuthenticationTokenProvider authTokenProvider)
         {
             var token = await authTokenProvider.GetTokenAsync();
-            httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("bearer", token);
+            httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue(ApiHeaderKeys.BearerTokenHeaderKey, token);
+        }
+
+        /// <summary>
+        /// Sets CorrelationId in request header
+        /// </summary>
+        /// <param name="httpClient"></param>
+        /// <param name="correlationId"></param>
+        /// <returns></returns>
+        public static void SetCorrelationIdHeaderAsync(this HttpClient httpClient, string correlationId)
+        {
+            httpClient.DefaultRequestHeaders.Add(ApiHeaderKeys.XCorrelationIdHeaderKey, correlationId);
         }
     }
 }

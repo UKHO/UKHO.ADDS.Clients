@@ -12,26 +12,17 @@ namespace UKHO.ADDS.Clients.SalesCatalogueService
     public class SalesCatalogueClient : ISalesCatalogueClient
     {
         private readonly IAuthenticationTokenProvider _authTokenProvider;
-        private readonly IHttpClientFactory _httpClientFactory;
-        private readonly HttpClient _httpClient;
+        private readonly IHttpClientFactory _httpClientFactory;        
 
         public SalesCatalogueClient(IHttpClientFactory httpClientFactory, string baseAddress, IAuthenticationTokenProvider authTokenProvider)
         {
             _httpClientFactory = new SetBaseAddressHttpClientFactory(httpClientFactory, new Uri(baseAddress));
-            _authTokenProvider = authTokenProvider;
-            _httpClient = _httpClientFactory.CreateClient();
+            _authTokenProvider = authTokenProvider;            
         }
 
         public SalesCatalogueClient(IHttpClientFactory httpClientFactory, string baseAddress, string accessToken) :
             this(httpClientFactory, baseAddress, new DefaultAuthenticationTokenProvider(accessToken))
         {
-        }
-
-        public SalesCatalogueClient(HttpClient httpClient, string accessToken)
-        {
-            _httpClient = httpClient;
-            _authTokenProvider = new DefaultAuthenticationTokenProvider(accessToken);
-            _httpClientFactory = null;
         }
 
         /// <summary>
@@ -46,24 +37,23 @@ namespace UKHO.ADDS.Clients.SalesCatalogueService
         {
             var uri = $"/{apiVersion}/catalogues/{productType}/basic";
 
-            await _httpClient.SetAuthenticationHeaderAsync(_authTokenProvider);
-            _httpClient.SetCorrelationIdHeaderAsync(correlationId);
-
             try
             {
-                using (var httpRequestMessage = new HttpRequestMessage(HttpMethod.Get, uri))
+                using var httpClient = await GetAuthenticatedClientAsync(correlationId);
+
+                using var httpRequestMessage = new HttpRequestMessage(HttpMethod.Get, uri);                
+
+                //set "If-Modified-Since" header value in request header if value is passed
+                if (!string.IsNullOrEmpty(sinceDateTime))
                 {
-                    //set "If-Modified-Since" header value in request header if value is passed
-                    if (!string.IsNullOrEmpty(sinceDateTime))
-                    {
-                        httpRequestMessage.Headers.Add("If-Modified-Since", sinceDateTime);
-                    }
-
-                    var response = await _httpClient.SendAsync(httpRequestMessage);
-
-                    //create response result as per expected output by reading additional values from httpresponse object 
-                    return await CreateS100ProductsFromSpecificDateResponse(response,correlationId);
+                    httpRequestMessage.Headers.Add("If-Modified-Since", sinceDateTime);
                 }
+
+                var response = await httpClient.SendAsync(httpRequestMessage);
+
+                //create response result as per expected output by reading additional values from httpresponse object 
+                return await CreateS100ProductsFromSpecificDateResponse(response, correlationId);
+
             }
             catch (Exception ex)
             {
@@ -122,7 +112,7 @@ namespace UKHO.ADDS.Clients.SalesCatalogueService
                 {
                     var bodyJson = await httpResponseMessage.Content.ReadAsStringAsync();
 
-                    //Deserialize Json response body to S100Products
+                    //Deserialize Json response body to list of S100Products
                     var products = JsonCodec.Decode<List<S100Products>>(bodyJson);
 
                     response.ResponseBody = products ?? new List<S100Products>();
@@ -135,6 +125,16 @@ namespace UKHO.ADDS.Clients.SalesCatalogueService
                 }
             }
             return Result.Success(response);
+        }
+
+        protected async Task<HttpClient> GetAuthenticatedClientAsync(string correlationId)
+        {
+            var httpClient = _httpClientFactory.CreateClient();
+
+            await httpClient.SetAuthenticationHeaderAsync(_authTokenProvider);
+            httpClient.SetCorrelationIdHeaderAsync(correlationId);
+
+            return httpClient;
         }
     }
 }

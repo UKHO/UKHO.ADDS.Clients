@@ -48,7 +48,7 @@ namespace UKHO.ADDS.Clients.PermitService
 
                     var httpResponse = await _httpClient.SendAsync(httpRequestMessage);
 
-                    return await httpResponse.CreateResultAsync<Stream>(Applications.PermitService);                    
+                    return await httpResponse.CreateResultAsync<Stream>(ApiNames.PermitService, correlationId);                    
                 }
             }
             catch (Exception ex)

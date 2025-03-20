@@ -51,7 +51,7 @@ namespace UKHO.ADDS.Clients.Common.Extensions
             }
         }
 
-        public static async Task<IResult<TValue>> CreateResultAsync<TValue>(this HttpResponseMessage response, string applicationName) where TValue : class
+        public static async Task<IResult<TValue>> CreateResultAsync<TValue>(this HttpResponseMessage response, string applicationName,string correlationId) where TValue : class
         {
             try
             {
@@ -69,7 +69,7 @@ namespace UKHO.ADDS.Clients.Common.Extensions
                     return Result.Success(body);
                 }
 
-                var errorMetadata = await CreateErrorMetadata(response, applicationName);
+                var errorMetadata = await response.CreateErrorMetadata(applicationName, correlationId);
                 return Result.Failure<TValue>(ErrorFactory.CreateError(response.StatusCode, errorMetadata));
             }
             catch (Exception ex)
@@ -114,16 +114,16 @@ namespace UKHO.ADDS.Clients.Common.Extensions
             }
         }
 
-        private static async Task<IDictionary<string, object>> CreateErrorMetadata(HttpResponseMessage response, string applicationName)
+        public static async Task<IDictionary<string, object>> CreateErrorMetadata(this HttpResponseMessage response, string applicationName, string correlationId)
         {
-            IDictionary<string, object> errorMetadata = new Dictionary<string, object>();
+            IDictionary<string, object> errorMetadata = ErrorFactory.CreateProperties(correlationId);
 
             //get error origin from http response
             var origin = response.Headers.TryGetValues(ApiHeaderKeys.ErrorOrigin, out var value) ? value.FirstOrDefault() : applicationName;
+            errorMetadata.Add(ErrorMetaDataKeys.ErrorOrigin, origin ?? applicationName);
+
             //get error response body
             var errorJson = await response.Content.ReadAsStringAsync();
-
-            errorMetadata.Add(ErrorMetaDataKeys.ErrorOrigin, origin ?? applicationName);
             errorMetadata.Add(ErrorMetaDataKeys.ErrorResponseBody, errorJson);
 
             return errorMetadata;

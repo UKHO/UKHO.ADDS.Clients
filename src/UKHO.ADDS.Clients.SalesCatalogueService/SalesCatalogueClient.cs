@@ -1,5 +1,6 @@
 ﻿using System.Net;
 using UKHO.ADDS.Clients.Common.Authentication;
+using UKHO.ADDS.Clients.Common.Constants;
 using UKHO.ADDS.Clients.Common.Extensions;
 using UKHO.ADDS.Clients.Common.Factories;
 using UKHO.ADDS.Clients.SalesCatalogueService.Models;
@@ -61,7 +62,7 @@ namespace UKHO.ADDS.Clients.SalesCatalogueService
                     var response = await _httpClient.SendAsync(httpRequestMessage);
 
                     //create response result as per expected output by reading additional values from httpresponse object 
-                    return await CreateS100ProductsFromSpecificDateResponse(response);
+                    return await CreateS100ProductsFromSpecificDateResponse(response,correlationId);
                 }
             }
             catch (Exception ex)
@@ -104,13 +105,14 @@ namespace UKHO.ADDS.Clients.SalesCatalogueService
         /// </summary>
         /// <param name="httpResponseMessage">The HTTP response message.</param>
         /// <returns>The result contains the S100 sales catalogue response.</returns>
-        private async Task<IResult<S100SalesCatalogueResponse>> CreateS100ProductsFromSpecificDateResponse(HttpResponseMessage httpResponseMessage)
+        private async Task<IResult<S100SalesCatalogueResponse>> CreateS100ProductsFromSpecificDateResponse(HttpResponseMessage httpResponseMessage, string correlationId)
         {
             var response = new S100SalesCatalogueResponse();
 
             if (httpResponseMessage.StatusCode != HttpStatusCode.OK && httpResponseMessage.StatusCode != HttpStatusCode.NotModified)
             {
-                return Result.Failure<S100SalesCatalogueResponse>(ErrorFactory.CreateError(httpResponseMessage.StatusCode));
+                var errorMetadata = await httpResponseMessage.CreateErrorMetadata(ApiNames.SaleCatalogueService, correlationId);
+                return Result.Failure<S100SalesCatalogueResponse>(ErrorFactory.CreateError(httpResponseMessage.StatusCode, errorMetadata));
             }
             else
             {

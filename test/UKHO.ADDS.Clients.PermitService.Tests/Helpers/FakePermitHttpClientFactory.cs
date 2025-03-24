@@ -4,12 +4,9 @@ using UKHO.ADDS.Infrastructure.Serialization.Json;
 
 namespace UKHO.ADDS.Clients.PermitService.Tests.Helpers
 {
-    public class FakePermitHttpClientFactory : DelegatingHandler, IHttpClientFactory
+    public class FakePermitHttpClientFactory(Func<HttpRequestMessage, (HttpStatusCode, object)> httpMessageHandler) : DelegatingHandler, IHttpClientFactory
     {
-        private readonly Func<HttpRequestMessage, (HttpStatusCode, object)> _httpMessageHandler;
         private HttpClient _httpClient;
-
-        public FakePermitHttpClientFactory(Func<HttpRequestMessage, (HttpStatusCode, object)> httpMessageHandler) => _httpMessageHandler = httpMessageHandler;
 
         public HttpClient HttpClient
         {
@@ -25,7 +22,7 @@ namespace UKHO.ADDS.Clients.PermitService.Tests.Helpers
 
         protected override Task<HttpResponseMessage> SendAsync(HttpRequestMessage request, CancellationToken cancellationToken)
         {
-            var (httpStatusCode, responseValue) = _httpMessageHandler(request);
+            var (httpStatusCode, responseValue) = httpMessageHandler(request);
             var response = new HttpResponseMessage { StatusCode = httpStatusCode };
 
             switch (responseValue)

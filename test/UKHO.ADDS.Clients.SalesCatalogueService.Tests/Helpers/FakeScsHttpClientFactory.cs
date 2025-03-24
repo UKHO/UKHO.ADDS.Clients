@@ -4,12 +4,9 @@ using UKHO.ADDS.Infrastructure.Serialization.Json;
 
 namespace UKHO.ADDS.Clients.SalesCatalogueService.Tests.Helpers
 {
-    public class FakeScsHttpClientFactory : DelegatingHandler, IHttpClientFactory
+    public class FakeScsHttpClientFactory(Func<HttpRequestMessage, (HttpStatusCode, object, DateTime?)> httpMessageHandler) : DelegatingHandler, IHttpClientFactory
     {
-        private readonly Func<HttpRequestMessage, (HttpStatusCode, object)> _httpMessageHandler;
         private HttpClient _httpClient;
-
-        public FakeScsHttpClientFactory(Func<HttpRequestMessage, (HttpStatusCode, object)> httpMessageHandler) => _httpMessageHandler = httpMessageHandler;
 
         public HttpClient HttpClient
         {
@@ -25,7 +22,7 @@ namespace UKHO.ADDS.Clients.SalesCatalogueService.Tests.Helpers
 
         protected override Task<HttpResponseMessage> SendAsync(HttpRequestMessage request, CancellationToken cancellationToken)
         {
-            var (httpStatusCode, responseValue) = _httpMessageHandler(request);
+            var (httpStatusCode, responseValue, responseHeaderLastModifiedValue) = httpMessageHandler(request);
             var response = new HttpResponseMessage { StatusCode = httpStatusCode };
 
             switch (responseValue)
@@ -37,6 +34,12 @@ namespace UKHO.ADDS.Clients.SalesCatalogueService.Tests.Helpers
                     break;
                 default:
                     response.Content = new StringContent(JsonCodec.Encode(responseValue), Encoding.UTF8, "application/json");
+                    
+                    if (responseHeaderLastModifiedValue.HasValue)
+                    {
+                        response.Content.Headers.LastModified = responseHeaderLastModifiedValue;
+                    }
+                    
                     break;
             }
 

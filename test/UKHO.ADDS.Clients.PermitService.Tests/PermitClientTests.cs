@@ -14,8 +14,8 @@ namespace UKHO.ADDS.Clients.PermitService.Tests
         private FakePermitHttpClientFactory _fakePermitHttpClientFactory;
         private PermitClient _permitApiClient;
         private Uri _lastRequestUri;
-        private ConcurrentQueue<object> _nextResponses;
-        private HttpStatusCode _nextResponseStatusCode;
+        private ConcurrentQueue<object> _responseBody;
+        private HttpStatusCode _responseStatusCode;
 
         [SetUp]
         public void Setup()
@@ -24,21 +24,21 @@ namespace UKHO.ADDS.Clients.PermitService.Tests
             {
                 _lastRequestUri = request.RequestUri;
 
-                if (_nextResponses.IsEmpty)
+                if (_responseBody.IsEmpty)
                 {
-                    return (_nextResponseStatusCode, new object());
+                    return (_responseStatusCode, new object());
                 }
 
-                if (_nextResponses.TryDequeue(out var response))
+                if (_responseBody.TryDequeue(out var response))
                 {
-                    return (_nextResponseStatusCode, response);
+                    return (_responseStatusCode, response);
                 }
 
                 throw new Exception("Failed to dequeue next response");
             });
 
-            _nextResponses = new ConcurrentQueue<object>();
-            _nextResponseStatusCode = HttpStatusCode.OK;
+            _responseBody = new ConcurrentQueue<object>();
+            _responseStatusCode = HttpStatusCode.OK;
             _permitApiClient = new PermitClient(_fakePermitHttpClientFactory, @"https://permit-tests.net/", DUMMY_ACCESS_TOKEN);
         }
 
@@ -52,7 +52,7 @@ namespace UKHO.ADDS.Clients.PermitService.Tests
             var apiVersion = "v1";
             var productType = "s100";
             var expectedStream = new MemoryStream(Encoding.UTF8.GetBytes(GetExpectedXmlString()));
-            _nextResponses.Enqueue(expectedStream);
+            _responseBody.Enqueue(expectedStream);
 
             var permitRequest = new PermitRequest
             {
@@ -72,11 +72,11 @@ namespace UKHO.ADDS.Clients.PermitService.Tests
                 UserPermits = new List<UserPermit>
                 {
                     new() {
-                        Title = "IHO Test System",
+                        Title = "UPN1",
                         Upn = "869D4E0E902FA2E1B934A3685E5D0E85C1FDEC8BD4E5F6"
                     },
                     new() {
-                        Title = "OeM Test 1",
+                        Title = "UPN2",
                         Upn = "7B5CED73389DECDB110E6E803F957253F0DE13D1G7H8I9"
                     }
                 }
@@ -119,19 +119,19 @@ namespace UKHO.ADDS.Clients.PermitService.Tests
                 UserPermits = new List<UserPermit>
                 {
                     new() {
-                        Title = "IHO Test System",
+                        Title = "UPN1",
                         Upn = "869D4E0E902FA2E1B934A3685E5D0E85C1FDEC8BD4E5F6"
                     },
                     new() {
-                        Title = "OeM Test 1",
+                        Title = "UPN2",
                         Upn = "7B5CED73389DECDB110E6E803F957253F0DE13D1G7H8I9"
                     }
                 }
             };
 
             var expectedStream = new MemoryStream(Encoding.UTF8.GetBytes(GetExpectedXmlString()));
-            _nextResponses.Enqueue(expectedStream);
-            _nextResponseStatusCode = HttpStatusCode.BadRequest;
+            _responseBody.Enqueue(expectedStream);
+            _responseStatusCode = HttpStatusCode.BadRequest;
 
             var result = await _permitApiClient.GetPermitAsync(apiVersion, productType, permitRequest, correlationId);
 
@@ -168,18 +168,18 @@ namespace UKHO.ADDS.Clients.PermitService.Tests
                 UserPermits = new List<UserPermit>
                 {
                     new() {
-                        Title = "IHO Test System",
+                        Title = "UPN1",
                         Upn = "869D4E0E902FA2E1B934A3685E5D0E85C1FDEC8BD4E5F6"
                     },
                     new() {
-                        Title = "OeM Test 1",
+                        Title = "UPN2",
                         Upn = "7B5CED73389DECDB110E6E803F957253F0DE13D1G7H8I9"
                     }
                 }
             };
 
             var expectedStream = new MemoryStream(Encoding.UTF8.GetBytes(GetExpectedXmlString()));
-            _nextResponses.Enqueue(expectedStream);
+            _responseBody.Enqueue(expectedStream);
 
             var result = await _permitApiClient.GetPermitAsync(apiVersion, productType, permitRequest, correlationId);
 

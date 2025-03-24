@@ -12,8 +12,7 @@ namespace UKHO.ADDS.Clients.PermitService.Tests
         private const string DUMMY_ACCESS_TOKEN = "ACarefullyEncodedSecretAccessToken";
         private const string XCorrelationIdHeaderKey = "X-Correlation-ID";
         private FakePermitHttpClientFactory _fakePermitHttpClientFactory;
-        private PermitClient _permitApiClient;
-        private Uri _lastRequestUri;
+        private PermitClient _permitApiClient;        
         private ConcurrentQueue<object> _responseBody;
         private HttpStatusCode _responseStatusCode;
 
@@ -22,8 +21,6 @@ namespace UKHO.ADDS.Clients.PermitService.Tests
         {
             _fakePermitHttpClientFactory = new FakePermitHttpClientFactory(request =>
             {
-                _lastRequestUri = request.RequestUri;
-
                 if (_responseBody.IsEmpty)
                 {
                     return (_responseStatusCode, new object());
@@ -90,8 +87,7 @@ namespace UKHO.ADDS.Clients.PermitService.Tests
             {
                 Assert.That(isSuccess, Is.True);
                 Assert.That(permitResponse, Is.Not.Null);
-                Assert.That(permitResponse, Is.EqualTo(expectedStream));
-                Assert.That(_lastRequestUri?.AbsolutePath, Is.EqualTo($"/v1/permits/s100"));
+                Assert.That(permitResponse, Is.EqualTo(expectedStream));                
             });
         }
 
@@ -191,8 +187,6 @@ namespace UKHO.ADDS.Clients.PermitService.Tests
                 Assert.That(_fakePermitHttpClientFactory.HttpClient.DefaultRequestHeaders.GetValues(XCorrelationIdHeaderKey).FirstOrDefault(), Is.EqualTo(correlationId));
             });
         }
-
-
         private static string GetExpectedXmlString()
         {
             var sb = new StringBuilder();

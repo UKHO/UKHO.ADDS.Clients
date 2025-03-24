@@ -11,8 +11,7 @@ namespace UKHO.ADDS.Clients.SalesCatalogueService.Tests
     {
         private const string DUMMY_ACCESS_TOKEN = "ACarefullyEncodedSecretAccessToken";
         private FakeScsHttpClientFactory _fakeScsHttpClientFactory;
-        private SalesCatalogueClient _salesCatalogueApiClient;
-        private Uri _lastRequestUri;
+        private SalesCatalogueClient _salesCatalogueApiClient;        
         private object _responseBody;
         private DateTime _responseHeader;
         private HttpStatusCode _responseStatusCode;
@@ -21,8 +20,7 @@ namespace UKHO.ADDS.Clients.SalesCatalogueService.Tests
         public void Setup()
         {
             _fakeScsHttpClientFactory = new FakeScsHttpClientFactory(request =>
-            {
-                _lastRequestUri = request.RequestUri;
+            {                
                 return (_responseStatusCode, _responseBody, _responseHeader);
             });
 
@@ -39,18 +37,7 @@ namespace UKHO.ADDS.Clients.SalesCatalogueService.Tests
             {
                 disposableResponse.Dispose();
             }
-        }
-        private static void CheckResponseMatchesExpectedResponse(S100SalesCatalogueResponse? expectedResponse, IResult<S100SalesCatalogueResponse> response)
-        {
-            var isSuccess = response.IsSuccess(out var responseValue);
-
-            Assert.That(responseValue!.ResponseBody.Count, Is.EqualTo(expectedResponse!.ResponseBody.Count));
-            Assert.Multiple(() =>
-            {
-                Assert.That(responseValue.ResponseCode, Is.EqualTo(expectedResponse.ResponseCode));
-                Assert.That(responseValue.LastModified, Is.EqualTo(expectedResponse.LastModified));
-            });
-        }
+        }       
 
         [Test]
         public async Task GetS100ProductsFromSpecificDateAsync_Success_ReturnsSuccessResult()
@@ -152,6 +139,17 @@ namespace UKHO.ADDS.Clients.SalesCatalogueService.Tests
             {
                 Assert.That(httpClient.DefaultRequestHeaders.Contains(ApiHeaderKeys.XCorrelationIdHeaderKey), Is.True);
                 Assert.That(httpClient.DefaultRequestHeaders.GetValues(ApiHeaderKeys.XCorrelationIdHeaderKey).FirstOrDefault(), Is.EqualTo(correlationId));
+            });
+        }
+        private static void CheckResponseMatchesExpectedResponse(S100SalesCatalogueResponse? expectedResponse, IResult<S100SalesCatalogueResponse> response)
+        {
+            var isSuccess = response.IsSuccess(out var responseValue);
+
+            Assert.That(responseValue!.ResponseBody.Count, Is.EqualTo(expectedResponse!.ResponseBody.Count));
+            Assert.Multiple(() =>
+            {
+                Assert.That(responseValue.ResponseCode, Is.EqualTo(expectedResponse.ResponseCode));
+                Assert.That(responseValue.LastModified, Is.EqualTo(expectedResponse.LastModified));
             });
         }
     }

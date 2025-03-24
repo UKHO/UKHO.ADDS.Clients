@@ -46,14 +46,7 @@ namespace UKHO.ADDS.Clients.SalesCatalogueService
                 //set "If-Modified-Since" header value in request header if value is passed
                 if (!string.IsNullOrEmpty(sinceDateTime))
                 {
-                    if (DateTime.TryParse(sinceDateTime, out DateTime parsedDate))
-                    {
-                        httpRequestMessage.Headers.Add("If-Modified-Since", parsedDate.ToString("R"));
-                    }
-                    else
-                    {
-                        throw new FormatException("Invalid date format for sinceDateTime.");
-                    }
+                    httpRequestMessage.Headers.Add("If-Modified-Since", sinceDateTime);
                 }
 
                 var response = await httpClient.SendAsync(httpRequestMessage);

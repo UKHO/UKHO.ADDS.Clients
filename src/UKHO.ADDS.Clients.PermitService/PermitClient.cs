@@ -12,7 +12,7 @@ namespace UKHO.ADDS.Clients.PermitService
     public class PermitClient : IPermitClient
     {
         private readonly IAuthenticationTokenProvider _authTokenProvider;
-        private readonly IHttpClientFactory _httpClientFactory;        
+        private readonly IHttpClientFactory _httpClientFactory;
 
         public PermitClient(IHttpClientFactory httpClientFactory, string baseAddress, IAuthenticationTokenProvider authTokenProvider)
         {
@@ -23,12 +23,12 @@ namespace UKHO.ADDS.Clients.PermitService
         public PermitClient(IHttpClientFactory httpClientFactory, string baseAddress, string accessToken) :
             this(httpClientFactory, baseAddress, new DefaultAuthenticationTokenProvider(accessToken))
         {
-        }        
+        }
 
         public async Task<IResult<Stream>> GetPermitAsync(string apiVersion, string productType, PermitRequest requestBody,
             string correlationId)
         {
-            var uri = $"/{apiVersion}/permits/{Uri.EscapeDataString(productType)}";             
+            var uri = new Uri($"/{apiVersion}/permits/{productType}", UriKind.Relative);
 
             try
             {

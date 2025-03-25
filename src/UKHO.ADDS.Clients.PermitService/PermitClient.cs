@@ -28,7 +28,7 @@ namespace UKHO.ADDS.Clients.PermitService
         public async Task<IResult<Stream>> GetPermitAsync(string apiVersion, string productType, PermitRequest requestBody,
             string correlationId)
         {
-            var uri = $"/{apiVersion}/permits/{productType}";             
+            var uri = $"/{apiVersion}/permits/{Uri.EscapeDataString(productType)}";             
 
             try
             {

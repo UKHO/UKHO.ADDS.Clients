@@ -12,12 +12,12 @@ namespace UKHO.ADDS.Clients.SalesCatalogueService
     public class SalesCatalogueClient : ISalesCatalogueClient
     {
         private readonly IAuthenticationTokenProvider _authTokenProvider;
-        private readonly IHttpClientFactory _httpClientFactory;        
+        private readonly IHttpClientFactory _httpClientFactory;
 
         public SalesCatalogueClient(IHttpClientFactory httpClientFactory, string baseAddress, IAuthenticationTokenProvider authTokenProvider)
         {
             _httpClientFactory = new SetBaseAddressHttpClientFactory(httpClientFactory, new Uri(baseAddress));
-            _authTokenProvider = authTokenProvider;            
+            _authTokenProvider = authTokenProvider;
         }
 
         public SalesCatalogueClient(IHttpClientFactory httpClientFactory, string baseAddress, string accessToken) :
@@ -33,7 +33,7 @@ namespace UKHO.ADDS.Clients.SalesCatalogueService
         /// <param name="sinceDateTime">The date and time since when the products are to be retrieved.</param>
         /// <param name="correlationId">The correlation ID for the request.</param>
         /// <returns>A task that represents the asynchronous operation. The task result contains the S100 sales catalogue response.</returns>
-        public async Task<IResult<S100SalesCatalogueResponse>> GetS100ProductsFromSpecificDateAsync(string apiVersion, string productType, string sinceDateTime, string correlationId)
+        public async Task<IResult<S100SalesCatalogueResponse>> GetS100ProductsFromSpecificDateAsync(string apiVersion, string productType, DateTime? sinceDateTime, string correlationId)
         {
             var uri = new Uri($"/{apiVersion}/catalogues/{productType}/basic", UriKind.Relative);
 
@@ -41,12 +41,13 @@ namespace UKHO.ADDS.Clients.SalesCatalogueService
             {
                 using var httpClient = await GetAuthenticatedClientAsync(correlationId);
 
-                using var httpRequestMessage = new HttpRequestMessage(HttpMethod.Get, uri);                
+                using var httpRequestMessage = new HttpRequestMessage(HttpMethod.Get, uri);
 
                 //set "If-Modified-Since" header value in request header if value is passed
-                if (!string.IsNullOrEmpty(sinceDateTime))
+                if (sinceDateTime.HasValue)
                 {
-                    httpRequestMessage.Headers.Add("If-Modified-Since", sinceDateTime);
+                    var headerDateString = sinceDateTime.Value.ToString("R");
+                    httpRequestMessage.Headers.Add("If-Modified-Since", headerDateString);
                 }
 
                 var response = await httpClient.SendAsync(httpRequestMessage);
@@ -118,10 +119,10 @@ namespace UKHO.ADDS.Clients.SalesCatalogueService
                     response.ResponseBody = products ?? new List<S100Products>();
                 }
 
-                var lastModified = httpResponseMessage.Content.Headers.LastModified;
-                if (lastModified != null)
+                var lastModifiedHeader = httpResponseMessage.Headers.TryGetValues("Last-Modified", out var values);
+                if (lastModifiedHeader && DateTimeOffset.TryParse(values!.FirstOrDefault(), out var lastModifiedValue))
                 {
-                    response.LastModified = ((DateTimeOffset)lastModified).UtcDateTime;
+                    response.LastModified = lastModifiedValue.UtcDateTime;
                 }
             }
             return Result.Success(response);

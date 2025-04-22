@@ -11,7 +11,7 @@ namespace UKHO.ADDS.Clients.SalesCatalogueService.Tests
     {
         private const string DUMMY_ACCESS_TOKEN = "ACarefullyEncodedSecretAccessToken";
         private FakeScsHttpClientFactory _fakeScsHttpClientFactory;
-        private SalesCatalogueClient _salesCatalogueApiClient;        
+        private SalesCatalogueClient _salesCatalogueApiClient;
         private object _responseBody;
         private DateTime _responseHeader;
         private HttpStatusCode _responseStatusCode;
@@ -20,7 +20,7 @@ namespace UKHO.ADDS.Clients.SalesCatalogueService.Tests
         public void Setup()
         {
             _fakeScsHttpClientFactory = new FakeScsHttpClientFactory(request =>
-            {                
+            {
                 return (_responseStatusCode, _responseBody, _responseHeader);
             });
 
@@ -37,7 +37,7 @@ namespace UKHO.ADDS.Clients.SalesCatalogueService.Tests
             {
                 disposableResponse.Dispose();
             }
-        }       
+        }
 
         [Test]
         public async Task GetS100ProductsFromSpecificDateAsync_Success_ReturnsSuccessResult()
@@ -52,14 +52,14 @@ namespace UKHO.ADDS.Clients.SalesCatalogueService.Tests
             var correlationId = Guid.NewGuid().ToString();
             var apiVersion = "v2";
             var productType = "s100";
-            var sinceDateTime = DateTime.UtcNow.AddDays(-1);            
+            var sinceDateTime = DateTime.UtcNow.AddDays(-1);
 
             _responseBody = expectedProducts;
             _responseStatusCode = HttpStatusCode.OK;
             _responseHeader = sinceDateTime;
 
             // Act
-            var result = await _salesCatalogueApiClient.GetS100ProductsFromSpecificDateAsync(apiVersion, productType, sinceDateTime.ToString("R"), correlationId);
+            var result = await _salesCatalogueApiClient.GetS100ProductsFromSpecificDateAsync(apiVersion, productType, sinceDateTime, correlationId);
 
             // Assert
             result.IsSuccess(out S100SalesCatalogueResponse? s100SalesCatalogueResponse);
@@ -79,14 +79,14 @@ namespace UKHO.ADDS.Clients.SalesCatalogueService.Tests
             var correlationId = Guid.NewGuid().ToString();
             var apiVersion = "v2";
             var productType = "s100";
-            var sinceDateTime = DateTime.UtcNow.AddDays(-1);            
+            var sinceDateTime = DateTime.UtcNow.AddDays(-1);
 
             _responseBody = expectedProducts;
             _responseStatusCode = HttpStatusCode.OK;
             _responseHeader = sinceDateTime;
 
             // Act
-            var result = await _salesCatalogueApiClient.GetS100ProductsFromSpecificDateAsync(apiVersion, productType, string.Empty, correlationId);
+            var result = await _salesCatalogueApiClient.GetS100ProductsFromSpecificDateAsync(apiVersion, productType, null, correlationId);
 
             // Assert
             result.IsSuccess(out S100SalesCatalogueResponse? s100SalesCatalogueResponse);
@@ -100,7 +100,7 @@ namespace UKHO.ADDS.Clients.SalesCatalogueService.Tests
             var correlationId = Guid.NewGuid().ToString();
             var apiVersion = "v1";
             var productType = "s100";
-            var sinceDateTime = DateTime.UtcNow.AddDays(-1).ToString("yyyy-MM-ddTHH:mm:ssZ");
+            var sinceDateTime = DateTime.UtcNow.AddDays(-1);
 
             _responseBody = new StringContent("Error message");
             _responseStatusCode = HttpStatusCode.BadRequest;
@@ -125,7 +125,7 @@ namespace UKHO.ADDS.Clients.SalesCatalogueService.Tests
             var correlationId = Guid.NewGuid().ToString();
             var apiVersion = "v1";
             var productType = "s100";
-            var sinceDateTime = DateTime.UtcNow.AddDays(-1).ToString("yyyy-MM-ddTHH:mm:ssZ");
+            var sinceDateTime = DateTime.UtcNow.AddDays(-1);
 
             _responseBody = new StringContent("Response content");
             _responseStatusCode = HttpStatusCode.OK;

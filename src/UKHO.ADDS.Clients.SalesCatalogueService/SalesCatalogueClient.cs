@@ -119,9 +119,10 @@ namespace UKHO.ADDS.Clients.SalesCatalogueService
                     response.ResponseBody = products ?? new List<S100Products>();
                 }
 
-                if (httpResponseMessage.Content.Headers.TryGetValues("Last-Modified", out var values) && DateTimeOffset.TryParse(values.FirstOrDefault(), out var parsedDate))
+                var lastModifiedHeader = httpResponseMessage.Headers.TryGetValues("Last-Modified", out var values);
+                if (lastModifiedHeader && DateTimeOffset.TryParse(values!.FirstOrDefault(), out var lastModifiedValue))
                 {
-                    response.LastModified = parsedDate.UtcDateTime;
+                    response.LastModified = lastModifiedValue.UtcDateTime;
                 }
             }
             return Result.Success(response);

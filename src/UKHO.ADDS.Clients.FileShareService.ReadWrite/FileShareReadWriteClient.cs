@@ -1,4 +1,7 @@
-﻿using UKHO.ADDS.Clients.Common.Authentication;
+﻿using System.Net.Http.Json;
+using System.Text;
+using System.Text.Json;
+using UKHO.ADDS.Clients.Common.Authentication;
 using UKHO.ADDS.Clients.FileShareService.ReadOnly;
 using UKHO.ADDS.Clients.FileShareService.ReadOnly.Models;
 using UKHO.ADDS.Clients.FileShareService.ReadWrite.Models;
@@ -22,9 +25,15 @@ namespace UKHO.ADDS.Clients.FileShareService.ReadWrite
 
         public Task<IResult<AppendAclResponse>> AppendAclAsync(string batchId, Acl acl, CancellationToken cancellationToken = default) => Task.FromResult<IResult<AppendAclResponse>>(Result.Success(new AppendAclResponse()));
 
-        public Task<IResult<IBatchHandle>> CreateBatchAsync(BatchModel batchModel) => Task.FromResult<IResult<IBatchHandle>>(Result.Success<IBatchHandle>(new BatchHandle("batchid")));
+        public async Task<IResult<IBatchHandle>> CreateBatchAsync(BatchModel batchModel)
+        {
+            return await CreateBatchInternalAsync(batchModel, CancellationToken.None);
+        }
 
-        public Task<IResult<IBatchHandle>> CreateBatchAsync(BatchModel batchModel, CancellationToken cancellationToken) => Task.FromResult<IResult<IBatchHandle>>(Result.Success<IBatchHandle>(new BatchHandle("batchid")));
+        public async Task<IResult<IBatchHandle>> CreateBatchAsync(BatchModel batchModel, CancellationToken cancellationToken)
+        {
+            return await CreateBatchInternalAsync(batchModel, cancellationToken);
+        }
 
         public Task<IResult<BatchStatusResponse>> GetBatchStatusAsync(IBatchHandle batchHandle) => Task.FromResult<IResult<BatchStatusResponse>>(Result.Success(new BatchStatusResponse()));
 
@@ -48,5 +57,33 @@ namespace UKHO.ADDS.Clients.FileShareService.ReadWrite
         public Task<IResult<RollBackBatchResponse>> RollBackBatchAsync(IBatchHandle batchHandle, CancellationToken cancellationToken) => Task.FromResult<IResult<RollBackBatchResponse>>(Result.Success(new RollBackBatchResponse()));
 
         public Task<IResult<SetExpiryDateResponse>> SetExpiryDateAsync(string batchId, BatchExpiryModel batchExpiry, CancellationToken cancellationToken = default) => Task.FromResult<IResult<SetExpiryDateResponse>>(Result.Success(new SetExpiryDateResponse()));
+
+        private async Task<IResult<IBatchHandle>> CreateBatchInternalAsync(BatchModel batchModel, CancellationToken cancellationToken)
+        {
+            var uri = new Uri($"batch", UriKind.Relative);
+
+            try
+            {
+                using var httpClient = await GetAuthenticationHeaderSetClient();
+                using var httpRequestMessage = new HttpRequestMessage(HttpMethod.Post, uri)
+                {
+                    Content = new StringContent(JsonSerializer.Serialize(batchModel), Encoding.UTF8, "application/json")
+                };
+
+                var response = await httpClient.SendAsync(httpRequestMessage, cancellationToken);
+
+                if (!response.IsSuccessStatusCode)
+                {
+                    return Result.Failure<IBatchHandle>($"Failed to create batch. Status code: {response.StatusCode}");
+                }
+
+                var batchHandle = await response.Content.ReadFromJsonAsync<BatchHandle>(cancellationToken: cancellationToken);
+                return Result.Success<IBatchHandle>(batchHandle);
+            }
+            catch (Exception ex)
+            {
+                return Result.Failure<IBatchHandle>(ex.Message);
+            }
+        }
     }
 }

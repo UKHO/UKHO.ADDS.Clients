@@ -1,7 +1,10 @@
-﻿namespace UKHO.ADDS.Clients.FileShareService.ReadWrite.Models
+﻿using System.Text.Json.Serialization;
+
+namespace UKHO.ADDS.Clients.FileShareService.ReadWrite.Models
 {
     public class BatchModel
     {
+        [JsonPropertyName("businessUnit")]
         public string BusinessUnit { get; set; }
 
         public Acl Acl { get; set; }

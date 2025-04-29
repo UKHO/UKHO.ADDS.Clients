@@ -33,9 +33,7 @@ namespace UKHO.ADDS.Clients.FileShareService.ReadWrite
 
             try
             {
-                var httpClient = HttpClientFactory.CreateClient();
-                await httpClient.SetAuthenticationHeaderAsync(AuthTokenProvider);
-                httpClient.SetCorrelationIdHeader(correlationId);
+                var httpClient = await CreateHttpClientWithHeadersAsync(correlationId);
 
                 using var httpRequestMessage = new HttpRequestMessage(HttpMethod.Post, uri)
                 {
@@ -81,5 +79,13 @@ namespace UKHO.ADDS.Clients.FileShareService.ReadWrite
         public Task<IResult<RollBackBatchResponse>> RollBackBatchAsync(IBatchHandle batchHandle, CancellationToken cancellationToken) => Task.FromResult<IResult<RollBackBatchResponse>>(Result.Success(new RollBackBatchResponse()));
 
         public Task<IResult<SetExpiryDateResponse>> SetExpiryDateAsync(string batchId, BatchExpiryModel batchExpiry, CancellationToken cancellationToken = default) => Task.FromResult<IResult<SetExpiryDateResponse>>(Result.Success(new SetExpiryDateResponse()));
+
+        protected async Task<HttpClient> CreateHttpClientWithHeadersAsync(string correlationId)
+        {
+            var httpClient = HttpClientFactory.CreateClient();
+            await httpClient.SetAuthenticationHeaderAsync(AuthTokenProvider);
+            httpClient.SetCorrelationIdHeader(correlationId);
+            return httpClient;
+        }
     }
 }

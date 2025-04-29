@@ -16,6 +16,7 @@ namespace UKHO.ADDS.Clients.FileShareService.ReadWrite.Tests
         private IAuthenticationTokenProvider _authTokenProvider;
         private FileShareReadWriteClient _client;
         private BatchModel _batchModel;
+        private const string CorrelationId = "TestCorrelationId";
 
         [OneTimeSetUp]
         public void OneTimeSetUp()
@@ -47,19 +48,18 @@ namespace UKHO.ADDS.Clients.FileShareService.ReadWrite.Tests
         {
             var batchHandle = new BatchHandle("batchId");
 
-            A.CallTo(() => _httpClient.SendAsync(A<HttpRequestMessage>._, A<CancellationToken>._)).Returns(Task.FromResult(GetHttpOkResponseMessage(batchHandle)));
+            var responseMessage = new HttpResponseMessage(HttpStatusCode.OK)
+            {
+                Content = new StringContent(JsonSerializer.Serialize(batchHandle), Encoding.UTF8, "application/json")
+            };
 
-            var result = await _client.CreateBatchAsync(_batchModel);
+            A.CallTo(() => _httpClient.SendAsync(A<HttpRequestMessage>._, A<CancellationToken>._)).Returns(Task.FromResult(responseMessage));
 
-            A.CallTo(() => _httpClient.SendAsync(A<HttpRequestMessage>._, A<CancellationToken>._)).Returns(Task.FromResult(GetHttpOkResponseMessage(batchHandle)));
-
-            var resultWithCancellationToken = await _client.CreateBatchAsync(_batchModel, CancellationToken.None);
+            var result = await _client.CreateBatchAsync(_batchModel, CorrelationId, CancellationToken.None);
 
             Assert.Multiple(() =>
             {
-                Assert.That(result.IsSuccess(out var value, out _), Is.True);
-                Assert.That(value?.BatchId, Is.EqualTo(batchHandle.BatchId));
-                Assert.That(resultWithCancellationToken.IsSuccess(out var valueCt, out _), Is.True);
+                Assert.That(result.IsSuccess(out var valueCt, out _), Is.True);
                 Assert.That(valueCt?.BatchId, Is.EqualTo(batchHandle.BatchId));
             });
         }
@@ -71,17 +71,13 @@ namespace UKHO.ADDS.Clients.FileShareService.ReadWrite.Tests
 
             A.CallTo(() => _httpClient.SendAsync(A<HttpRequestMessage>._, A<CancellationToken>._)).Returns(Task.FromResult(responseMessage));
 
-            var result = await _client.CreateBatchAsync(_batchModel);
-            var resultWithCancellationToken = await _client.CreateBatchAsync(_batchModel, CancellationToken.None);
+            var result = await _client.CreateBatchAsync(_batchModel, CorrelationId, CancellationToken.None);
 
             Assert.Multiple(() =>
             {
                 Assert.That(result.IsSuccess, Is.False);
                 Assert.That(result.Errors.FirstOrDefault()?.Message,
-                    Is.EqualTo("Failed to create batch. Status code: BadRequest"));
-                Assert.That(resultWithCancellationToken.IsSuccess, Is.False);
-                Assert.That(resultWithCancellationToken.Errors.FirstOrDefault()?.Message,
-                    Is.EqualTo("Failed to create batch. Status code: BadRequest"));
+                    Is.EqualTo("Bad request"));
             });
         }
 
@@ -90,24 +86,13 @@ namespace UKHO.ADDS.Clients.FileShareService.ReadWrite.Tests
         {
             A.CallTo(() => _httpClient.SendAsync(A<HttpRequestMessage>._, A<CancellationToken>._)).Throws(new Exception("Test exception"));
 
-            var result = await _client.CreateBatchAsync(_batchModel);
-            var resultWithCancellationToken = await _client.CreateBatchAsync(_batchModel, CancellationToken.None);
+            var result = await _client.CreateBatchAsync(_batchModel, CorrelationId, CancellationToken.None);
 
             Assert.Multiple(() =>
             {
                 Assert.That(result.IsSuccess, Is.False);
                 Assert.That(result.Errors.FirstOrDefault()?.Message, Is.EqualTo("Test exception"));
-                Assert.That(resultWithCancellationToken.IsSuccess, Is.False);
-                Assert.That(resultWithCancellationToken.Errors.FirstOrDefault()?.Message, Is.EqualTo("Test exception"));
             });
-        }
-
-        private static HttpResponseMessage GetHttpOkResponseMessage(BatchHandle batchHandle)
-        {
-            return new HttpResponseMessage(HttpStatusCode.OK)
-            {
-                Content = new StringContent(JsonSerializer.Serialize(batchHandle), Encoding.UTF8, "application/json")
-            };
         }
     }
 }

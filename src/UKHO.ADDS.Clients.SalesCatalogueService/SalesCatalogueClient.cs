@@ -39,9 +39,7 @@ namespace UKHO.ADDS.Clients.SalesCatalogueService
 
             try
             {
-                var httpClient = _httpClientFactory.CreateClient();
-                await httpClient.SetAuthenticationHeaderAsync(_authTokenProvider);
-                httpClient.SetCorrelationIdHeader(correlationId);
+                var httpClient = await CreateHttpClientWithHeadersAsync(correlationId);
 
                 using var httpRequestMessage = new HttpRequestMessage(HttpMethod.Get, uri);
 
@@ -91,6 +89,14 @@ namespace UKHO.ADDS.Clients.SalesCatalogueService
         public async Task<IResult<SalesCatalogueDataResponse>> GetSalesCatalogueDataResponse(string batchId, string correlationId)
         {
             return await Task.FromResult(Result.Success(new SalesCatalogueDataResponse()));
+        }
+
+        protected async Task<HttpClient> CreateHttpClientWithHeadersAsync(string correlationId)
+        {
+            var httpClient = _httpClientFactory.CreateClient();
+            await httpClient.SetAuthenticationHeaderAsync(_authTokenProvider);
+            httpClient.SetCorrelationIdHeader(correlationId);
+            return httpClient;
         }
 
         /// <summary>

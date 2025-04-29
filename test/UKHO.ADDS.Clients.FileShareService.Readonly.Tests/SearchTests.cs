@@ -14,6 +14,7 @@ namespace UKHO.ADDS.Clients.FileShareService.ReadOnly.Tests
         private Uri _lastRequestUri;
         private object _nextResponse;
         private HttpStatusCode _nextResponseStatusCode;
+        private string _correlationId = Guid.NewGuid().ToString();
 
         [SetUp]
         public void Setup()
@@ -51,7 +52,7 @@ namespace UKHO.ADDS.Clients.FileShareService.ReadOnly.Tests
             var expectedResponse = new BatchSearchResponse { Count = 2, Total = 2, Entries = new List<BatchDetails> { new("batch1"), new("batch2") }, Links = new Links(new Link("self")) };
             _nextResponse = expectedResponse;
 
-            var response = await _fileShareApiClient.SearchAsync("");
+            var response = await _fileShareApiClient.SearchAsync("", _correlationId);
 
             Assert.Multiple(() =>
             {
@@ -68,7 +69,7 @@ namespace UKHO.ADDS.Clients.FileShareService.ReadOnly.Tests
             var expectedResponse = new BatchSearchResponse { Count = 2, Total = 2, Entries = new List<BatchDetails> { new("batch1"), new("batch2") }, Links = new Links(new Link("self")) };
             _nextResponse = expectedResponse;
 
-            var response = await _fileShareApiClient.SearchAsync("$batch(key) eq 'value'");
+            var response = await _fileShareApiClient.SearchAsync("$batch(key) eq 'value'", _correlationId);
 
             Assert.Multiple(() =>
             {
@@ -85,7 +86,7 @@ namespace UKHO.ADDS.Clients.FileShareService.ReadOnly.Tests
             var expectedResponse = new BatchSearchResponse { Count = 2, Total = 2, Entries = new List<BatchDetails> { new("batch1"), new("batch2") }, Links = new Links(new Link("self")) };
             _nextResponse = expectedResponse;
 
-            var response = await _fileShareApiClient.SearchAsync("$batch(key) eq 'value'", 50);
+            var response = await _fileShareApiClient.SearchAsync("$batch(key) eq 'value'", 50, _correlationId);
 
             Assert.Multiple(() =>
             {
@@ -102,7 +103,7 @@ namespace UKHO.ADDS.Clients.FileShareService.ReadOnly.Tests
             var expectedResponse = new BatchSearchResponse { Count = 2, Total = 2, Entries = new List<BatchDetails> { new("batch1"), new("batch2") }, Links = new Links(new Link("self")) };
             _nextResponse = expectedResponse;
 
-            var response = await _fileShareApiClient.SearchAsync("$batch(key) eq 'value'", null, 20);
+            var response = await _fileShareApiClient.SearchAsync("$batch(key) eq 'value'", null, 20, _correlationId);
 
             Assert.Multiple(() =>
             {
@@ -119,7 +120,7 @@ namespace UKHO.ADDS.Clients.FileShareService.ReadOnly.Tests
             var expectedResponse = new BatchSearchResponse { Count = 2, Total = 2, Entries = new List<BatchDetails> { new("batch1"), new("batch2") }, Links = new Links(new Link("self")) };
             _nextResponse = expectedResponse;
 
-            var response = await _fileShareApiClient.SearchAsync("$batch(key) eq 'value'", 10, 20);
+            var response = await _fileShareApiClient.SearchAsync("$batch(key) eq 'value'", 10, 20, _correlationId);
 
             Assert.Multiple(() =>
             {
@@ -134,7 +135,7 @@ namespace UKHO.ADDS.Clients.FileShareService.ReadOnly.Tests
         [TestCase(0)]
         public void TestSearchWithInvalidPageSizeThrowsArgumentException(int pageSize)
         {
-            var exception = Assert.ThrowsAsync<ArgumentException>(async () => await _fileShareApiClient.SearchAsync("$batch(key) eq 'value'", pageSize, 20));
+            var exception = Assert.ThrowsAsync<ArgumentException>(async () => await _fileShareApiClient.SearchAsync("$batch(key) eq 'value'", pageSize, 20, _correlationId));
 
             Assert.That(exception.ParamName, Is.EqualTo("pageSize"));
         }
@@ -142,7 +143,7 @@ namespace UKHO.ADDS.Clients.FileShareService.ReadOnly.Tests
         [Test]
         public void TestSearchWithInvalidPageStartThrowsArgumentException()
         {
-            var exception = Assert.ThrowsAsync<ArgumentException>(async () => await _fileShareApiClient.SearchAsync("$batch(key) eq 'value'", -10, 20));
+            var exception = Assert.ThrowsAsync<ArgumentException>(async () => await _fileShareApiClient.SearchAsync("$batch(key) eq 'value'", -10, 20, _correlationId));
 
             Assert.That(exception.ParamName, Is.EqualTo("pageSize"));
         }
@@ -153,7 +154,7 @@ namespace UKHO.ADDS.Clients.FileShareService.ReadOnly.Tests
             var expectedResponse = new BatchSearchResponse { Count = 0, Total = 0, Entries = new List<BatchDetails>(), Links = new Links(new Link("self")) };
             _nextResponse = expectedResponse;
 
-            var response = await _fileShareApiClient.SearchAsync("$batch(key) eq 'value'");
+            var response = await _fileShareApiClient.SearchAsync("$batch(key) eq 'value'", _correlationId);
 
             Assert.Multiple(() =>
             {
@@ -169,7 +170,7 @@ namespace UKHO.ADDS.Clients.FileShareService.ReadOnly.Tests
         {
             _nextResponse = new BatchSearchResponse { Count = 0, Total = 0, Entries = new List<BatchDetails>(), Links = new Links(new Link("self")) };
 
-            await _fileShareApiClient.SearchAsync("");
+            await _fileShareApiClient.SearchAsync("", _correlationId);
 
             Assert.That(_fakeFssHttpClientFactory.HttpClient.DefaultRequestHeaders.Authorization, Is.Not.Null);
             Assert.Multiple(() =>
@@ -185,7 +186,7 @@ namespace UKHO.ADDS.Clients.FileShareService.ReadOnly.Tests
             var expectedResponse = new BatchSearchResponse { Count = 2, Total = 2, Entries = new List<BatchDetails> { new("batch1"), new("batch2") }, Links = new Links(new Link("self")) };
             _nextResponse = expectedResponse;
 
-            var response = await _fileShareApiClient.SearchAsync("", null, null, CancellationToken.None);
+            var response = await _fileShareApiClient.SearchAsync("", null, null, _correlationId, CancellationToken.None);
 
             Assert.Multiple(() =>
             {
@@ -204,7 +205,7 @@ namespace UKHO.ADDS.Clients.FileShareService.ReadOnly.Tests
             var expectedResponse = new BatchSearchResponse { Count = 2, Total = 2, Entries = new List<BatchDetails> { new("batch1"), new("batch2") }, Links = new Links(new Link("self")) };
             _nextResponse = expectedResponse;
 
-            var response = await _fileShareApiClient.SearchAsync("$batch(key) eq 'value'", null, null, CancellationToken.None);
+            var response = await _fileShareApiClient.SearchAsync("$batch(key) eq 'value'", null, null, _correlationId, CancellationToken.None);
 
             Assert.Multiple(() =>
             {
@@ -223,7 +224,7 @@ namespace UKHO.ADDS.Clients.FileShareService.ReadOnly.Tests
             var expectedResponse = new BatchSearchResponse { Count = 2, Total = 2, Entries = new List<BatchDetails> { new("batch1"), new("batch2") }, Links = new Links(new Link("self")) };
             _nextResponse = expectedResponse;
 
-            var response = await _fileShareApiClient.SearchAsync("$batch(key) eq 'value'", 50, null, CancellationToken.None);
+            var response = await _fileShareApiClient.SearchAsync("$batch(key) eq 'value'", 50, null, _correlationId, CancellationToken.None);
 
             Assert.Multiple(() =>
             {
@@ -242,7 +243,7 @@ namespace UKHO.ADDS.Clients.FileShareService.ReadOnly.Tests
             var expectedResponse = new BatchSearchResponse { Count = 2, Total = 2, Entries = new List<BatchDetails> { new("batch1"), new("batch2") }, Links = new Links(new Link("self")) };
             _nextResponse = expectedResponse;
 
-            var response = await _fileShareApiClient.SearchAsync("$batch(key) eq 'value'", null, 20, CancellationToken.None);
+            var response = await _fileShareApiClient.SearchAsync("$batch(key) eq 'value'", null, 20, _correlationId, CancellationToken.None);
 
             Assert.Multiple(() =>
             {
@@ -259,7 +260,7 @@ namespace UKHO.ADDS.Clients.FileShareService.ReadOnly.Tests
         [TestCase(0)]
         public void TestSearchWithInvalidPageSizeThrowsArgumentExceptionAndCancellationn(int pageSize)
         {
-            var exception = Assert.ThrowsAsync<ArgumentException>(async () => await _fileShareApiClient.SearchAsync("$batch(key) eq 'value'", pageSize, 20, CancellationToken.None));
+            var exception = Assert.ThrowsAsync<ArgumentException>(async () => await _fileShareApiClient.SearchAsync("$batch(key) eq 'value'", pageSize, 20, _correlationId, CancellationToken.None));
 
             Assert.That(exception.ParamName, Is.EqualTo("pageSize"));
         }
@@ -267,7 +268,7 @@ namespace UKHO.ADDS.Clients.FileShareService.ReadOnly.Tests
         [Test]
         public void TestSearchWithInvalidPageStartThrowsArgumentExceptionAndCancellation()
         {
-            var exception = Assert.ThrowsAsync<ArgumentException>(async () => await _fileShareApiClient.SearchAsync("$batch(key) eq 'value'", -10, 20, CancellationToken.None));
+            var exception = Assert.ThrowsAsync<ArgumentException>(async () => await _fileShareApiClient.SearchAsync("$batch(key) eq 'value'", -10, 20, _correlationId, CancellationToken.None));
 
             Assert.That(exception.ParamName, Is.EqualTo("pageSize"));
         }
@@ -278,7 +279,7 @@ namespace UKHO.ADDS.Clients.FileShareService.ReadOnly.Tests
             var expectedResponse = new BatchSearchResponse { Count = 0, Total = 0, Entries = new List<BatchDetails>(), Links = new Links(new Link("self")) };
             _nextResponse = expectedResponse;
 
-            var response = await _fileShareApiClient.SearchAsync("$batch(key) eq 'value'", null, null, CancellationToken.None);
+            var response = await _fileShareApiClient.SearchAsync("$batch(key) eq 'value'", null, null, _correlationId, CancellationToken.None);
 
             Assert.Multiple(() =>
             {
@@ -296,7 +297,7 @@ namespace UKHO.ADDS.Clients.FileShareService.ReadOnly.Tests
         {
             _nextResponse = new BatchSearchResponse { Count = 0, Total = 0, Entries = new List<BatchDetails>(), Links = new Links(new Link("self")) };
 
-            await _fileShareApiClient.SearchAsync("", null, null, CancellationToken.None);
+            await _fileShareApiClient.SearchAsync("", null, null, _correlationId, CancellationToken.None);
 
             Assert.That(_fakeFssHttpClientFactory.HttpClient.DefaultRequestHeaders.Authorization, Is.Not.Null);
             Assert.Multiple(() =>
@@ -311,7 +312,7 @@ namespace UKHO.ADDS.Clients.FileShareService.ReadOnly.Tests
         {
             _nextResponseStatusCode = HttpStatusCode.BadRequest;
 
-            var response = await _fileShareApiClient.SearchAsync("$batch(key) eq 'value'", null, null, CancellationToken.None);
+            var response = await _fileShareApiClient.SearchAsync("$batch(key) eq 'value'", null, null, _correlationId, CancellationToken.None);
 
             Assert.Multiple(() =>
             {
@@ -327,7 +328,7 @@ namespace UKHO.ADDS.Clients.FileShareService.ReadOnly.Tests
         {
             _nextResponseStatusCode = HttpStatusCode.InternalServerError;
 
-            var response = await _fileShareApiClient.SearchAsync("$batch(key) eq 'value'", null, null, CancellationToken.None);
+            var response = await _fileShareApiClient.SearchAsync("$batch(key) eq 'value'", null, null, _correlationId, CancellationToken.None);
 
             Assert.Multiple(() =>
             {

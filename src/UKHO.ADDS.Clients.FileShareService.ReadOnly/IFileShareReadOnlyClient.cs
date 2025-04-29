@@ -6,10 +6,10 @@ namespace UKHO.ADDS.Clients.FileShareService.ReadOnly
     public interface IFileShareReadOnlyClient
     {
         Task<IResult<BatchStatusResponse>> GetBatchStatusAsync(string batchId);
-        Task<IResult<BatchSearchResponse>> SearchAsync(string searchQuery);
-        Task<IResult<BatchSearchResponse>> SearchAsync(string searchQuery, int? pageSize);
-        Task<IResult<BatchSearchResponse>> SearchAsync(string searchQuery, int? pageSize, int? start);
-        Task<IResult<BatchSearchResponse>> SearchAsync(string searchQuery, int? pageSize, int? start, CancellationToken cancellationToken);
+        Task<IResult<BatchSearchResponse>> SearchAsync(string searchQuery, string correlationId);
+        Task<IResult<BatchSearchResponse>> SearchAsync(string searchQuery, int? pageSize, string correlationId);
+        Task<IResult<BatchSearchResponse>> SearchAsync(string searchQuery, int? pageSize, int? start, string correlationId);
+        Task<IResult<BatchSearchResponse>> SearchAsync(string searchQuery, int? pageSize, int? start, string correlationId, CancellationToken cancellationToken);
         Task<IResult<BatchAttributesSearchResponse>> BatchAttributeSearchAsync(string searchQuery, CancellationToken cancellationToken);
         Task<IResult<BatchAttributesSearchResponse>> BatchAttributeSearchAsync(string searchQuery, int maxAttributeValueCount, CancellationToken cancellationToken);
         Task<IResult<Stream>> DownloadFileAsync(string batchId, string filename);

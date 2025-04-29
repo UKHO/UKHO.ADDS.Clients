@@ -91,7 +91,7 @@ namespace UKHO.ADDS.Clients.SalesCatalogueService
             return await Task.FromResult(Result.Success(new SalesCatalogueDataResponse()));
         }
 
-        protected async Task<HttpClient> CreateHttpClientWithHeadersAsync(string correlationId)
+        private async Task<HttpClient> CreateHttpClientWithHeadersAsync(string correlationId)
         {
             var httpClient = _httpClientFactory.CreateClient();
             await httpClient.SetAuthenticationHeaderAsync(_authTokenProvider);

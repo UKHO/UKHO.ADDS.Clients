@@ -36,6 +36,12 @@ namespace UKHO.ADDS.Clients.FileShareService.ReadWrite.Tests
             };
         }
 
+        [OneTimeTearDown]
+        public void OneTimeTearDown()
+        {
+            _httpClient.Dispose();
+        }
+
         [Test]
         public async Task WhenCreateBatchAsyncIsCalledWithValidBatchModel_ThenReturnSuccessResult()
         {

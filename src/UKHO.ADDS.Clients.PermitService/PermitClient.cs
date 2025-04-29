@@ -52,7 +52,7 @@ namespace UKHO.ADDS.Clients.PermitService
             var httpClient = _httpClientFactory.CreateClient();
 
             await httpClient.SetAuthenticationHeaderAsync(_authTokenProvider);
-            httpClient.SetCorrelationIdHeaderAsync(correlationId);
+            httpClient.SetCorrelationIdHeader(correlationId);
 
             return httpClient;
         }

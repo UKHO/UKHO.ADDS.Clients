@@ -9,8 +9,7 @@ namespace UKHO.ADDS.Clients.FileShareService.ReadWrite
     public interface IFileShareReadWriteClient : IFileShareReadOnlyClient
     {
         Task<IResult<AppendAclResponse>> AppendAclAsync(string batchId, Acl acl, CancellationToken cancellationToken = default);
-        Task<IResult<IBatchHandle>> CreateBatchAsync(BatchModel batchModel);
-        Task<IResult<IBatchHandle>> CreateBatchAsync(BatchModel batchModel, CancellationToken cancellationToken);
+        Task<IResult<IBatchHandle>> CreateBatchAsync(BatchModel batchModel, string correlationId, CancellationToken cancellationToken = default);
         Task<IResult<BatchStatusResponse>> GetBatchStatusAsync(IBatchHandle batchHandle);
 
         Task<IResult> AddFileToBatchAsync(IBatchHandle batchHandle, Stream stream, string fileName, string mimeType,

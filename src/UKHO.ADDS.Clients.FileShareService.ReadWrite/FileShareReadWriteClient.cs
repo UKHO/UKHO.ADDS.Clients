@@ -4,6 +4,7 @@ using System.Text.Json;
 using UKHO.ADDS.Clients.Common.Authentication;
 using UKHO.ADDS.Clients.Common.Constants;
 using UKHO.ADDS.Clients.Common.Extensions;
+using UKHO.ADDS.Clients.Common.Factories;
 using UKHO.ADDS.Clients.FileShareService.ReadOnly;
 using UKHO.ADDS.Clients.FileShareService.ReadOnly.Models;
 using UKHO.ADDS.Clients.FileShareService.ReadWrite.Models;
@@ -17,11 +18,20 @@ namespace UKHO.ADDS.Clients.FileShareService.ReadWrite
         private const int DefaultMaxFileBlockSize = 4194304;
         private readonly int _maxFileBlockSize;
 
+        private readonly IAuthenticationTokenProvider _authTokenProvider;
+        private readonly IHttpClientFactory _httpClientFactory;
+
+        public FileShareReadWriteClient(IHttpClientFactory httpClientFactory, string baseAddress, IAuthenticationTokenProvider authTokenProvider)
+            : base(httpClientFactory, baseAddress, authTokenProvider)
+        {
+            _httpClientFactory = new SetBaseAddressHttpClientFactory(httpClientFactory, new Uri(baseAddress));
+            _authTokenProvider = authTokenProvider;
+            _maxFileBlockSize = DefaultMaxFileBlockSize;
+        }
+
         public FileShareReadWriteClient(IHttpClientFactory httpClientFactory, string baseAddress, string accessToken) : base(httpClientFactory, baseAddress, accessToken) => _maxFileBlockSize = DefaultMaxFileBlockSize;
 
         public FileShareReadWriteClient(IHttpClientFactory httpClientFactory, string baseAddress, string accessToken, int maxFileBlockSize) : base(httpClientFactory, baseAddress, accessToken) => _maxFileBlockSize = maxFileBlockSize;
-
-        public FileShareReadWriteClient(IHttpClientFactory httpClientFactory, string baseAddress, IAuthenticationTokenProvider authTokenProvider) : base(httpClientFactory, baseAddress, authTokenProvider) => _maxFileBlockSize = DefaultMaxFileBlockSize;
 
         public FileShareReadWriteClient(IHttpClientFactory httpClientFactory, string baseAddress, IAuthenticationTokenProvider authTokenProvider, int maxFileBlockSize) : base(httpClientFactory, baseAddress, authTokenProvider) => _maxFileBlockSize = maxFileBlockSize;
 
@@ -35,10 +45,7 @@ namespace UKHO.ADDS.Clients.FileShareService.ReadWrite
             {
                 var httpClient = await CreateHttpClientWithHeadersAsync(correlationId);
 
-                using var httpRequestMessage = new HttpRequestMessage(HttpMethod.Post, uri)
-                {
-                    Content = new StringContent(JsonSerializer.Serialize(batchModel), Encoding.UTF8, "application/json")
-                };
+                var httpRequestMessage = CreateHttpRequestMessage(uri, batchModel);
 
                 var response = await httpClient.SendAsync(httpRequestMessage, cancellationToken);
 
@@ -82,10 +89,18 @@ namespace UKHO.ADDS.Clients.FileShareService.ReadWrite
 
         private async Task<HttpClient> CreateHttpClientWithHeadersAsync(string correlationId)
         {
-            var httpClient = HttpClientFactory.CreateClient();
-            await httpClient.SetAuthenticationHeaderAsync(AuthTokenProvider);
+            var httpClient = _httpClientFactory.CreateClient();
+            await httpClient.SetAuthenticationHeaderAsync(_authTokenProvider);
             httpClient.SetCorrelationIdHeader(correlationId);
             return httpClient;
+        }
+
+        private HttpRequestMessage CreateHttpRequestMessage(Uri uri, BatchModel batchModel)
+        {
+            return new HttpRequestMessage(HttpMethod.Post, uri)
+            {
+                Content = new StringContent(JsonSerializer.Serialize(batchModel), Encoding.UTF8, "application/json")
+            };
         }
     }
 }

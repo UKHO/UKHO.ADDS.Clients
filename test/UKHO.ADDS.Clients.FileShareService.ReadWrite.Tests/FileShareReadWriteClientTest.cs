@@ -17,6 +17,7 @@ namespace UKHO.ADDS.Clients.FileShareService.ReadWrite.Tests
         private FileShareReadWriteClient _client;
         private BatchModel _batchModel;
         private const string CorrelationId = "TestCorrelationId";
+        private const string BaseAddress = "http://test.com";
 
         [OneTimeSetUp]
         public void OneTimeSetUp()
@@ -24,7 +25,7 @@ namespace UKHO.ADDS.Clients.FileShareService.ReadWrite.Tests
             _httpClient = A.Fake<HttpClient>();
             _httpClientFactory = A.Fake<IHttpClientFactory>();
             _authTokenProvider = A.Fake<IAuthenticationTokenProvider>();
-            _client = new FileShareReadWriteClient(_httpClientFactory, "http://test.com", _authTokenProvider);
+            _client = new FileShareReadWriteClient(_httpClientFactory, BaseAddress, _authTokenProvider);
 
             A.CallTo(() => _httpClientFactory.CreateClient(A<string>._)).Returns(_httpClient);
 
@@ -47,7 +48,7 @@ namespace UKHO.ADDS.Clients.FileShareService.ReadWrite.Tests
         public async Task WhenCreateBatchAsyncIsCalledWithValidBatchModel_ThenReturnSuccessResult()
         {
             var batchHandle = new BatchHandle("batchId");
-            
+
             var responseMessage = new HttpResponseMessage(HttpStatusCode.OK)
             {
                 Content = new StringContent(JsonSerializer.Serialize(batchHandle), Encoding.UTF8, "application/json")
@@ -70,7 +71,7 @@ namespace UKHO.ADDS.Clients.FileShareService.ReadWrite.Tests
         public async Task WhenCreateBatchAsyncIsCalledWithInvalidResponse_ThenReturnFailureResult()
         {
             var responseMessage = new HttpResponseMessage(HttpStatusCode.BadRequest);
-            
+
             A.CallTo(() => _httpClient.SendAsync(A<HttpRequestMessage>._, A<CancellationToken>._)).Returns(Task.FromResult(responseMessage));
 
             var result = await _client.CreateBatchAsync(_batchModel, CorrelationId, CancellationToken.None);
@@ -89,7 +90,7 @@ namespace UKHO.ADDS.Clients.FileShareService.ReadWrite.Tests
         public async Task WhenCreateBatchAsyncThrowsException_ThenReturnFailureResult()
         {
             A.CallTo(() => _httpClient.SendAsync(A<HttpRequestMessage>._, A<CancellationToken>._)).Throws(new Exception("Test exception"));
-            
+
             var result = await _client.CreateBatchAsync(_batchModel, CorrelationId, CancellationToken.None);
 
             Assert.Multiple(() =>
@@ -131,11 +132,11 @@ namespace UKHO.ADDS.Clients.FileShareService.ReadWrite.Tests
                 Assert.That(httpRequestMessage.Content.Headers.ContentType!.MediaType, Is.EqualTo("application/json"));
             });
         }
-        
+
         [Test]
         public void WhenConstructorIsCalledWithHttpClientFactoryBaseAddressAndAccessToken_ThenHttpClientFactoryIsNotNull()
         {
-            var client = new FileShareReadWriteClient(_httpClientFactory, "http://test.com", "accessToken");
+            var client = new FileShareReadWriteClient(_httpClientFactory, BaseAddress, "TestAccessToken");
 
             Assert.Multiple(() =>
             {

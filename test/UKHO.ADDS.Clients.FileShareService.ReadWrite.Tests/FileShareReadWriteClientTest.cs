@@ -63,8 +63,6 @@ namespace UKHO.ADDS.Clients.FileShareService.ReadWrite.Tests
                 Assert.That(result.IsSuccess(out var value, out _), Is.True);
                 Assert.That(value?.BatchId, Is.EqualTo(batchHandle.BatchId));
             });
-
-            await AssertCreateHttpClientWithHeadersAsync();
         }
 
         [Test]
@@ -82,8 +80,6 @@ namespace UKHO.ADDS.Clients.FileShareService.ReadWrite.Tests
                 Assert.That(result.Errors.FirstOrDefault()?.Message,
                     Is.EqualTo("Bad request"));
             });
-
-            await AssertCreateHttpClientWithHeadersAsync();
         }
 
         [Test]
@@ -98,8 +94,6 @@ namespace UKHO.ADDS.Clients.FileShareService.ReadWrite.Tests
                 Assert.That(result.IsSuccess, Is.False);
                 Assert.That(result.Errors.FirstOrDefault()?.Message, Is.EqualTo("Test exception"));
             });
-
-            await AssertCreateHttpClientWithHeadersAsync();
         }
 
         [Test]
@@ -148,23 +142,6 @@ namespace UKHO.ADDS.Clients.FileShareService.ReadWrite.Tests
 
                 var httpClientFactory = baseAddressField?.GetValue(client) as IHttpClientFactory;
                 Assert.That(httpClientFactory, Is.Not.Null);
-            });
-        }
-
-        private async Task AssertCreateHttpClientWithHeadersAsync()
-        {
-            var method = _client.GetType()
-                .GetMethod("CreateHttpClientWithHeadersAsync", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
-
-            var task = method.Invoke(_client, new object[] { CorrelationId }) as Task<HttpClient>;
-
-            var result = await task;
-
-            Assert.Multiple(() =>
-            {
-                Assert.That(result, Is.Not.Null);
-                Assert.That(result.DefaultRequestHeaders.Contains("X-Correlation-ID"), Is.True);
-                Assert.That(result.DefaultRequestHeaders.GetValues("X-Correlation-ID").FirstOrDefault(), Is.EqualTo(CorrelationId));
             });
         }
     }

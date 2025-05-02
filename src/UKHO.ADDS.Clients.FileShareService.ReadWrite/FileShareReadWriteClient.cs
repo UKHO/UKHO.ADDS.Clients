@@ -39,26 +39,21 @@ namespace UKHO.ADDS.Clients.FileShareService.ReadWrite
         public FileShareReadWriteClient(IHttpClientFactory httpClientFactory, string baseAddress, string accessToken,
             int maxFileBlockSize) : base(httpClientFactory, baseAddress, accessToken)
         {
-            _httpClientFactory = new SetBaseAddressHttpClientFactory(httpClientFactory, new Uri(baseAddress));
-            _maxFileBlockSize = DefaultMaxFileBlockSize;
         }
 
         public FileShareReadWriteClient(IHttpClientFactory httpClientFactory, string baseAddress, IAuthenticationTokenProvider authTokenProvider, int maxFileBlockSize) : base(httpClientFactory, baseAddress, authTokenProvider)
         {
-            _httpClientFactory = new SetBaseAddressHttpClientFactory(httpClientFactory, new Uri(baseAddress));
-            _maxFileBlockSize = DefaultMaxFileBlockSize;
         }
 
         public Task<IResult<AppendAclResponse>> AppendAclAsync(string batchId, Acl acl, CancellationToken cancellationToken = default) => Task.FromResult<IResult<AppendAclResponse>>(Result.Success(new AppendAclResponse()));
-
+        
         public async Task<IResult<IBatchHandle>> CreateBatchAsync(BatchModel batchModel, string correlationId, CancellationToken cancellationToken = default)
         {
             var uri = new Uri($"batch", UriKind.Relative);
 
             try
             {
-                var httpClient = _httpClientFactory.CreateClient();
-                httpClient.SetCorrelationIdHeader(correlationId);
+                var httpClient = await CreateHttpClientWithHeadersAsync(correlationId);
 
                 var httpRequestMessage = CreateHttpRequestMessage(uri, batchModel);
 
@@ -108,6 +103,13 @@ namespace UKHO.ADDS.Clients.FileShareService.ReadWrite
             {
                 Content = new StringContent(JsonSerializer.Serialize(batchModel), Encoding.UTF8, "application/json")
             };
+        }
+
+        private Task<HttpClient> CreateHttpClientWithHeadersAsync(string correlationId)
+        {
+            var httpClient = _httpClientFactory.CreateClient();
+            httpClient.SetCorrelationIdHeader(correlationId);
+            return Task.FromResult(httpClient);
         }
     }
 }

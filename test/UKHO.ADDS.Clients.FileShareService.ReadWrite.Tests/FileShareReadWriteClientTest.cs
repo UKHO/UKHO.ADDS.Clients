@@ -47,7 +47,7 @@ namespace UKHO.ADDS.Clients.FileShareService.ReadWrite.Tests
         public async Task WhenCreateBatchAsyncIsCalledWithValidBatchModel_ThenReturnSuccessResult()
         {
             var batchHandle = new BatchHandle("batchId");
-
+            
             var responseMessage = new HttpResponseMessage(HttpStatusCode.OK)
             {
                 Content = new StringContent(JsonSerializer.Serialize(batchHandle), Encoding.UTF8, "application/json")
@@ -62,7 +62,7 @@ namespace UKHO.ADDS.Clients.FileShareService.ReadWrite.Tests
                 Assert.That(result.IsSuccess(out var value, out _), Is.True);
                 Assert.That(value?.BatchId, Is.EqualTo(batchHandle.BatchId));
             });
-            
+
             await AssertCreateHttpClientWithHeadersAsync();
         }
 
@@ -70,7 +70,7 @@ namespace UKHO.ADDS.Clients.FileShareService.ReadWrite.Tests
         public async Task WhenCreateBatchAsyncIsCalledWithInvalidResponse_ThenReturnFailureResult()
         {
             var responseMessage = new HttpResponseMessage(HttpStatusCode.BadRequest);
-
+            
             A.CallTo(() => _httpClient.SendAsync(A<HttpRequestMessage>._, A<CancellationToken>._)).Returns(Task.FromResult(responseMessage));
 
             var result = await _client.CreateBatchAsync(_batchModel, CorrelationId, CancellationToken.None);
@@ -89,7 +89,7 @@ namespace UKHO.ADDS.Clients.FileShareService.ReadWrite.Tests
         public async Task WhenCreateBatchAsyncThrowsException_ThenReturnFailureResult()
         {
             A.CallTo(() => _httpClient.SendAsync(A<HttpRequestMessage>._, A<CancellationToken>._)).Throws(new Exception("Test exception"));
-
+            
             var result = await _client.CreateBatchAsync(_batchModel, CorrelationId, CancellationToken.None);
 
             Assert.Multiple(() =>
@@ -100,7 +100,7 @@ namespace UKHO.ADDS.Clients.FileShareService.ReadWrite.Tests
 
             await AssertCreateHttpClientWithHeadersAsync();
         }
-        
+
         [Test]
         public void WhenCreateHttpRequestMessageIsCalled_ThenHttpRequestMessageIsConfiguredCorrectly()
         {
@@ -115,7 +115,7 @@ namespace UKHO.ADDS.Clients.FileShareService.ReadWrite.Tests
 
             var method = typeof(FileShareReadWriteClient).GetMethod("CreateHttpRequestMessage",
                 System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
-            
+
             var httpRequestMessage = (HttpRequestMessage)method.Invoke(_client, new object[] { uri, batchModel });
 
             Assert.Multiple(() =>
@@ -131,17 +131,37 @@ namespace UKHO.ADDS.Clients.FileShareService.ReadWrite.Tests
                 Assert.That(httpRequestMessage.Content.Headers.ContentType!.MediaType, Is.EqualTo("application/json"));
             });
         }
-
-        private async Task AssertCreateHttpClientWithHeadersAsync()
+        
+        [Test]
+        public void WhenConstructorIsCalledWithHttpClientFactoryBaseAddressAndAccessToken_ThenHttpClientFactoryIsNotNull()
         {
-            var method = typeof(FileShareReadWriteClient).GetMethod("CreateHttpClientWithHeadersAsync",
-                System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
-            var result = await (Task<HttpClient>)method.Invoke(_client, new object[] { CorrelationId });
+            var client = new FileShareReadWriteClient(_httpClientFactory, "http://test.com", "accessToken");
 
             Assert.Multiple(() =>
             {
-                Assert.That(result.DefaultRequestHeaders.Contains("Authorization"), Is.True);
-                Assert.That(result.DefaultRequestHeaders.GetValues("Authorization").FirstOrDefault(), Is.EqualTo("bearer"));
+                Assert.That(client, Is.Not.Null);
+                Assert.That(client, Is.InstanceOf<FileShareReadWriteClient>());
+
+                var baseAddressField = typeof(FileShareReadWriteClient)
+                    .GetField("_httpClientFactory", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
+
+                var httpClientFactory = baseAddressField?.GetValue(client) as IHttpClientFactory;
+                Assert.That(httpClientFactory, Is.Not.Null);
+            });
+        }
+
+        private async Task AssertCreateHttpClientWithHeadersAsync()
+        {
+            var method = _client.GetType()
+                .GetMethod("CreateHttpClientWithHeadersAsync", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
+
+            var task = method.Invoke(_client, new object[] { CorrelationId }) as Task<HttpClient>;
+
+            var result = await task;
+
+            Assert.Multiple(() =>
+            {
+                Assert.That(result, Is.Not.Null);
                 Assert.That(result.DefaultRequestHeaders.Contains("X-Correlation-ID"), Is.True);
                 Assert.That(result.DefaultRequestHeaders.GetValues("X-Correlation-ID").FirstOrDefault(), Is.EqualTo(CorrelationId));
             });

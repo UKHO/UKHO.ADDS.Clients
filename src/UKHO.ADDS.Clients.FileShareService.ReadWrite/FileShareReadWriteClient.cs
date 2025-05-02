@@ -29,11 +29,25 @@ namespace UKHO.ADDS.Clients.FileShareService.ReadWrite
             _maxFileBlockSize = DefaultMaxFileBlockSize;
         }
 
-        public FileShareReadWriteClient(IHttpClientFactory httpClientFactory, string baseAddress, string accessToken) : base(httpClientFactory, baseAddress, accessToken) => _maxFileBlockSize = DefaultMaxFileBlockSize;
+        public FileShareReadWriteClient(IHttpClientFactory httpClientFactory, string baseAddress, string accessToken) :
+            base(httpClientFactory, baseAddress, accessToken )
+        {
+            _httpClientFactory = new SetBaseAddressHttpClientFactory(httpClientFactory, new Uri(baseAddress));
+            _maxFileBlockSize = DefaultMaxFileBlockSize;
+        }
 
-        public FileShareReadWriteClient(IHttpClientFactory httpClientFactory, string baseAddress, string accessToken, int maxFileBlockSize) : base(httpClientFactory, baseAddress, accessToken) => _maxFileBlockSize = maxFileBlockSize;
+        public FileShareReadWriteClient(IHttpClientFactory httpClientFactory, string baseAddress, string accessToken,
+            int maxFileBlockSize) : base(httpClientFactory, baseAddress, accessToken)
+        {
+            _httpClientFactory = new SetBaseAddressHttpClientFactory(httpClientFactory, new Uri(baseAddress));
+            _maxFileBlockSize = DefaultMaxFileBlockSize;
+        }
 
-        public FileShareReadWriteClient(IHttpClientFactory httpClientFactory, string baseAddress, IAuthenticationTokenProvider authTokenProvider, int maxFileBlockSize) : base(httpClientFactory, baseAddress, authTokenProvider) => _maxFileBlockSize = maxFileBlockSize;
+        public FileShareReadWriteClient(IHttpClientFactory httpClientFactory, string baseAddress, IAuthenticationTokenProvider authTokenProvider, int maxFileBlockSize) : base(httpClientFactory, baseAddress, authTokenProvider)
+        {
+            _httpClientFactory = new SetBaseAddressHttpClientFactory(httpClientFactory, new Uri(baseAddress));
+            _maxFileBlockSize = DefaultMaxFileBlockSize;
+        }
 
         public Task<IResult<AppendAclResponse>> AppendAclAsync(string batchId, Acl acl, CancellationToken cancellationToken = default) => Task.FromResult<IResult<AppendAclResponse>>(Result.Success(new AppendAclResponse()));
 
@@ -43,7 +57,8 @@ namespace UKHO.ADDS.Clients.FileShareService.ReadWrite
 
             try
             {
-                var httpClient = await CreateHttpClientWithHeadersAsync(correlationId);
+                var httpClient = _httpClientFactory.CreateClient();
+                httpClient.SetCorrelationIdHeader(correlationId);
 
                 var httpRequestMessage = CreateHttpRequestMessage(uri, batchModel);
 
@@ -86,14 +101,6 @@ namespace UKHO.ADDS.Clients.FileShareService.ReadWrite
         public Task<IResult<RollBackBatchResponse>> RollBackBatchAsync(IBatchHandle batchHandle, CancellationToken cancellationToken) => Task.FromResult<IResult<RollBackBatchResponse>>(Result.Success(new RollBackBatchResponse()));
 
         public Task<IResult<SetExpiryDateResponse>> SetExpiryDateAsync(string batchId, BatchExpiryModel batchExpiry, CancellationToken cancellationToken = default) => Task.FromResult<IResult<SetExpiryDateResponse>>(Result.Success(new SetExpiryDateResponse()));
-
-        private async Task<HttpClient> CreateHttpClientWithHeadersAsync(string correlationId)
-        {
-            var httpClient = _httpClientFactory.CreateClient();
-            await httpClient.SetAuthenticationHeaderAsync(_authTokenProvider);
-            httpClient.SetCorrelationIdHeader(correlationId);
-            return httpClient;
-        }
 
         private HttpRequestMessage CreateHttpRequestMessage(Uri uri, BatchModel batchModel)
         {

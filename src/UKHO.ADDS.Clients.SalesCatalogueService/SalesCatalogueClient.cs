@@ -39,7 +39,7 @@ namespace UKHO.ADDS.Clients.SalesCatalogueService
 
             try
             {
-                var httpClient = await CreateHttpClientWithHeadersAsync(correlationId);
+                var httpClient = await GetAuthenticatedClientAsync(correlationId);
 
                 using var httpRequestMessage = new HttpRequestMessage(HttpMethod.Get, uri);
 
@@ -53,7 +53,7 @@ namespace UKHO.ADDS.Clients.SalesCatalogueService
                 var response = await httpClient.SendAsync(httpRequestMessage);
 
                 //create response result as per expected output by reading additional values from httpresponse object 
-                return await CreateS100ProductsFromSpecificDateResponseAsync(response, correlationId);
+                return await CreateS100ProductsFromSpecificDateResponse(response, correlationId);
 
             }
             catch (Exception ex)
@@ -91,20 +91,14 @@ namespace UKHO.ADDS.Clients.SalesCatalogueService
             return await Task.FromResult(Result.Success(new SalesCatalogueDataResponse()));
         }
 
-        private async Task<HttpClient> CreateHttpClientWithHeadersAsync(string correlationId)
-        {
-            var httpClient = _httpClientFactory.CreateClient();
-            await httpClient.SetAuthenticationHeaderAsync(_authTokenProvider);
-            httpClient.SetCorrelationIdHeader(correlationId);
-            return httpClient;
-        }
+
 
         /// <summary>
         /// Creates a response for S100 products retrieved from a specific date.
         /// </summary>
         /// <param name="httpResponseMessage">The HTTP response message.</param>
         /// <returns>The result contains the S100 sales catalogue response.</returns>
-        private async Task<IResult<S100SalesCatalogueResponse>> CreateS100ProductsFromSpecificDateResponseAsync(HttpResponseMessage httpResponseMessage, string correlationId)
+        private async Task<IResult<S100SalesCatalogueResponse>> CreateS100ProductsFromSpecificDateResponse(HttpResponseMessage httpResponseMessage, string correlationId)
         {
             var response = new S100SalesCatalogueResponse();
 
@@ -134,6 +128,16 @@ namespace UKHO.ADDS.Clients.SalesCatalogueService
                 }
             }
             return Result.Success(response);
+        }
+
+        protected async Task<HttpClient> GetAuthenticatedClientAsync(string correlationId)
+        {
+            var httpClient = _httpClientFactory.CreateClient();
+
+            await httpClient.SetAuthenticationHeaderAsync(_authTokenProvider);
+            httpClient.SetCorrelationIdHeader(correlationId);
+
+            return httpClient;
         }
     }
 }

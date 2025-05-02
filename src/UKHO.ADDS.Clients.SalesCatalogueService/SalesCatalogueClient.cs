@@ -39,7 +39,7 @@ namespace UKHO.ADDS.Clients.SalesCatalogueService
 
             try
             {
-                var httpClient = await GetAuthenticatedClientAsync(correlationId);
+                using var httpClient = await GetAuthenticatedClientAsync(correlationId);
 
                 using var httpRequestMessage = new HttpRequestMessage(HttpMethod.Get, uri);
 

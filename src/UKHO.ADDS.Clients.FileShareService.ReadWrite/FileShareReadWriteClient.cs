@@ -30,15 +30,11 @@ namespace UKHO.ADDS.Clients.FileShareService.ReadWrite
         }
 
         public FileShareReadWriteClient(IHttpClientFactory httpClientFactory, string baseAddress, string accessToken) :
-            base(httpClientFactory, baseAddress, accessToken)
-        {
-            _httpClientFactory = new SetBaseAddressHttpClientFactory(httpClientFactory, new Uri(baseAddress));
-            _maxFileBlockSize = DefaultMaxFileBlockSize;
-        }
+            this(httpClientFactory, baseAddress, new DefaultAuthenticationTokenProvider(accessToken)) => _maxFileBlockSize = DefaultMaxFileBlockSize;
 
-        public FileShareReadWriteClient(IHttpClientFactory httpClientFactory, string baseAddress, string accessToken, int maxFileBlockSize) : base(httpClientFactory, baseAddress, accessToken) => _maxFileBlockSize = DefaultMaxFileBlockSize;
+        public FileShareReadWriteClient(IHttpClientFactory httpClientFactory, string baseAddress, string accessToken, int maxFileBlockSize) : this(httpClientFactory, baseAddress, new DefaultAuthenticationTokenProvider(accessToken)) => _maxFileBlockSize = maxFileBlockSize;
 
-        public FileShareReadWriteClient(IHttpClientFactory httpClientFactory, string baseAddress, IAuthenticationTokenProvider authTokenProvider, int maxFileBlockSize) : base(httpClientFactory, baseAddress, authTokenProvider) => _maxFileBlockSize = DefaultMaxFileBlockSize;
+        public FileShareReadWriteClient(IHttpClientFactory httpClientFactory, string baseAddress, IAuthenticationTokenProvider authTokenProvider, int maxFileBlockSize) : this(httpClientFactory, baseAddress, authTokenProvider) => _maxFileBlockSize = maxFileBlockSize;
 
         public Task<IResult<AppendAclResponse>> AppendAclAsync(string batchId, Acl acl, CancellationToken cancellationToken = default) => Task.FromResult<IResult<AppendAclResponse>>(Result.Success(new AppendAclResponse()));
 

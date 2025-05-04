@@ -17,7 +17,16 @@ namespace UKHO.ADDS.Clients.FileShareService.ReadWrite.Tests
         private FileShareReadWriteClient _client;
         private BatchModel _batchModel;
         private const string CorrelationId = "TestCorrelationId";
+        private const string AccessToken = "TestAccessToken";
         private const string BaseAddress = "http://test.com";
+        private const int MaxFileBlockSize = 8192;
+
+        [SetUp]
+        public void SetUp()
+        {
+            _httpClientFactory = A.Fake<IHttpClientFactory>();
+            _authTokenProvider = A.Fake<IAuthenticationTokenProvider>();
+        }
 
         [OneTimeSetUp]
         public void OneTimeSetUp()
@@ -142,6 +151,66 @@ namespace UKHO.ADDS.Clients.FileShareService.ReadWrite.Tests
 
                 var httpClientFactory = baseAddressField?.GetValue(client) as IHttpClientFactory;
                 Assert.That(httpClientFactory, Is.Not.Null);
+            });
+        }
+
+        [Test]
+        public void WhenConstructorIsCalledWithHttpClientFactoryBaseAddressAndAuthTokenProvider_ThenInstanceIsCreated()
+        {
+            var client = new FileShareReadWriteClient(_httpClientFactory, BaseAddress, _authTokenProvider);
+
+            Assert.Multiple(() =>
+            {
+                Assert.That(client, Is.Not.Null);
+                Assert.That(client, Is.InstanceOf<FileShareReadWriteClient>());
+            });
+        }
+
+        [Test]
+        public void WhenConstructorIsCalledWithHttpClientFactoryBaseAddressAndAccessToken_ThenInstanceIsCreated()
+        {
+            var client = new FileShareReadWriteClient(_httpClientFactory, BaseAddress, AccessToken);
+
+            Assert.Multiple(() =>
+            {
+                Assert.That(client, Is.Not.Null);
+                Assert.That(client, Is.InstanceOf<FileShareReadWriteClient>());
+            });
+        }
+
+        [Test]
+        public void WhenConstructorIsCalledWithHttpClientFactoryBaseAddressAccessTokenAndMaxFileBlockSize_ThenInstanceIsCreated()
+        {
+            var client = new FileShareReadWriteClient(_httpClientFactory, BaseAddress, AccessToken, MaxFileBlockSize);
+
+            Assert.Multiple(() =>
+            {
+                Assert.That(client, Is.Not.Null);
+                Assert.That(client, Is.InstanceOf<FileShareReadWriteClient>());
+
+                var maxFileBlockSizeField = typeof(FileShareReadWriteClient)
+                    .GetField("_maxFileBlockSize", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
+
+                var maxFileBlockSize = (int)maxFileBlockSizeField?.GetValue(client);
+                Assert.That(maxFileBlockSize, Is.EqualTo(MaxFileBlockSize));
+            });
+        }
+
+        [Test]
+        public void WhenConstructorIsCalledWithHttpClientFactoryBaseAddressAuthTokenProviderAndMaxFileBlockSize_ThenInstanceIsCreated()
+        {
+            var client = new FileShareReadWriteClient(_httpClientFactory, BaseAddress, _authTokenProvider, MaxFileBlockSize);
+
+            Assert.Multiple(() =>
+            {
+                Assert.That(client, Is.Not.Null);
+                Assert.That(client, Is.InstanceOf<FileShareReadWriteClient>());
+
+                var maxFileBlockSizeField = typeof(FileShareReadWriteClient)
+                    .GetField("_maxFileBlockSize", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
+
+                var maxFileBlockSize = (int)maxFileBlockSizeField?.GetValue(client);
+                Assert.That(maxFileBlockSize, Is.EqualTo(MaxFileBlockSize));
             });
         }
     }

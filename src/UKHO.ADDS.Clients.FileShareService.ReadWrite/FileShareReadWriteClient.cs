@@ -1,6 +1,5 @@
 ﻿using System.Net.Http.Json;
 using System.Text;
-using System.Text.Json;
 using UKHO.ADDS.Clients.Common.Authentication;
 using UKHO.ADDS.Clients.Common.Constants;
 using UKHO.ADDS.Clients.Common.Extensions;
@@ -10,6 +9,7 @@ using UKHO.ADDS.Clients.FileShareService.ReadOnly.Models;
 using UKHO.ADDS.Clients.FileShareService.ReadWrite.Models;
 using UKHO.ADDS.Clients.FileShareService.ReadWrite.Models.Response;
 using UKHO.ADDS.Infrastructure.Results;
+using UKHO.ADDS.Infrastructure.Serialization.Json;
 
 namespace UKHO.ADDS.Clients.FileShareService.ReadWrite
 {
@@ -97,7 +97,7 @@ namespace UKHO.ADDS.Clients.FileShareService.ReadWrite
         {
             return new HttpRequestMessage(HttpMethod.Post, uri)
             {
-                Content = new StringContent(JsonSerializer.Serialize(batchModel), Encoding.UTF8, "application/json")
+                Content = new StringContent(JsonCodec.Encode(batchModel), Encoding.UTF8, "application/json")
             };
         }
     }

@@ -1,10 +1,10 @@
 ﻿using System.Net;
 using System.Text;
-using System.Text.Json;
 using FakeItEasy;
 using NUnit.Framework;
 using UKHO.ADDS.Clients.Common.Authentication;
 using UKHO.ADDS.Clients.FileShareService.ReadWrite.Models;
+using UKHO.ADDS.Infrastructure.Serialization.Json;
 
 namespace UKHO.ADDS.Clients.FileShareService.ReadWrite.Tests
 {
@@ -51,7 +51,7 @@ namespace UKHO.ADDS.Clients.FileShareService.ReadWrite.Tests
 
             var responseMessage = new HttpResponseMessage(HttpStatusCode.OK)
             {
-                Content = new StringContent(JsonSerializer.Serialize(batchHandle), Encoding.UTF8, "application/json")
+                Content = new StringContent(JsonCodec.Encode(batchHandle), Encoding.UTF8, "application/json")
             };
 
             A.CallTo(() => _httpClient.SendAsync(A<HttpRequestMessage>._, A<CancellationToken>._)).Returns(Task.FromResult(responseMessage));
@@ -120,7 +120,7 @@ namespace UKHO.ADDS.Clients.FileShareService.ReadWrite.Tests
                 Assert.That(httpRequestMessage.Content, Is.Not.Null);
 
                 var content = httpRequestMessage.Content!.ReadAsStringAsync().Result;
-                var serializedBatchModel = JsonSerializer.Serialize(batchModel);
+                var serializedBatchModel = JsonCodec.Encode(batchModel);
                 Assert.That(content, Is.EqualTo(serializedBatchModel));
 
                 Assert.That(httpRequestMessage.Content.Headers.ContentType!.MediaType, Is.EqualTo("application/json"));

@@ -1,9 +1,15 @@
-﻿using UKHO.ADDS.Clients.Common.Authentication;
+﻿using System.Net.Http.Json;
+using System.Text;
+using UKHO.ADDS.Clients.Common.Authentication;
+using UKHO.ADDS.Clients.Common.Constants;
+using UKHO.ADDS.Clients.Common.Extensions;
+using UKHO.ADDS.Clients.Common.Factories;
 using UKHO.ADDS.Clients.FileShareService.ReadOnly;
 using UKHO.ADDS.Clients.FileShareService.ReadOnly.Models;
 using UKHO.ADDS.Clients.FileShareService.ReadWrite.Models;
 using UKHO.ADDS.Clients.FileShareService.ReadWrite.Models.Response;
 using UKHO.ADDS.Infrastructure.Results;
+using UKHO.ADDS.Infrastructure.Serialization.Json;
 
 namespace UKHO.ADDS.Clients.FileShareService.ReadWrite
 {
@@ -12,19 +18,59 @@ namespace UKHO.ADDS.Clients.FileShareService.ReadWrite
         private const int DefaultMaxFileBlockSize = 4194304;
         private readonly int _maxFileBlockSize;
 
-        public FileShareReadWriteClient(IHttpClientFactory httpClientFactory, string baseAddress, string accessToken) : base(httpClientFactory, baseAddress, accessToken) => _maxFileBlockSize = DefaultMaxFileBlockSize;
+        private readonly IAuthenticationTokenProvider _authTokenProvider;
+        private readonly IHttpClientFactory _httpClientFactory;
 
-        public FileShareReadWriteClient(IHttpClientFactory httpClientFactory, string baseAddress, string accessToken, int maxFileBlockSize) : base(httpClientFactory, baseAddress, accessToken) => _maxFileBlockSize = maxFileBlockSize;
+        public FileShareReadWriteClient(IHttpClientFactory httpClientFactory, string baseAddress, IAuthenticationTokenProvider authTokenProvider)
+            : base(httpClientFactory, baseAddress, authTokenProvider)
+        {
+            if (httpClientFactory == null)
+                throw new ArgumentNullException(nameof(httpClientFactory));
+            if (string.IsNullOrWhiteSpace(baseAddress))
+                throw new UriFormatException(nameof(baseAddress));
+            if (!Uri.IsWellFormedUriString(baseAddress, UriKind.Absolute))
+                throw new UriFormatException(nameof(baseAddress));
 
-        public FileShareReadWriteClient(IHttpClientFactory httpClientFactory, string baseAddress, IAuthenticationTokenProvider authTokenProvider) : base(httpClientFactory, baseAddress, authTokenProvider) => _maxFileBlockSize = DefaultMaxFileBlockSize;
+            _httpClientFactory = new SetBaseAddressHttpClientFactory(httpClientFactory, new Uri(baseAddress));
+            _authTokenProvider = authTokenProvider ?? throw new ArgumentNullException(nameof(authTokenProvider));
+            _maxFileBlockSize = DefaultMaxFileBlockSize;
+        }
 
-        public FileShareReadWriteClient(IHttpClientFactory httpClientFactory, string baseAddress, IAuthenticationTokenProvider authTokenProvider, int maxFileBlockSize) : base(httpClientFactory, baseAddress, authTokenProvider) => _maxFileBlockSize = maxFileBlockSize;
+        public FileShareReadWriteClient(IHttpClientFactory httpClientFactory, string baseAddress, string accessToken) :
+            this(httpClientFactory, baseAddress, new DefaultAuthenticationTokenProvider(accessToken)) => _maxFileBlockSize = DefaultMaxFileBlockSize;
+
+        public FileShareReadWriteClient(IHttpClientFactory httpClientFactory, string baseAddress, string accessToken, int maxFileBlockSize) : this(httpClientFactory, baseAddress, new DefaultAuthenticationTokenProvider(accessToken)) => _maxFileBlockSize = maxFileBlockSize;
+
+        public FileShareReadWriteClient(IHttpClientFactory httpClientFactory, string baseAddress, IAuthenticationTokenProvider authTokenProvider, int maxFileBlockSize) : this(httpClientFactory, baseAddress, authTokenProvider) => _maxFileBlockSize = maxFileBlockSize;
 
         public Task<IResult<AppendAclResponse>> AppendAclAsync(string batchId, Acl acl, CancellationToken cancellationToken = default) => Task.FromResult<IResult<AppendAclResponse>>(Result.Success(new AppendAclResponse()));
 
-        public Task<IResult<IBatchHandle>> CreateBatchAsync(BatchModel batchModel) => Task.FromResult<IResult<IBatchHandle>>(Result.Success<IBatchHandle>(new BatchHandle("batchid")));
+        public async Task<IResult<IBatchHandle>> CreateBatchAsync(BatchModel batchModel, string correlationId, CancellationToken cancellationToken = default)
+        {
+            var uri = new Uri("batch", UriKind.Relative);
 
-        public Task<IResult<IBatchHandle>> CreateBatchAsync(BatchModel batchModel, CancellationToken cancellationToken) => Task.FromResult<IResult<IBatchHandle>>(Result.Success<IBatchHandle>(new BatchHandle("batchid")));
+            try
+            {
+                using var httpClient = await CreateHttpClientWithHeadersAsync(correlationId);
+
+                var httpRequestMessage = CreateHttpRequestMessage(uri, batchModel);
+
+                var response = await httpClient.SendAsync(httpRequestMessage, cancellationToken);
+
+                if (!response.IsSuccessStatusCode)
+                {
+                    var errorMetadata = await response.CreateErrorMetadata(ApiNames.FileShareService, correlationId);
+                    return Result.Failure<IBatchHandle>(ErrorFactory.CreateError(response.StatusCode, errorMetadata));
+                }
+
+                var batchHandle = await response.Content.ReadFromJsonAsync<BatchHandle>(cancellationToken: cancellationToken);
+                return Result.Success<IBatchHandle>(batchHandle);
+            }
+            catch (Exception ex)
+            {
+                return Result.Failure<IBatchHandle>(ex.Message);
+            }
+        }
 
         public Task<IResult<BatchStatusResponse>> GetBatchStatusAsync(IBatchHandle batchHandle) => Task.FromResult<IResult<BatchStatusResponse>>(Result.Success(new BatchStatusResponse()));
 
@@ -48,5 +94,21 @@ namespace UKHO.ADDS.Clients.FileShareService.ReadWrite
         public Task<IResult<RollBackBatchResponse>> RollBackBatchAsync(IBatchHandle batchHandle, CancellationToken cancellationToken) => Task.FromResult<IResult<RollBackBatchResponse>>(Result.Success(new RollBackBatchResponse()));
 
         public Task<IResult<SetExpiryDateResponse>> SetExpiryDateAsync(string batchId, BatchExpiryModel batchExpiry, CancellationToken cancellationToken = default) => Task.FromResult<IResult<SetExpiryDateResponse>>(Result.Success(new SetExpiryDateResponse()));
+
+        private HttpRequestMessage CreateHttpRequestMessage(Uri uri, BatchModel batchModel)
+        {
+            return new HttpRequestMessage(HttpMethod.Post, uri)
+            {
+                Content = new StringContent(JsonCodec.Encode(batchModel), Encoding.UTF8, "application/json")
+            };
+        }
+
+        protected async Task<HttpClient> CreateHttpClientWithHeadersAsync(string correlationId)
+        {
+            var httpClient = _httpClientFactory.CreateClient();
+            await httpClient.SetAuthenticationHeaderAsync(_authTokenProvider);
+            httpClient.SetCorrelationIdHeader(correlationId);
+            return httpClient;
+        }
     }
 }

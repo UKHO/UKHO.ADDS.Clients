@@ -91,6 +91,8 @@ namespace UKHO.ADDS.Clients.SalesCatalogueService
             return await Task.FromResult(Result.Success(new SalesCatalogueDataResponse()));
         }
 
+
+
         /// <summary>
         /// Creates a response for S100 products retrieved from a specific date.
         /// </summary>

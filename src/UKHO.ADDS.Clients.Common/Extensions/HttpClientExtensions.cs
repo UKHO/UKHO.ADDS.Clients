@@ -12,7 +12,7 @@ namespace UKHO.ADDS.Clients.Common.Extensions
         /// <param name="httpClient"></param>
         /// <param name="authTokenProvider"></param>
         /// <returns></returns>
-        public static async Task SetAuthenticationHeaderAsync(this HttpClient httpClient, IAuthenticationTokenProvider authTokenProvider)
+        internal static async Task SetAuthenticationHeaderAsync(this HttpClient httpClient, IAuthenticationTokenProvider authTokenProvider)
         {
             var token = await authTokenProvider.GetTokenAsync();
             httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue(ApiHeaderKeys.BearerTokenHeaderKey, token);
@@ -24,7 +24,7 @@ namespace UKHO.ADDS.Clients.Common.Extensions
         /// <param name="httpClient"></param>
         /// <param name="correlationId"></param>
         /// <returns></returns>
-        public static void SetCorrelationIdHeaderAsync(this HttpClient httpClient, string correlationId)
+        internal static void SetCorrelationIdHeader(this HttpClient httpClient, string correlationId)
         {
             httpClient.DefaultRequestHeaders.Add(ApiHeaderKeys.XCorrelationIdHeaderKey, correlationId);
         }

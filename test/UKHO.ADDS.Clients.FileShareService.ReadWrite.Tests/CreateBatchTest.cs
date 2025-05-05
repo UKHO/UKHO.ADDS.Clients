@@ -13,7 +13,8 @@ namespace UKHO.ADDS.Clients.FileShareService.ReadWrite.Tests
     {
         private const string DummyAccessToken = "ACarefullyEncodedSecretAccessToken";
         private const string DummyCorrelationId = "dummy-correlation-id";
-        private const string BaseAddress = "http://test.com";
+        //private const string BaseAddress = "http://test.com";
+        private const string BaseAddress = "https://fss-tests.net";
         private const int MaxFileBlockSize = 8192;
 
         private FakeFssHttpClientFactory _fakeFssHttpClientFactory;
@@ -45,7 +46,7 @@ namespace UKHO.ADDS.Clients.FileShareService.ReadWrite.Tests
             };
 
             _nextResponseStatusCode = HttpStatusCode.OK;
-            _fileShareReadWriteClient = new FileShareReadWriteClient(_fakeFssHttpClientFactory, @"https://fss-tests.net/basePath/", DummyAccessToken);
+            _fileShareReadWriteClient = new FileShareReadWriteClient(_fakeFssHttpClientFactory, $@"{BaseAddress}/basePath/", DummyAccessToken);
         }
 
         [TearDown]
@@ -147,11 +148,8 @@ namespace UKHO.ADDS.Clients.FileShareService.ReadWrite.Tests
         public async Task WhenCreateBatchAsyncThrowsException_ThenReturnFailureResult()
         {
             var exceptionMessage = "Test exception";
-            _fakeFssHttpClientFactory = new FakeFssHttpClientFactory(_ =>
-            {
-                throw new Exception(exceptionMessage);
-            });
-            _fileShareReadWriteClient = new FileShareReadWriteClient(_fakeFssHttpClientFactory, @"https://fss-tests.net/basePath/", DummyAccessToken);
+            _fakeFssHttpClientFactory = new FakeFssHttpClientFactory(_ => throw new Exception(exceptionMessage));
+            _fileShareReadWriteClient = new FileShareReadWriteClient(_fakeFssHttpClientFactory, $@"{BaseAddress}/basePath/", DummyAccessToken);
 
             var result = await _fileShareReadWriteClient.CreateBatchAsync(_batchModel, DummyCorrelationId, CancellationToken.None);
 
@@ -185,7 +183,6 @@ namespace UKHO.ADDS.Clients.FileShareService.ReadWrite.Tests
         [Test]
         public void WhenCreateHttpRequestMessageIsCalled_ThenHttpRequestMessageIsConfiguredCorrectly()
         {
-            // Arrange
             var uri = new Uri("batch", UriKind.Relative);
             var batchModel = new BatchModel
             {
@@ -195,14 +192,11 @@ namespace UKHO.ADDS.Clients.FileShareService.ReadWrite.Tests
                 ExpiryDate = DateTime.UtcNow.AddDays(1)
             };
 
-            // Use reflection to access the private CreateHttpRequestMessage method
             var method = typeof(FileShareReadWriteClient).GetMethod("CreateHttpRequestMessage",
                 System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
 
-            // Act
             var httpRequestMessage = (HttpRequestMessage)method.Invoke(_fileShareReadWriteClient, new object[] { uri, batchModel });
 
-            // Assert
             Assert.Multiple(() =>
             {
                 Assert.That(httpRequestMessage!.Method, Is.EqualTo(HttpMethod.Post));

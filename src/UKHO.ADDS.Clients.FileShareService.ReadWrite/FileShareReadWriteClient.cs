@@ -24,8 +24,15 @@ namespace UKHO.ADDS.Clients.FileShareService.ReadWrite
         public FileShareReadWriteClient(IHttpClientFactory httpClientFactory, string baseAddress, IAuthenticationTokenProvider authTokenProvider)
             : base(httpClientFactory, baseAddress, authTokenProvider)
         {
+            if (httpClientFactory == null)
+                throw new ArgumentNullException(nameof(httpClientFactory));
+            if (string.IsNullOrWhiteSpace(baseAddress))
+                throw new UriFormatException(nameof(baseAddress));
+            if (!Uri.IsWellFormedUriString(baseAddress, UriKind.Absolute))
+                throw new UriFormatException(nameof(baseAddress));
+
             _httpClientFactory = new SetBaseAddressHttpClientFactory(httpClientFactory, new Uri(baseAddress));
-            _authTokenProvider = authTokenProvider;
+            _authTokenProvider = authTokenProvider ?? throw new ArgumentNullException(nameof(authTokenProvider));
             _maxFileBlockSize = DefaultMaxFileBlockSize;
         }
 
@@ -44,8 +51,7 @@ namespace UKHO.ADDS.Clients.FileShareService.ReadWrite
 
             try
             {
-                using var httpClient = _httpClientFactory.CreateClient();
-                httpClient.SetCorrelationIdHeader(correlationId);
+                using var httpClient = await CreateHttpClientWithHeadersAsync(correlationId);
 
                 var httpRequestMessage = CreateHttpRequestMessage(uri, batchModel);
 
@@ -95,6 +101,14 @@ namespace UKHO.ADDS.Clients.FileShareService.ReadWrite
             {
                 Content = new StringContent(JsonCodec.Encode(batchModel), Encoding.UTF8, "application/json")
             };
+        }
+
+        protected async Task<HttpClient> CreateHttpClientWithHeadersAsync(string correlationId)
+        {
+            var httpClient = _httpClientFactory.CreateClient();
+            await httpClient.SetAuthenticationHeaderAsync(_authTokenProvider);
+            httpClient.SetCorrelationIdHeader(correlationId);
+            return httpClient;
         }
     }
 }

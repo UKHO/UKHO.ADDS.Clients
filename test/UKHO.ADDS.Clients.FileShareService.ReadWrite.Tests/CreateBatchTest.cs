@@ -13,7 +13,6 @@ namespace UKHO.ADDS.Clients.FileShareService.ReadWrite.Tests
     {
         private const string DummyAccessToken = "ACarefullyEncodedSecretAccessToken";
         private const string DummyCorrelationId = "dummy-correlation-id";
-        //private const string BaseAddress = "http://test.com";
         private const string BaseAddress = "https://fss-tests.net";
         private const int MaxFileBlockSize = 8192;
 

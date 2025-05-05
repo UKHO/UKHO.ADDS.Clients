@@ -24,7 +24,7 @@ namespace UKHO.ADDS.Clients.Common.Extensions
         /// <param name="httpClient"></param>
         /// <param name="correlationId"></param>
         /// <returns></returns>
-        public static void SetCorrelationIdHeaderAsync(this HttpClient httpClient, string correlationId)
+        public static void SetCorrelationIdHeader(this HttpClient httpClient, string correlationId)
         {
             httpClient.DefaultRequestHeaders.Add(ApiHeaderKeys.XCorrelationIdHeaderKey, correlationId);
         }

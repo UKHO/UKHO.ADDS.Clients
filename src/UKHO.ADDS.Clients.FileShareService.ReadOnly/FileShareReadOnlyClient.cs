@@ -19,8 +19,15 @@ namespace UKHO.ADDS.Clients.FileShareService.ReadOnly
 
         public FileShareReadOnlyClient(IHttpClientFactory httpClientFactory, string baseAddress, IAuthenticationTokenProvider authTokenProvider)
         {
+            if (httpClientFactory == null)
+                throw new ArgumentNullException(nameof(httpClientFactory));
+            if (string.IsNullOrWhiteSpace(baseAddress))
+                throw new UriFormatException("Invalid URI: The URI is empty.");
+            if (!Uri.IsWellFormedUriString(baseAddress, UriKind.Absolute))
+                throw new UriFormatException("Invalid URI: The format of the URI could not be determined.");
+
             _httpClientFactory = new SetBaseAddressHttpClientFactory(httpClientFactory, new Uri(baseAddress));
-            _authTokenProvider = authTokenProvider;
+            _authTokenProvider = authTokenProvider ?? throw new ArgumentNullException(nameof(authTokenProvider));
         }
 
         public FileShareReadOnlyClient(IHttpClientFactory httpClientFactory, string baseAddress, string accessToken) :
@@ -223,7 +230,7 @@ namespace UKHO.ADDS.Clients.FileShareService.ReadOnly
         {
             var httpClient = _httpClientFactory.CreateClient();
             await httpClient.SetAuthenticationHeaderAsync(_authTokenProvider);
-            httpClient.SetCorrelationIdHeaderAsync(correlationId);
+            httpClient.SetCorrelationIdHeader(correlationId);
             return httpClient;
         }
 

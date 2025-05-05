@@ -53,6 +53,19 @@ namespace UKHO.ADDS.Clients.FileShareService.ReadOnly
                 return Result.Failure<BatchStatusResponse>(ex.Message);
             }
         }
+        public async Task<IResult<BatchSearchResponse>> SearchAsync(string searchQuery) => await SearchAsync(searchQuery, null, null, string.Empty);
+
+        public async Task<IResult<BatchSearchResponse>> SearchAsync(string searchQuery, int? pageSize) => await SearchAsync(searchQuery, pageSize, null, string.Empty);
+
+        public async Task<IResult<BatchSearchResponse>> SearchAsync(string searchQuery, int? pageSize, int? start) => await SearchAsync(searchQuery, pageSize, start, string.Empty, CancellationToken.None);
+
+        public async Task<IResult<BatchSearchResponse>> SearchAsync(string searchQuery, int? pageSize, int? start,  CancellationToken cancellationToken)
+        {
+            var response = await SearchResponse(searchQuery, pageSize, start, string.Empty, cancellationToken);
+            var errorMetadata = await response.CreateErrorMetadata(ApiNames.FileShareService, string.Empty);
+
+            return await response.CreateResultAsync<BatchSearchResponse, ErrorResponseModel>((errorResponseModel, status) => TranslateErrors(errorResponseModel, status, errorMetadata));
+        }
 
         public async Task<IResult<BatchSearchResponse>> SearchAsync(string searchQuery, string correlationId) => await SearchAsync(searchQuery, null, null, correlationId);
 
@@ -230,11 +243,15 @@ namespace UKHO.ADDS.Clients.FileShareService.ReadOnly
         {
             var httpClient = _httpClientFactory.CreateClient();
             await httpClient.SetAuthenticationHeaderAsync(_authTokenProvider);
-            httpClient.SetCorrelationIdHeader(correlationId);
+            if (!string.IsNullOrEmpty(correlationId))
+            {
+                httpClient.SetCorrelationIdHeader(correlationId);
+            }
+            
             return httpClient;
         }
 
-        private async Task<HttpResponseMessage> SearchResponse(string searchQuery, int? pageSize, int? start, string correlationId, CancellationToken cancellationToken)
+        private async Task<HttpResponseMessage> SearchResponse(string searchQuery, int? pageSize, int? start, string? correlationId, CancellationToken cancellationToken)
         {
             var uri = "batch";
 

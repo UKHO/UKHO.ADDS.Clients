@@ -175,7 +175,7 @@ namespace UKHO.ADDS.Clients.FileShareService.ReadOnly.Tests
 
         [TestCase(-10)]
         [TestCase(0)]
-        public void TestSearchWithInvalidPageSizeThrowsArgumentException(int pageSize)
+        public void WhenSearchWithInvalidPageSize_ThenThrowsArgumentException(int pageSize)
         {
             var exception = Assert.ThrowsAsync<ArgumentException>(async () => await _fileShareApiClient.SearchAsync("$batch(key) eq 'value'", pageSize, 20, DummyCorrelationId));
 
@@ -185,7 +185,7 @@ namespace UKHO.ADDS.Clients.FileShareService.ReadOnly.Tests
 
         [Test]
         [TestCase(-10)]
-        public void TestSearchWithInvalidPageStartThrowsArgumentException(int start)
+        public void WhenSearchWithInvalidPageStart_ThenThrowsArgumentException(int start)
         {
             var exception = Assert.ThrowsAsync<ArgumentException>(async () => await _fileShareApiClient.SearchAsync("$batch(key) eq 'value'", 10, start, DummyCorrelationId));
 
@@ -301,7 +301,7 @@ namespace UKHO.ADDS.Clients.FileShareService.ReadOnly.Tests
 
         [TestCase(-10)]
         [TestCase(0)]
-        public void TestSearchWithInvalidPageSizeThrowsArgumentExceptionAndCancellationn(int pageSize)
+        public void WhenSearchWithInvalidPageSize_ThenThrowsArgumentExceptionAndCancellation(int pageSize)
         {
             var exception = Assert.ThrowsAsync<ArgumentException>(async () => await _fileShareApiClient.SearchAsync("$batch(key) eq 'value'", pageSize, 20, DummyCorrelationId, CancellationToken.None));
 
@@ -310,7 +310,7 @@ namespace UKHO.ADDS.Clients.FileShareService.ReadOnly.Tests
         }
 
         [Test]
-        public void TestSearchWithInvalidPageStartThrowsArgumentExceptionAndCancellation()
+        public void WhenSearchWithInvalidPageStart_ThenThrowsArgumentExceptionAndCancellation()
         {
             var exception = Assert.ThrowsAsync<ArgumentException>(async () => await _fileShareApiClient.SearchAsync("$batch(key) eq 'value'", -10, 20, DummyCorrelationId, CancellationToken.None));
 

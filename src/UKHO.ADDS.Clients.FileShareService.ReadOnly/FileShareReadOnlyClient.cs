@@ -2,6 +2,7 @@
 using System.Text;
 using System.Text.Encodings.Web;
 using UKHO.ADDS.Clients.Common.Authentication;
+using UKHO.ADDS.Clients.Common.Constants;
 using UKHO.ADDS.Clients.Common.Extensions;
 using UKHO.ADDS.Clients.Common.Factories;
 using UKHO.ADDS.Clients.FileShareService.ReadOnly.Models;
@@ -13,13 +14,20 @@ namespace UKHO.ADDS.Clients.FileShareService.ReadOnly
     {
         private readonly int _maxDownloadBytes = 10485760;
 
-        protected readonly IAuthenticationTokenProvider AuthTokenProvider;
-        protected readonly IHttpClientFactory HttpClientFactory;
+        protected readonly IAuthenticationTokenProvider _authTokenProvider;
+        protected readonly IHttpClientFactory _httpClientFactory;
 
         public FileShareReadOnlyClient(IHttpClientFactory httpClientFactory, string baseAddress, IAuthenticationTokenProvider authTokenProvider)
         {
-            HttpClientFactory = new SetBaseAddressHttpClientFactory(httpClientFactory, new Uri(baseAddress));
-            AuthTokenProvider = authTokenProvider;
+            if (httpClientFactory == null)
+                throw new ArgumentNullException(nameof(httpClientFactory));
+            if (string.IsNullOrWhiteSpace(baseAddress))
+                throw new UriFormatException("Invalid URI: The URI is empty.");
+            if (!Uri.IsWellFormedUriString(baseAddress, UriKind.Absolute))
+                throw new UriFormatException("Invalid URI: The format of the URI could not be determined.");
+
+            _httpClientFactory = new SetBaseAddressHttpClientFactory(httpClientFactory, new Uri(baseAddress));
+            _authTokenProvider = authTokenProvider ?? throw new ArgumentNullException(nameof(authTokenProvider));
         }
 
         public FileShareReadOnlyClient(IHttpClientFactory httpClientFactory, string baseAddress, string accessToken) :
@@ -45,17 +53,37 @@ namespace UKHO.ADDS.Clients.FileShareService.ReadOnly
                 return Result.Failure<BatchStatusResponse>(ex.Message);
             }
         }
+        public async Task<IResult<BatchSearchResponse>> SearchAsync(string searchQuery) => await SearchAsync(searchQuery, null, null, string.Empty);
 
-        public async Task<IResult<BatchSearchResponse>> SearchAsync(string searchQuery) => await SearchAsync(searchQuery, null, null);
+        public async Task<IResult<BatchSearchResponse>> SearchAsync(string searchQuery, int? pageSize) => await SearchAsync(searchQuery, pageSize, null, string.Empty);
 
-        public async Task<IResult<BatchSearchResponse>> SearchAsync(string searchQuery, int? pageSize) => await SearchAsync(searchQuery, pageSize, null);
+        public async Task<IResult<BatchSearchResponse>> SearchAsync(string searchQuery, int? pageSize, int? start) => await SearchAsync(searchQuery, pageSize, start, string.Empty, CancellationToken.None);
 
-        public async Task<IResult<BatchSearchResponse>> SearchAsync(string searchQuery, int? pageSize, int? start) => await SearchAsync(searchQuery, pageSize, start, CancellationToken.None);
-
-        public async Task<IResult<BatchSearchResponse>> SearchAsync(string searchQuery, int? pageSize, int? start, CancellationToken cancellationToken)
+        public async Task<IResult<BatchSearchResponse>> SearchAsync(string searchQuery, int? pageSize, int? start,  CancellationToken cancellationToken)
         {
-            var response = await SearchResponse(searchQuery, pageSize, start, cancellationToken);
-            return await response.CreateResultAsync<BatchSearchResponse, ErrorResponseModel>(TranslateErrors);
+            var response = await SearchResponse(searchQuery, pageSize, start, string.Empty, cancellationToken);
+            var errorMetadata = await response.CreateErrorMetadata(ApiNames.FileShareService, string.Empty);
+
+            return await response.CreateResultAsync<BatchSearchResponse, ErrorResponseModel>((errorResponseModel, status) => TranslateErrors(errorResponseModel, status, errorMetadata));
+        }
+
+        public async Task<IResult<BatchSearchResponse>> SearchAsync(string searchQuery, string correlationId) => await SearchAsync(searchQuery, null, null, correlationId);
+
+        public async Task<IResult<BatchSearchResponse>> SearchAsync(string searchQuery, int? pageSize, string correlationId) => await SearchAsync(searchQuery, pageSize, null, correlationId);
+
+        public async Task<IResult<BatchSearchResponse>> SearchAsync(string searchQuery, int? pageSize, int? start, string correlationId) => await SearchAsync(searchQuery, pageSize, start, correlationId, CancellationToken.None);
+
+        public async Task<IResult<BatchSearchResponse>> SearchAsync(string searchQuery, int? pageSize, int? start, string correlationId, CancellationToken cancellationToken)
+        {
+            var response = await SearchResponse(searchQuery, pageSize, start, correlationId, cancellationToken);
+            var errorMetadata = await response.CreateErrorMetadata(ApiNames.FileShareService, correlationId);
+
+            return await response.CreateResultAsync<BatchSearchResponse, ErrorResponseModel>((errorResponseModel, status) => TranslateErrors(errorResponseModel, status, errorMetadata));
+        }
+
+        protected IError TranslateErrors(ErrorResponseModel errorResponseModel, HttpStatusCode status, IDictionary<string, object> errorMetadata)
+        {
+            return ErrorFactory.CreateError(status, errorMetadata);
         }
 
         protected IError TranslateErrors(ErrorResponseModel errorResponseModel, HttpStatusCode status)
@@ -206,12 +234,24 @@ namespace UKHO.ADDS.Clients.FileShareService.ReadOnly
 
         protected async Task<HttpClient> GetAuthenticationHeaderSetClient()
         {
-            var httpClient = HttpClientFactory.CreateClient();
-            await httpClient.SetAuthenticationHeaderAsync(AuthTokenProvider);
+            var httpClient = _httpClientFactory.CreateClient();
+            await httpClient.SetAuthenticationHeaderAsync(_authTokenProvider);
             return httpClient;
         }
 
-        private async Task<HttpResponseMessage> SearchResponse(string searchQuery, int? pageSize, int? start, CancellationToken cancellationToken)
+        protected async Task<HttpClient> CreateHttpClientWithHeadersAsync(string correlationId)
+        {
+            var httpClient = _httpClientFactory.CreateClient();
+            await httpClient.SetAuthenticationHeaderAsync(_authTokenProvider);
+            if (!string.IsNullOrEmpty(correlationId))
+            {
+                httpClient.SetCorrelationIdHeader(correlationId);
+            }
+            
+            return httpClient;
+        }
+
+        private async Task<HttpResponseMessage> SearchResponse(string searchQuery, int? pageSize, int? start, string? correlationId, CancellationToken cancellationToken)
         {
             var uri = "batch";
 
@@ -243,7 +283,8 @@ namespace UKHO.ADDS.Clients.FileShareService.ReadOnly
 
             uri = AddQueryString(uri, query);
 
-            using var httpClient = await GetAuthenticationHeaderSetClient();
+            using var httpClient = await CreateHttpClientWithHeadersAsync(correlationId);
+
             using var httpRequestMessage = new HttpRequestMessage(HttpMethod.Get, uri);
 
             return await httpClient.SendAsync(httpRequestMessage, cancellationToken);

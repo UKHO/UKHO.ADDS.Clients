@@ -67,14 +67,12 @@ namespace UKHO.ADDS.Clients.FileShareService.ReadWrite.Tests
                 Assert.That(client, Is.InstanceOf<IFileShareReadWriteClient>());
             });
         }
-
         [Test]
-        public void WhenCreateClientIsCalledWithNullBaseAddress_ThenThrowsArgumentNullException()
+        public void WhenCreateClientIsCalledWithNullBaseAddress_ThenThrowsUriFormatException()
         {
-            Assert.Throws<ArgumentNullException>(() =>
+            Assert.Throws<UriFormatException>(() =>
                 _fileShareReadWriteClientFactory.CreateClient(null, DummyAccessToken));
         }
-
         [Test]
         public void WhenCreateClientIsCalledWithEmptyBaseAddress_ThenThrowsArgumentException()
         {

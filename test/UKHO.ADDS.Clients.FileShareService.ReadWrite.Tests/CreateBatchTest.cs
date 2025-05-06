@@ -2,6 +2,7 @@
 using FakeItEasy;
 using NUnit.Framework;
 using UKHO.ADDS.Clients.Common.Authentication;
+using UKHO.ADDS.Clients.Common.Constants;
 using UKHO.ADDS.Clients.FileShareService.ReadWrite.Models;
 using UKHO.ADDS.Clients.FileShareService.ReadWrite.Tests.Helpers;
 using UKHO.ADDS.Infrastructure.Serialization.Json;
@@ -107,7 +108,7 @@ namespace UKHO.ADDS.Clients.FileShareService.ReadWrite.Tests
         }
 
         [Test]
-        public async Task WhenCreateBatchAsyncIsCalledWithValidBatchModel_ThenReturnSuccessResult()
+        public async Task WhenCreateBatchAsyncIsCalledWithValidBatchModelWithCorrelationIdAndCancellationToken_ThenReturnSuccessResult()
         {
             var batchHandle = new BatchHandle("batchId");
 
@@ -120,14 +121,33 @@ namespace UKHO.ADDS.Clients.FileShareService.ReadWrite.Tests
             {
                 Assert.That(result.IsSuccess(out var value, out _), Is.True);
                 Assert.That(value?.BatchId, Is.EqualTo(batchHandle.BatchId));
+                Assert.That(_fakeFssHttpClientFactory.HttpClient.DefaultRequestHeaders.Contains(ApiHeaderKeys.XCorrelationIdHeaderKey), Is.True);
+                Assert.That(_fakeFssHttpClientFactory.HttpClient.DefaultRequestHeaders.GetValues(ApiHeaderKeys.XCorrelationIdHeaderKey), Contains.Item(DummyCorrelationId));
+                Assert.That(_lastRequestUri?.AbsolutePath, Is.EqualTo($"/basePath/batch"));
             });
-
-            Assert.That(_lastRequestUri?.AbsolutePath, Is.EqualTo($"/basePath/batch"));
         }
 
+        [Test]
+        public async Task WhenCreateBatchAsyncIsCalledWithValidBatchModelWithoutCorrelationIdAndCancellationToken_ThenReturnSuccessResult()
+        {
+            var batchHandle = new BatchHandle("batchId");
+
+            _nextResponse = batchHandle;
+            _nextResponseStatusCode = HttpStatusCode.OK;
+
+            var result = await _fileShareReadWriteClient.CreateBatchAsync(_batchModel);
+
+            Assert.Multiple(() =>
+            {
+                Assert.That(result.IsSuccess(out var value, out _), Is.True);
+                Assert.That(value?.BatchId, Is.EqualTo(batchHandle.BatchId));
+                Assert.That(_fakeFssHttpClientFactory.HttpClient.DefaultRequestHeaders.Contains(ApiHeaderKeys.XCorrelationIdHeaderKey), Is.False);
+                Assert.That(_lastRequestUri?.AbsolutePath, Is.EqualTo($"/basePath/batch"));
+            });
+        }
 
         [Test]
-        public async Task WhenCreateBatchAsyncIsCalledWithInvalidResponse_ThenReturnFailureResult()
+        public async Task WhenCreateBatchAsyncIsCalledWithInvalidResponseAndCorrelationIdAndCancellationToken_ThenReturnFailureResult()
         {
             _nextResponseStatusCode = HttpStatusCode.BadRequest;
 
@@ -136,11 +156,27 @@ namespace UKHO.ADDS.Clients.FileShareService.ReadWrite.Tests
             Assert.Multiple(() =>
             {
                 Assert.That(result.IsFailure);
-                Assert.That(result.Errors.FirstOrDefault()?.Message,
-                    Is.EqualTo("Bad request"));
+                Assert.That(result.Errors.FirstOrDefault()?.Message, Is.EqualTo("Bad request"));
+                Assert.That(_fakeFssHttpClientFactory.HttpClient.DefaultRequestHeaders.Contains(ApiHeaderKeys.XCorrelationIdHeaderKey), Is.True);
+                Assert.That(_fakeFssHttpClientFactory.HttpClient.DefaultRequestHeaders.GetValues(ApiHeaderKeys.XCorrelationIdHeaderKey), Contains.Item(DummyCorrelationId));
+                Assert.That(_lastRequestUri?.AbsolutePath, Is.EqualTo($"/basePath/batch"));
             });
+        }
 
-            Assert.That(_lastRequestUri?.AbsolutePath, Is.EqualTo($"/basePath/batch"));
+        [Test]
+        public async Task WhenCreateBatchAsyncIsCalledWithoutInvalidResponseAndCorrelationIdAndCancellationToken_ThenReturnFailureResult()
+        {
+            _nextResponseStatusCode = HttpStatusCode.BadRequest;
+
+            var result = await _fileShareReadWriteClient.CreateBatchAsync(_batchModel);
+
+            Assert.Multiple(() =>
+            {
+                Assert.That(result.IsFailure);
+                Assert.That(result.Errors.FirstOrDefault()?.Message, Is.EqualTo("Bad request"));
+                Assert.That(_fakeFssHttpClientFactory.HttpClient.DefaultRequestHeaders.Contains(ApiHeaderKeys.XCorrelationIdHeaderKey), Is.False);
+                Assert.That(_lastRequestUri?.AbsolutePath, Is.EqualTo($"/basePath/batch"));
+            });
         }
 
         [Test]
@@ -160,7 +196,7 @@ namespace UKHO.ADDS.Clients.FileShareService.ReadWrite.Tests
         }
 
         [Test]
-        public async Task WhenCreateHttpClientWithHeadersAsyncIsCalled_ThenSetsAuthenticationAndCorrelationIdHeaders()
+        public async Task WhenCreateHttpClientWithHeadersAsyncIsCalledWithCorrelationId_ThenSetsAuthenticationAndCorrelationIdHeaders()
         {
             var batchHandle = new BatchHandle("batchId");
 
@@ -172,10 +208,29 @@ namespace UKHO.ADDS.Clients.FileShareService.ReadWrite.Tests
             Assert.That(_fakeFssHttpClientFactory.HttpClient.DefaultRequestHeaders.Authorization, Is.Not.Null);
             Assert.Multiple(() =>
             {
-                Assert.That(_fakeFssHttpClientFactory.HttpClient.DefaultRequestHeaders.Authorization.Scheme, Is.EqualTo("bearer"));
+                Assert.That(_fakeFssHttpClientFactory.HttpClient.DefaultRequestHeaders.Authorization.Scheme, Is.EqualTo(ApiHeaderKeys.BearerTokenHeaderKey));
                 Assert.That(_fakeFssHttpClientFactory.HttpClient.DefaultRequestHeaders.Authorization.Parameter, Is.EqualTo(DummyAccessToken));
-                Assert.That(_fakeFssHttpClientFactory.HttpClient.DefaultRequestHeaders.Contains("X-Correlation-ID"), Is.True);
-                Assert.That(_fakeFssHttpClientFactory.HttpClient.DefaultRequestHeaders.GetValues("X-Correlation-ID"), Contains.Item(DummyCorrelationId));
+                Assert.That(_fakeFssHttpClientFactory.HttpClient.DefaultRequestHeaders.Contains(ApiHeaderKeys.XCorrelationIdHeaderKey), Is.True);
+                Assert.That(_fakeFssHttpClientFactory.HttpClient.DefaultRequestHeaders.GetValues(ApiHeaderKeys.XCorrelationIdHeaderKey), Contains.Item(DummyCorrelationId));
+            });
+        }
+
+        [Test]
+        public async Task WhenCreateHttpClientWithHeadersAsyncIsCalledWithoutCorrelationId_ThenSetsAuthenticationAndCorrelationIdHeaders()
+        {
+            var batchHandle = new BatchHandle("batchId");
+
+            _nextResponse = batchHandle;
+            _nextResponseStatusCode = HttpStatusCode.OK;
+
+            var result = await _fileShareReadWriteClient.CreateBatchAsync(_batchModel, CancellationToken.None);
+
+            Assert.That(_fakeFssHttpClientFactory.HttpClient.DefaultRequestHeaders.Authorization, Is.Not.Null);
+            Assert.Multiple(() =>
+            {
+                Assert.That(_fakeFssHttpClientFactory.HttpClient.DefaultRequestHeaders.Authorization.Scheme, Is.EqualTo(ApiHeaderKeys.BearerTokenHeaderKey));
+                Assert.That(_fakeFssHttpClientFactory.HttpClient.DefaultRequestHeaders.Authorization.Parameter, Is.EqualTo(DummyAccessToken));
+                Assert.That(_fakeFssHttpClientFactory.HttpClient.DefaultRequestHeaders.Contains(ApiHeaderKeys.XCorrelationIdHeaderKey), Is.False);
             });
         }
 

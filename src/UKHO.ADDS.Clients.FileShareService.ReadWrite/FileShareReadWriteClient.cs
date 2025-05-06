@@ -45,7 +45,17 @@ namespace UKHO.ADDS.Clients.FileShareService.ReadWrite
 
         public Task<IResult<AppendAclResponse>> AppendAclAsync(string batchId, Acl acl, CancellationToken cancellationToken = default) => Task.FromResult<IResult<AppendAclResponse>>(Result.Success(new AppendAclResponse()));
 
+        public async Task<IResult<IBatchHandle>> CreateBatchAsync(BatchModel batchModel, CancellationToken cancellationToken = default)
+        {
+            return await CreateBatchInternalAsync(batchModel, cancellationToken);
+        }
+
         public async Task<IResult<IBatchHandle>> CreateBatchAsync(BatchModel batchModel, string correlationId, CancellationToken cancellationToken = default)
+        {
+            return await CreateBatchInternalAsync(batchModel, cancellationToken, correlationId);
+        }
+
+        private async Task<IResult<IBatchHandle>> CreateBatchInternalAsync(BatchModel batchModel, CancellationToken cancellationToken, string? correlationId = null)
         {
             var uri = new Uri("batch", UriKind.Relative);
 
@@ -103,11 +113,14 @@ namespace UKHO.ADDS.Clients.FileShareService.ReadWrite
             };
         }
 
-        protected async Task<HttpClient> CreateHttpClientWithHeadersAsync(string correlationId)
+        protected async Task<HttpClient> CreateHttpClientWithHeadersAsync(string? correlationId = null)
         {
             var httpClient = _httpClientFactory.CreateClient();
             await httpClient.SetAuthenticationHeaderAsync(_authTokenProvider);
-            httpClient.SetCorrelationIdHeader(correlationId);
+            if (!string.IsNullOrEmpty(correlationId))
+            {
+                httpClient.SetCorrelationIdHeader(correlationId);
+            }
             return httpClient;
         }
     }

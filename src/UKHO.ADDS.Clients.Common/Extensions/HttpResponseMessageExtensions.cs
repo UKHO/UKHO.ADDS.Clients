@@ -51,7 +51,7 @@ namespace UKHO.ADDS.Clients.Common.Extensions
             }
         }
 
-        public static async Task<IResult<TValue>> CreateResultAsync<TValue>(this HttpResponseMessage response, string applicationName,string correlationId) where TValue : class
+        public static async Task<IResult<TValue>> CreateResultAsync<TValue>(this HttpResponseMessage response, string applicationName, string correlationId) where TValue : class
         {
             try
             {
@@ -114,7 +114,7 @@ namespace UKHO.ADDS.Clients.Common.Extensions
             }
         }
 
-        public static async Task<IDictionary<string, object>> CreateErrorMetadata(this HttpResponseMessage response, string applicationName, string correlationId)
+        public static async Task<IDictionary<string, object>> CreateErrorMetadata(this HttpResponseMessage response, string applicationName, string? correlationId = null)
         {
             IDictionary<string, object> errorMetadata = ErrorFactory.CreateProperties(correlationId);
 

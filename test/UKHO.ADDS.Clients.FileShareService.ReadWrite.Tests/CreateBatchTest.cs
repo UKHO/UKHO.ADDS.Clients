@@ -113,14 +113,13 @@ namespace UKHO.ADDS.Clients.FileShareService.ReadWrite.Tests
             var batchHandle = new BatchHandle("batchId");
 
             _nextResponse = batchHandle;
-            _nextResponseStatusCode = HttpStatusCode.OK;
 
             var result = await _fileShareReadWriteClient.CreateBatchAsync(_batchModel, DummyCorrelationId, CancellationToken.None);
 
             Assert.Multiple(() =>
             {
                 Assert.That(result.IsSuccess(out var value, out _), Is.True);
-                Assert.That(value?.BatchId, Is.EqualTo(batchHandle.BatchId));
+                Assert.That(value?.Body.BatchId, Is.EqualTo(batchHandle.BatchId));
                 Assert.That(_fakeFssHttpClientFactory.HttpClient.DefaultRequestHeaders.Contains(ApiHeaderKeys.XCorrelationIdHeaderKey), Is.True);
                 Assert.That(_fakeFssHttpClientFactory.HttpClient.DefaultRequestHeaders.GetValues(ApiHeaderKeys.XCorrelationIdHeaderKey), Contains.Item(DummyCorrelationId));
                 Assert.That(_lastRequestUri?.AbsolutePath, Is.EqualTo($"/basePath/batch"));
@@ -140,7 +139,7 @@ namespace UKHO.ADDS.Clients.FileShareService.ReadWrite.Tests
             Assert.Multiple(() =>
             {
                 Assert.That(result.IsSuccess(out var value, out _), Is.True);
-                Assert.That(value?.BatchId, Is.EqualTo(batchHandle.BatchId));
+                Assert.That(value?.Body.BatchId, Is.EqualTo(batchHandle.BatchId));
                 Assert.That(_fakeFssHttpClientFactory.HttpClient.DefaultRequestHeaders.Contains(ApiHeaderKeys.XCorrelationIdHeaderKey), Is.False);
                 Assert.That(_lastRequestUri?.AbsolutePath, Is.EqualTo($"/basePath/batch"));
             });

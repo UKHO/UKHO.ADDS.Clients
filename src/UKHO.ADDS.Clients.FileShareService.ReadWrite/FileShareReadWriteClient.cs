@@ -45,17 +45,17 @@ namespace UKHO.ADDS.Clients.FileShareService.ReadWrite
 
         public Task<IResult<AppendAclResponse>> AppendAclAsync(string batchId, Acl acl, CancellationToken cancellationToken = default) => Task.FromResult<IResult<AppendAclResponse>>(Result.Success(new AppendAclResponse()));
 
-        public async Task<IResult<IBatchHandle>> CreateBatchAsync(BatchModel batchModel, CancellationToken cancellationToken = default)
+        public async Task<IResult<BaseResponse<CreateBatchResponseModel>>> CreateBatchAsync(BatchModel batchModel, CancellationToken cancellationToken = default)
         {
             return await CreateBatchInternalAsync(batchModel, cancellationToken);
         }
 
-        public async Task<IResult<IBatchHandle>> CreateBatchAsync(BatchModel batchModel, string correlationId, CancellationToken cancellationToken = default)
+        public async Task<IResult<BaseResponse<CreateBatchResponseModel>>> CreateBatchAsync(BatchModel batchModel, string correlationId, CancellationToken cancellationToken = default)
         {
             return await CreateBatchInternalAsync(batchModel, cancellationToken, correlationId);
         }
 
-        private async Task<IResult<IBatchHandle>> CreateBatchInternalAsync(BatchModel batchModel, CancellationToken cancellationToken, string? correlationId = null)
+        private async Task<IResult<BaseResponse<CreateBatchResponseModel>>> CreateBatchInternalAsync(BatchModel batchModel, CancellationToken cancellationToken, string? correlationId = null)
         {
             var uri = new Uri("batch", UriKind.Relative);
 
@@ -70,15 +70,15 @@ namespace UKHO.ADDS.Clients.FileShareService.ReadWrite
                 if (!response.IsSuccessStatusCode)
                 {
                     var errorMetadata = await response.CreateErrorMetadata(ApiNames.FileShareService, correlationId);
-                    return Result.Failure<IBatchHandle>(ErrorFactory.CreateError(response.StatusCode, errorMetadata));
+                    return Result.Failure<BaseResponse<CreateBatchResponseModel>>(ErrorFactory.CreateError(response.StatusCode, errorMetadata));
                 }
 
-                var batchHandle = await response.Content.ReadFromJsonAsync<BatchHandle>(cancellationToken: cancellationToken);
-                return Result.Success<IBatchHandle>(batchHandle);
+                var body = await response.Content.ReadFromJsonAsync<CreateBatchResponseModel>(cancellationToken: cancellationToken);
+                return Result.Success(new BaseResponse<CreateBatchResponseModel>(response.StatusCode, body));
             }
             catch (Exception ex)
             {
-                return Result.Failure<IBatchHandle>(ex.Message);
+                return Result.Failure<BaseResponse<CreateBatchResponseModel>>(ex.Message);
             }
         }
 

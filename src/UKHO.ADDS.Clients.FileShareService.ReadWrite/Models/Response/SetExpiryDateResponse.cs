@@ -2,5 +2,6 @@
 {
     public class SetExpiryDateResponse 
     {
+        public bool IsExpiryDateSet { get; set; }
     }
 }

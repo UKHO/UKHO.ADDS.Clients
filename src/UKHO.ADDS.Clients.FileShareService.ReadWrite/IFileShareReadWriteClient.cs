@@ -35,5 +35,7 @@ namespace UKHO.ADDS.Clients.FileShareService.ReadWrite
         Task<IResult> RollBackBatchAsync(IBatchHandle batchHandle);
         Task<IResult<RollBackBatchResponse>> RollBackBatchAsync(IBatchHandle batchHandle, CancellationToken cancellationToken);
         Task<IResult<SetExpiryDateResponse>> SetExpiryDateAsync(string batchId, BatchExpiryModel batchExpiry, CancellationToken cancellationToken = default);
+        Task<IResult<SetExpiryDateResponse>> SetExpiryDateAsync(string batchId, BatchExpiryModel batchExpiry,
+            string correlationId, CancellationToken cancellationToken = default);
     }
 }

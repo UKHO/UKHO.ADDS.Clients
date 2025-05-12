@@ -1,4 +1,5 @@
-﻿using System.Net.Http.Json;
+﻿using System.Net;
+using System.Net.Http.Json;
 using System.Text;
 using UKHO.ADDS.Clients.Common.Authentication;
 using UKHO.ADDS.Clients.Common.Constants;
@@ -103,7 +104,39 @@ namespace UKHO.ADDS.Clients.FileShareService.ReadWrite
 
         public Task<IResult<RollBackBatchResponse>> RollBackBatchAsync(IBatchHandle batchHandle, CancellationToken cancellationToken) => Task.FromResult<IResult<RollBackBatchResponse>>(Result.Success(new RollBackBatchResponse()));
 
-        public Task<IResult<SetExpiryDateResponse>> SetExpiryDateAsync(string batchId, BatchExpiryModel batchExpiry, CancellationToken cancellationToken = default) => Task.FromResult<IResult<SetExpiryDateResponse>>(Result.Success(new SetExpiryDateResponse()));
+        public async Task<IResult<SetExpiryDateResponse>> SetExpiryDateAsync(string batchId, BatchExpiryModel batchExpiry, CancellationToken cancellationToken = default)
+        {
+            return await SetExpiryDateInternalAsync(batchId, batchExpiry, cancellationToken);
+        }
+
+        public async Task<IResult<SetExpiryDateResponse>> SetExpiryDateAsync(string batchId, BatchExpiryModel batchExpiry, string correlationId, CancellationToken cancellationToken = default)
+        {
+            return await SetExpiryDateInternalAsync(batchId, batchExpiry, cancellationToken ,correlationId);
+        }
+
+        private async Task<IResult<SetExpiryDateResponse>> SetExpiryDateInternalAsync(string batchId, BatchExpiryModel batchExpiryModel, CancellationToken cancellationToken, string? correlationId = null)
+        {
+            var uri = new Uri($"/batch/{batchId}/expiry", UriKind.Relative);
+
+            try
+            {
+                using var httpClient = await CreateHttpClientWithHeadersAsync(correlationId);
+
+                var httpRequestMessage = new HttpRequestMessage(HttpMethod.Put, uri)
+                {
+                    Content = new StringContent(JsonCodec.Encode(batchExpiryModel), Encoding.UTF8, "application/json")
+                };
+                var response = await httpClient.SendAsync(httpRequestMessage, cancellationToken);
+
+                var result = (response.StatusCode == HttpStatusCode.NoContent);
+
+                return Result.Success(new SetExpiryDateResponse() { IsExpiryDateSet = result });
+            }
+            catch (Exception ex)
+            {
+                return Result.Failure<SetExpiryDateResponse>(ex.Message);
+            }
+        }
 
         private HttpRequestMessage CreateHttpRequestMessage(Uri uri, BatchModel batchModel)
         {

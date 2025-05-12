@@ -75,15 +75,6 @@ stages:
         packagesDirectory: '$(Build.SourcesDirectory)\packages'
 
     - task: DotNetCoreCLI@2
-      displayName: Unit tests
-      inputs:
-        command: test
-        projects: |
-          **/*.Tests.csproj
-        testRunTitle: UnitTests
-        workingDirectory: '$(Build.SourcesDirectory)'
-
-    - task: DotNetCoreCLI@2
       displayName: Pack libraries
       inputs:
         command: pack
@@ -123,57 +114,6 @@ stages:
       inputs:
         path: $(Build.BinariesDirectory)\IntegrationTests
         artifact: IntegrationTests
-
-  - job:
-    dependsOn: MainBuild
-    displayName: Integration tests
-    # variables:
-    # - group: clients-integration-tests
-    steps:
-    - checkout: none
-  
-    - download: current
-      displayName: Download integration tests
-      artifact: IntegrationTests
-
-    # - task: FileTransform@2
-    #   displayName: File transform - FileShareService.ReadOnly
-    #   inputs:
-    #     folderPath: $(Pipeline.Workspace)\IntegrationTests\FileShareService.ReadOnly
-    #     xmlTransformationRules:
-    #     jsonTargetFiles: 'appsettings.json'
-
-    # - task: FileTransform@2
-    #   displayName: File transform - FileShareService.ReadWrite
-    #   inputs:
-    #     folderPath: $(Pipeline.Workspace)\IntegrationTests\FileShareService.ReadWrite
-    #     xmlTransformationRules:
-    #     jsonTargetFiles: 'appsettings.json'
-
-    # - task: FileTransform@2
-    #   displayName: File transform - PermitService
-    #   inputs:
-    #     folderPath: $(Pipeline.Workspace)\IntegrationTests\PermitService
-    #     xmlTransformationRules:
-    #     jsonTargetFiles: 'appsettings.json'
-
-    # - task: FileTransform@2
-    #   displayName: File transform - SalesCatalogueService
-    #   inputs:
-    #     folderPath: $(Pipeline.Workspace)\IntegrationTests\SalesCatalogueService
-    #     xmlTransformationRules:
-    #     jsonTargetFiles: 'appsettings.json'
-
-    # - task: DotNetCoreCLI@2
-    #   displayName: Run integration tests
-    #   inputs:
-    #     command: test
-    #     projects: |
-    #       $(Pipeline.Workspace)\IntegrationTests\FileShareService.ReadOnly\UKHO.ADDS.Clients.FileShareService.ReadOnly.IntegrationTests.dll
-    #       $(Pipeline.Workspace)\IntegrationTests\FileShareService.ReadWrite\UKHO.ADDS.Clients.FileShareService.ReadWrite.IntegrationTests.dll
-    #       $(Pipeline.Workspace)\IntegrationTests\PermitService\UKHO.ADDS.Clients.PermitService.IntegrationTests.dll
-    #       $(Pipeline.Workspace)\IntegrationTests\SalesCatalogueService\UKHO.ADDS.Clients.SalesCatalogueService.IntegrationTests.dll
-    #     testRunTitle: IntegrationTests
 
 - stage: ProGet
   condition: and(succeeded(), eq(variables['Build.SourceBranch'], 'refs/heads/main'))

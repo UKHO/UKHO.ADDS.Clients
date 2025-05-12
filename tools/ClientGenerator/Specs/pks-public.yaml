@@ -1,0 +1,302 @@
+openapi: 3.0.0
+info:
+  version: "0.1"
+  title: Product Key Service API
+  description: |
+    This API is for the Product Key Service.
+  contact:
+    name: Martin Rock-Evans
+    email: martin.rock-evans@ukho.gov.uk
+externalDocs:
+  url: https://github.com/UKHO/product-key-service
+servers:
+  - url: https://productkeys.admiralty.co.uk/
+security:
+  - jwtBearerAuth: []
+tags:
+  - name: SENC Providers
+    description: These operations are available to SENC Providers.
+paths:
+  /keys:
+    post:
+      summary: Get one or more product keys for product type ENC-S63
+      tags:
+        - "SENC Providers"
+      security:
+        - jwtBearerAuth:
+            - "read:keys"
+      operationId: getKeys
+      requestBody:
+        description: the list of product/edition combinations that the keys are required for
+        content:
+          application/json:
+            schema:
+              type: array
+              items:
+                type: object
+                properties:
+                  productName:
+                    type: string
+                  edition:
+                    type: string
+            examples:
+              "ENC-S63 example":
+                value:
+                  [
+                    { "productName": "GB123456", "edition": "12" },
+                    { "productName": "GB345689", "edition": "4" },
+                  ]
+              "ARCS example":
+                value:
+                  [
+                    { "productName": "GB2", "edition": "2020-02-20" },
+                    { "productName": "GB26", "edition": "2021-11-25" },
+                  ]
+
+      responses:
+        "200":
+          description: Returns the requested keys
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    productName:
+                      type: string
+                    edition:
+                      type: string
+                    key:
+                      type: string
+              examples:
+                "ENC-S63 example":
+                  value:
+                    [
+                      {
+                        "productName": "GB123456",
+                        "edition": "12",
+                        "key": "GB1234562023010132CE6EA0797B6FBD32CE6EA0797B6FBDB1FF1F3E78EDEF89",
+                      },
+                      {
+                        "productName": "GB345689",
+                        "edition": "4",
+                        "key": "GB34568920230101E9476F6E460FFC17E9476F6E460FFC17E84FC48C87629FBF",
+                      },
+                    ]
+                "ARCS example":
+                  value:
+                    [
+                      {
+                        "productName": "GB2",
+                        "edition": "2020-02-20",
+                        "key": "2+++++++22010311289d3e2abcdef1234567890abc",
+                      },
+                      {
+                        "productName": "GB26",
+                        "edition": "2021-11-25",
+                        "key": "26++++++220903139482ae2abcdef1234567890abc",
+                      },
+                    ]
+        "400":
+          description: Bad request.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/errorDescription"
+        "401":
+          $ref: "#/components/responses/unauthorised"
+        "403":
+          $ref: "#/components/responses/forbidden"
+        "429":
+          $ref: "#/components/responses/tooManyRequests"
+        "500":
+          $ref: "#/components/responses/internalServerError"
+  /keys/{productName}/{edition}:
+    get:
+      summary: >-
+        Retrieve a single key for product type ENC-S63
+      tags:
+        - "SENC Providers"
+      security:
+        - jwtBearerAuth:
+            - "read:keys"
+      operationId: getKey
+      description: >
+        Get a single product key for product type ENC-S63
+      parameters:
+        - name: productName
+          in: path
+          description: The product name that the new key is for
+          required: true
+          schema:
+            type: string
+          example: GB123456
+        - name: edition
+          in: path
+          description: The Edition the new key is for
+          required: true
+          schema:
+            type: string
+          example: 2
+      responses:
+        "200":
+          description: Returns the requested keys
+          content:
+            text/plain:
+              schema:
+                type: string
+                description: The operation will the raw permit string in the response body.
+              example: GB1234562023010132CE6EA0797B6FBD32CE6EA0797B6FBDB1FF1F3E78EDEF89
+            application/json:
+              schema:
+                type: object
+                properties:
+                  productName:
+                    type: string
+                  edition:
+                    type: string
+                  key:
+                    type: string
+              example:
+                {
+                  "productName": "GB123456",
+                  "edition": "12",
+                  "key": "GB1234562023010132CE6EA0797B6FBD32CE6EA0797B6FBDB1FF1F3E78EDEF89",
+                }
+        "400":
+          description: Bad request.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/errorDescription"
+        "401":
+          $ref: "#/components/responses/unauthorised"
+        "403":
+          $ref: "#/components/responses/forbidden"
+        "429":
+          $ref: "#/components/responses/tooManyRequests"
+        "500":
+          $ref: "#/components/responses/internalServerError"
+  /auth/client_credentials:
+    post:
+      summary: Get token from AAD B2C.
+      tags:
+        - "SENC Providers"
+      operationId: getPKSTokenUsingClientCredentials
+      description: |
+        Returns a token direct from AAD B2C using Client Credentials.
+
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                client_id:
+                  type: string
+                  description: >-
+                    The application ID that's assigned to the distributor's app.
+                    This will be provided to the distributor when they register
+                    their application.
+                client_secret:
+                  type: string
+                  description: >-
+                    The client secret that has been generated for the
+                    distributor's app when the app was registered. The client
+                    secret must be URL-encoded before being sent.
+      responses:
+        "200":
+          description: OK.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  token_type:
+                    type: string
+                  expires_in:
+                    type: string
+                  ext_expires_in:
+                    type: string
+                  access_token:
+                    type: string
+              example: |
+                {
+                  "token_type": "Bearer",
+                  "expires_in": 3599,
+                  "ext_expires_in": 3599,
+                  "access_token": "eyJ0eXAiOiJKV1QiLCJhbGciOiJSUzI1NiIsImtpZCI6Imwzc1EtNTBjQ0g0eEJWWkxIVEd3blNSNzY4MCJ9.eyJhdWQiOiI0ZTE1NGYyYi0wNWM2LTQwZDEtODdiNy0wYWYwNTI5ZTBhNTEiLCJpc3MiOiJodHRwczovL2xvZ2luLm1pY3Jvc29mdG9ubGluZS5jb20vZTkyYzk4MWItZDY4OS00Y2MzLTgyNDUtMGQ3MTBlMjQ2YmNhL3YyLjAiLCJpYXQiOjE2MzI0NzU1OTAsIm5iZiI6MTYzMjQ3NTU5MCwiZXhwIjoxNjMyNDc5NDkwLCJhaW8iOiJFMlpnWUdpZTJhSmhQT0ZDWTdQR3NxYUhaWi9tQXdBPSIsImF6cCI6IjJmMzJmNmY3LTFmMmYtNDNjZS1hZmQ3LWYzM2Y5M2NiN2U2MSIsImF6cGFjciI6IjEiLCJvaWQiOiJkNmY4ZDg0My0zZTY1LTQ5YTAtODdkNy0zMTBkMGNiM2UzOGUiLCJyaCI6IjAuQVNJQUc1Z3M2WW5XdzB5Q1JRMXhEaVJyeXZmMk1pOHZIODVEcjlmelA1UExmbUVpQUFBLiIsInN1YiI6ImQ2ZjhkODQzLTNlNjUtNDlhMC04N2Q3LTMxMGQwY2IzZTM4ZSIsInRpZCI6ImU5MmM5ODFiLWQ2ODktNGNjMy04MjQ1LTBkNzEwZTI0NmJjYSIsInV0aSI6IlREVmtmenZuS2txVEdRUXNEWjItQUEiLCJ2ZXIiOiIyLjAifQ.W-TB97v6D56UuPCstaSrfLFbc9gE6W1VHD5t0RLo_EK-1LuaTvQ0aqJtaYCRnXnd6RmMIIml3ckHxFL0lZlYUoSjszIMFkb1w0aH5SxD-GOfY-dktvGKdMVxqtyjJJg1IV7V3Dv1BYI24RnGPfcJG73-af7vcTRjE5KFeW_kOMVAfCAcZOV9dJ7BJULfEdHlK8ZFUb2hEzFkoORGdlrpNIJ7-QEhB9Kcnxa9QtA4z8lMtWESx-q17N88fmlaz87kEKEjX3pIP7k2l_y5BNtNAxK0h995pZ9hHNe4-UBH-xjvfuDa6IbCsZD1J1IW7AO1bXCjGGvc31PtJqEc5FRdQQ"
+                }
+        "400":
+          description: Bad request - Request missing client_id and/or client_secret.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/errorDescription"
+              example:
+                correlationId: 184ef711-b039-4c24-b81a-89081d8f324c
+                errors:
+                  - source: request
+                    description: request missing client_id and/or client_secret
+        "401":
+          $ref: "#/components/responses/unauthorised"
+        "403":
+          $ref: "#/components/responses/forbidden"
+        "429":
+          $ref: "#/components/responses/tooManyRequests"
+components:
+  responses:
+    unauthorised:
+      description: >-
+        Unauthorised - either you have not provided any credentials, or your
+        credentials are not recognised.
+    forbidden:
+      description: >-
+        Forbidden - you have been authorised, but you are not allowed to access
+        this resource.
+    tooManyRequests:
+      description: >-
+        You have sent too many requests in a given amount of time. Please
+        back-off for the time in the Retry-After header (in seconds) and try
+        again.
+      headers:
+        Retry-After:
+          schema:
+            type: integer
+          description: Specifies the time you should wait in seconds before retrying.
+    internalServerError:
+      description: Internal Server Error.
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/defaultErrorResponse"
+  schemas:
+    defaultErrorResponse:
+      type: object
+      title: error
+      properties:
+        correlationId:
+          type: string
+    errorDescription:
+      type: object
+      properties:
+        correlationId:
+          type: string
+        errors:
+          type: array
+          items:
+            $ref: "#/components/schemas/fieldError"
+    fieldError:
+      type: object
+      properties:
+        source:
+          type: string
+        description:
+          type: string
+
+  securitySchemes:
+    jwtBearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT

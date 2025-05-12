@@ -3,37 +3,7 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
 VisualStudioVersion = 17.12.35527.113
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "UKHO.ADDS.Clients.Common", "src\UKHO.ADDS.Clients.Common\UKHO.ADDS.Clients.Common.csproj", "{FF65D8FC-E663-4709-BF24-37A637097C24}"
-EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "UKHO.ADDS.Clients.PermitService", "src\UKHO.ADDS.Clients.PermitService\UKHO.ADDS.Clients.PermitService.csproj", "{D5D24B9F-4DC4-40AB-B081-EFB427A39B49}"
-EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "UKHO.ADDS.Clients.SalesCatalogueService", "src\UKHO.ADDS.Clients.SalesCatalogueService\UKHO.ADDS.Clients.SalesCatalogueService.csproj", "{799C4212-8A34-413F-BD0C-9FC690192EC4}"
-EndProject
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Tests", "Tests", "{D8F713D6-4ADB-4F17-A8AC-75135F64B219}"
-EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "UKHO.ADDS.Clients.PermitService.Tests", "test\UKHO.ADDS.Clients.PermitService.Tests\UKHO.ADDS.Clients.PermitService.Tests.csproj", "{853E4968-390A-4F28-B550-3CCB1E0BAA3E}"
-EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "UKHO.ADDS.Clients.SalesCatalogueService.Tests", "test\UKHO.ADDS.Clients.SalesCatalogueService.Tests\UKHO.ADDS.Clients.SalesCatalogueService.Tests.csproj", "{B0A88348-1E24-483F-BAFE-58945972122C}"
-EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "UKHO.ADDS.Clients.FileShareService.ReadOnly", "src\UKHO.ADDS.Clients.FileShareService.ReadOnly\UKHO.ADDS.Clients.FileShareService.ReadOnly.csproj", "{B5BF31B3-DAEC-4029-A535-091BFA8DA645}"
-EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "UKHO.ADDS.Clients.FileShareService.ReadWrite", "src\UKHO.ADDS.Clients.FileShareService.ReadWrite\UKHO.ADDS.Clients.FileShareService.ReadWrite.csproj", "{E7F88D83-ACC2-43F0-B49A-24BB4B658AA1}"
-EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "UKHO.ADDS.Clients.FileShareService.ReadWrite.Tests", "test\UKHO.ADDS.Clients.FileShareService.ReadWrite.Tests\UKHO.ADDS.Clients.FileShareService.ReadWrite.Tests.csproj", "{7AD40F55-D00F-4259-901F-D9A64DE03BBF}"
-EndProject
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Integration", "Integration", "{2DE2F378-6ACB-4FF1-A382-54475C4E03DA}"
-EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "UKHO.ADDS.Clients.PermitService.IntegrationTests", "test\UKHO.ADDS.Clients.PermitService.IntegrationTests\UKHO.ADDS.Clients.PermitService.IntegrationTests.csproj", "{0CA774D6-62E9-4ED2-9A64-89489955694C}"
-EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "UKHO.ADDS.Clients.SalesCatalogueService.IntegrationTests", "test\UKHO.ADDS.Clients.SalesCatalogueService.IntegrationTests\UKHO.ADDS.Clients.SalesCatalogueService.IntegrationTests.csproj", "{A9FDF5C5-30CF-4AAE-847B-CA797EB99A31}"
-EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "UKHO.ADDS.Clients.FileShareService.ReadOnly.Tests", "test\UKHO.ADDS.Clients.FileShareService.ReadOnly.Tests\UKHO.ADDS.Clients.FileShareService.ReadOnly.Tests.csproj", "{0A37F8E7-5B56-4F83-9A94-A34C7F452878}"
-EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "UKHO.ADDS.Clients.FileShareService.ReadOnly.IntegrationTests", "test\UKHO.ADDS.Clients.FileShareService.ReadOnly.IntegrationTests\UKHO.ADDS.Clients.FileShareService.ReadOnly.IntegrationTests.csproj", "{A52A91B9-46D5-4D35-8B6E-6D71F26A618E}"
-EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "UKHO.ADDS.Clients.FileShareService.ReadWrite.IntegrationTests", "test\UKHO.ADDS.Clients.FileShareService.ReadWrite.IntegrationTests\UKHO.ADDS.Clients.FileShareService.ReadWrite.IntegrationTests.csproj", "{B6DD8A91-E006-4065-A9D0-38F76ACFB99A}"
-EndProject
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Pipeline", "Pipeline", "{02EA681E-C7D8-13C7-8484-4AC65E1B71E8}"
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "@Pipeline", "@Pipeline", "{02EA681E-C7D8-13C7-8484-4AC65E1B71E8}"
 	ProjectSection(SolutionItems) = preProject
 		azure-pipelines.yml = azure-pipelines.yml
 		BuildNuget.config = BuildNuget.config
@@ -46,79 +16,33 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Deployment", "Deployment", 
 		deployment\integration-test-build.yml = deployment\integration-test-build.yml
 	EndProjectSection
 EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "@Tools", "@Tools", "{2412214A-06CE-41AD-AB6F-349D1ABE2A73}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ClientGenerator", "tools\ClientGenerator\ClientGenerator.csproj", "{71640A1B-08D7-4DB3-A4DC-39F4E49865FE}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "UKHO.ADDS.Clients.FileShare", "src\UKHO.ADDS.Clients.FileShare\UKHO.ADDS.Clients.FileShare.csproj", "{617A155C-A890-4AC6-A3E5-57164BBC7899}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
 		Release|Any CPU = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
-		{FF65D8FC-E663-4709-BF24-37A637097C24}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{FF65D8FC-E663-4709-BF24-37A637097C24}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{FF65D8FC-E663-4709-BF24-37A637097C24}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{FF65D8FC-E663-4709-BF24-37A637097C24}.Release|Any CPU.Build.0 = Release|Any CPU
-		{D5D24B9F-4DC4-40AB-B081-EFB427A39B49}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{D5D24B9F-4DC4-40AB-B081-EFB427A39B49}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{D5D24B9F-4DC4-40AB-B081-EFB427A39B49}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{D5D24B9F-4DC4-40AB-B081-EFB427A39B49}.Release|Any CPU.Build.0 = Release|Any CPU
-		{799C4212-8A34-413F-BD0C-9FC690192EC4}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{799C4212-8A34-413F-BD0C-9FC690192EC4}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{799C4212-8A34-413F-BD0C-9FC690192EC4}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{799C4212-8A34-413F-BD0C-9FC690192EC4}.Release|Any CPU.Build.0 = Release|Any CPU
-		{853E4968-390A-4F28-B550-3CCB1E0BAA3E}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{853E4968-390A-4F28-B550-3CCB1E0BAA3E}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{853E4968-390A-4F28-B550-3CCB1E0BAA3E}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{853E4968-390A-4F28-B550-3CCB1E0BAA3E}.Release|Any CPU.Build.0 = Release|Any CPU
-		{B0A88348-1E24-483F-BAFE-58945972122C}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{B0A88348-1E24-483F-BAFE-58945972122C}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{B0A88348-1E24-483F-BAFE-58945972122C}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{B0A88348-1E24-483F-BAFE-58945972122C}.Release|Any CPU.Build.0 = Release|Any CPU
-		{B5BF31B3-DAEC-4029-A535-091BFA8DA645}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{B5BF31B3-DAEC-4029-A535-091BFA8DA645}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{B5BF31B3-DAEC-4029-A535-091BFA8DA645}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{B5BF31B3-DAEC-4029-A535-091BFA8DA645}.Release|Any CPU.Build.0 = Release|Any CPU
-		{E7F88D83-ACC2-43F0-B49A-24BB4B658AA1}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{E7F88D83-ACC2-43F0-B49A-24BB4B658AA1}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{E7F88D83-ACC2-43F0-B49A-24BB4B658AA1}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{E7F88D83-ACC2-43F0-B49A-24BB4B658AA1}.Release|Any CPU.Build.0 = Release|Any CPU
-		{7AD40F55-D00F-4259-901F-D9A64DE03BBF}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{7AD40F55-D00F-4259-901F-D9A64DE03BBF}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{7AD40F55-D00F-4259-901F-D9A64DE03BBF}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{7AD40F55-D00F-4259-901F-D9A64DE03BBF}.Release|Any CPU.Build.0 = Release|Any CPU
-		{0CA774D6-62E9-4ED2-9A64-89489955694C}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{0CA774D6-62E9-4ED2-9A64-89489955694C}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{0CA774D6-62E9-4ED2-9A64-89489955694C}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{0CA774D6-62E9-4ED2-9A64-89489955694C}.Release|Any CPU.Build.0 = Release|Any CPU
-		{A9FDF5C5-30CF-4AAE-847B-CA797EB99A31}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{A9FDF5C5-30CF-4AAE-847B-CA797EB99A31}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{A9FDF5C5-30CF-4AAE-847B-CA797EB99A31}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{A9FDF5C5-30CF-4AAE-847B-CA797EB99A31}.Release|Any CPU.Build.0 = Release|Any CPU
-		{0A37F8E7-5B56-4F83-9A94-A34C7F452878}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{0A37F8E7-5B56-4F83-9A94-A34C7F452878}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{0A37F8E7-5B56-4F83-9A94-A34C7F452878}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{0A37F8E7-5B56-4F83-9A94-A34C7F452878}.Release|Any CPU.Build.0 = Release|Any CPU
-		{A52A91B9-46D5-4D35-8B6E-6D71F26A618E}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{A52A91B9-46D5-4D35-8B6E-6D71F26A618E}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{A52A91B9-46D5-4D35-8B6E-6D71F26A618E}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{A52A91B9-46D5-4D35-8B6E-6D71F26A618E}.Release|Any CPU.Build.0 = Release|Any CPU
-		{B6DD8A91-E006-4065-A9D0-38F76ACFB99A}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{B6DD8A91-E006-4065-A9D0-38F76ACFB99A}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{B6DD8A91-E006-4065-A9D0-38F76ACFB99A}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{B6DD8A91-E006-4065-A9D0-38F76ACFB99A}.Release|Any CPU.Build.0 = Release|Any CPU
+		{71640A1B-08D7-4DB3-A4DC-39F4E49865FE}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{71640A1B-08D7-4DB3-A4DC-39F4E49865FE}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{71640A1B-08D7-4DB3-A4DC-39F4E49865FE}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{71640A1B-08D7-4DB3-A4DC-39F4E49865FE}.Release|Any CPU.Build.0 = Release|Any CPU
+		{617A155C-A890-4AC6-A3E5-57164BBC7899}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{617A155C-A890-4AC6-A3E5-57164BBC7899}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{617A155C-A890-4AC6-A3E5-57164BBC7899}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{617A155C-A890-4AC6-A3E5-57164BBC7899}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
 	EndGlobalSection
 	GlobalSection(NestedProjects) = preSolution
-		{853E4968-390A-4F28-B550-3CCB1E0BAA3E} = {D8F713D6-4ADB-4F17-A8AC-75135F64B219}
-		{B0A88348-1E24-483F-BAFE-58945972122C} = {D8F713D6-4ADB-4F17-A8AC-75135F64B219}
-		{7AD40F55-D00F-4259-901F-D9A64DE03BBF} = {D8F713D6-4ADB-4F17-A8AC-75135F64B219}
-		{2DE2F378-6ACB-4FF1-A382-54475C4E03DA} = {D8F713D6-4ADB-4F17-A8AC-75135F64B219}
-		{0CA774D6-62E9-4ED2-9A64-89489955694C} = {2DE2F378-6ACB-4FF1-A382-54475C4E03DA}
-		{A9FDF5C5-30CF-4AAE-847B-CA797EB99A31} = {2DE2F378-6ACB-4FF1-A382-54475C4E03DA}
-		{0A37F8E7-5B56-4F83-9A94-A34C7F452878} = {D8F713D6-4ADB-4F17-A8AC-75135F64B219}
-		{A52A91B9-46D5-4D35-8B6E-6D71F26A618E} = {2DE2F378-6ACB-4FF1-A382-54475C4E03DA}
-		{B6DD8A91-E006-4065-A9D0-38F76ACFB99A} = {2DE2F378-6ACB-4FF1-A382-54475C4E03DA}
 		{596A0DB9-2056-4788-A518-AE735F3C84EA} = {02EA681E-C7D8-13C7-8484-4AC65E1B71E8}
+		{71640A1B-08D7-4DB3-A4DC-39F4E49865FE} = {2412214A-06CE-41AD-AB6F-349D1ABE2A73}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {167AB8EC-098E-4189-B92D-BEE77911725F}

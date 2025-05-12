@@ -93,10 +93,16 @@ namespace UKHO.ADDS.Clients.FileShareService.ReadWrite
         public Task<IResult<AddFileToBatchResponse>> AddFileToBatchAsync(IBatchHandle batchHandle, Stream stream, string fileName, string mimeType, Action<(int blocksComplete, int totalBlockCount)> progressUpdate, CancellationToken cancellationToken, params KeyValuePair<string, string>[] fileAttributes) =>
             Task.FromResult<IResult<AddFileToBatchResponse>>(Result.Success(new AddFileToBatchResponse()));
 
-        public Task<IResult> CommitBatchAsync(IBatchHandle batchHandle) => Task.FromResult<IResult>(Result.Success());
+        public async Task<IResult<CommitBatchResponse>> CommitBatchAsync(IBatchHandle batchHandle, CancellationToken cancellationToken = default)
+        {
+            return await CommitBatchInternalAsync(batchHandle, cancellationToken);
+        }
 
-        public Task<IResult<CommitBatchResponse>> CommitBatchAsync(IBatchHandle batchHandle, CancellationToken cancellationToken) => Task.FromResult<IResult<CommitBatchResponse>>(Result.Success(new CommitBatchResponse()));
-
+        public async Task<IResult<CommitBatchResponse>> CommitBatchAsync(IBatchHandle batchHandle, string correlationId, CancellationToken cancellationToken = default)
+        {
+            return await CommitBatchInternalAsync(batchHandle, cancellationToken, correlationId);
+        }
+        
         public Task<IResult<ReplaceAclResponse>> ReplaceAclAsync(string batchId, Acl acl, CancellationToken cancellationToken = default) => Task.FromResult<IResult<ReplaceAclResponse>>(Result.Success(new ReplaceAclResponse()));
 
         public Task<IResult> RollBackBatchAsync(IBatchHandle batchHandle) => Task.FromResult<IResult>(Result.Success());
@@ -105,11 +111,51 @@ namespace UKHO.ADDS.Clients.FileShareService.ReadWrite
 
         public Task<IResult<SetExpiryDateResponse>> SetExpiryDateAsync(string batchId, BatchExpiryModel batchExpiry, CancellationToken cancellationToken = default) => Task.FromResult<IResult<SetExpiryDateResponse>>(Result.Success(new SetExpiryDateResponse()));
 
+        private async Task<IResult<CommitBatchResponse>> CommitBatchInternalAsync(IBatchHandle batchHandle, CancellationToken cancellationToken, string? correlationId = null)
+        {
+            var uri = new Uri($"batch/{batchHandle.BatchId}", UriKind.Relative);
+
+            try
+            {
+                using var httpClient = await CreateHttpClientWithHeadersAsync(correlationId);
+
+                var httpRequestMessage = CreateHttpRequestMessage(uri, batchHandle);
+
+                var response = await httpClient.SendAsync(httpRequestMessage, cancellationToken);
+
+                if (!response.IsSuccessStatusCode)
+                {
+                    var errorMetadata = await response.CreateErrorMetadata(ApiNames.FileShareService, correlationId);
+                    return Result.Failure<CommitBatchResponse>(ErrorFactory.CreateError(response.StatusCode, errorMetadata));
+                }
+
+                var commitBatchResponse = await response.Content.ReadFromJsonAsync<CommitBatchResponse>(cancellationToken: cancellationToken);
+                if (commitBatchResponse == null)
+                {
+                    return Result.Failure<CommitBatchResponse>("The response content is null or invalid.");
+                }
+
+                return Result.Success(commitBatchResponse);
+            }
+            catch (Exception ex)
+            {
+                return Result.Failure<CommitBatchResponse>(ex.Message);
+            }
+        }
+
         private HttpRequestMessage CreateHttpRequestMessage(Uri uri, BatchModel batchModel)
         {
             return new HttpRequestMessage(HttpMethod.Post, uri)
             {
                 Content = new StringContent(JsonCodec.Encode(batchModel), Encoding.UTF8, "application/json")
+            };
+        }
+
+        private HttpRequestMessage CreateHttpRequestMessage(Uri uri, IBatchHandle batchHandle)
+        {
+            return new HttpRequestMessage(HttpMethod.Put, uri)
+            {
+                Content = new StringContent(JsonCodec.Encode(batchHandle), Encoding.UTF8, "application/json")
             };
         }
 

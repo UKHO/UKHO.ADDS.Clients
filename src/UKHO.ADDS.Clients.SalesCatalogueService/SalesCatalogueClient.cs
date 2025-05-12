@@ -35,7 +35,7 @@ namespace UKHO.ADDS.Clients.SalesCatalogueService
         /// <returns>A task that represents the asynchronous operation. The task result contains the S100 sales catalogue response.</returns>
         public async Task<IResult<S100SalesCatalogueResponse>> GetS100ProductsFromSpecificDateAsync(string apiVersion, string productType, DateTime? sinceDateTime, string correlationId)
         {
-            var uri = new Uri($"/{apiVersion}/catalogues/{productType}/basic", UriKind.Relative);
+            var uri = new Uri($"{apiVersion}/catalogues/{productType}/basic", UriKind.Relative);
 
             try
             {

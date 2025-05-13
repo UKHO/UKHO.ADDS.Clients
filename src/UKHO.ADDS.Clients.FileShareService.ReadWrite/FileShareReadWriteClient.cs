@@ -1,8 +1,6 @@
 ﻿using System.Net.Http.Json;
 using System.Security.Cryptography;
 using System.Text;
-using System.Text.Json;
-using System.Text.Json.Serialization;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Converters;
 using UKHO.ADDS.Clients.Common.Authentication;
@@ -91,7 +89,7 @@ namespace UKHO.ADDS.Clients.FileShareService.ReadWrite
 
         public Task AddFileToBatchAsync(IBatchHandle batchHandle, Stream stream, string fileName, string mimeType, params KeyValuePair<string, string>[] fileAttributes)
         {
-            return AddFileToBatchAsync(batchHandle, stream, fileName, mimeType, fileAttributes);
+            return AddFileToBatchAsync(batchHandle, stream, fileName, mimeType, _ => { }, CancellationToken.None, fileAttributes);
         }
 
         public Task<IResult<AddFileToBatchResponse>> AddFileToBatchAsync(IBatchHandle batchHandle, Stream stream, string fileName, string mimeType, CancellationToken cancellationToken, params KeyValuePair<string, string>[] fileAttributes)
@@ -335,14 +333,21 @@ namespace UKHO.ADDS.Clients.FileShareService.ReadWrite
             }
         }
 
-        private async Task<IResult<TResponse>> SendMessageResult<TResponse>(HttpRequestMessage messageToSend, CancellationToken cancellationToken)
+        private async Task<IResult<TResponse>> SendMessageResult<TResponse>(HttpRequestMessage messageToSend, CancellationToken cancellationToken, string? correlationId = null)
         {
             using (var httpClient = await GetAuthenticationHeaderSetClient())
             {
                 var response = await httpClient.SendAsync(messageToSend, cancellationToken);
-                var result = new Result<TResponse>();
-                return await Result.WithObjectData<TResponse>(response);
+                if (!response.IsSuccessStatusCode)
+                {
+                    var errorMetadata = await response.CreateErrorMetadata(ApiNames.FileShareService, correlationId ?? string.Empty);
+                    return Result.Failure<TResponse>(ErrorFactory.CreateError(response.StatusCode, errorMetadata));
+                }
+
+                var responseData = await response.Content.ReadFromJsonAsync<TResponse>(cancellationToken: cancellationToken);
+                return Result.Success(responseData);
             }
         }
+
     }
 }

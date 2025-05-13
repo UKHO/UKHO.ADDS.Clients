@@ -130,10 +130,6 @@ namespace UKHO.ADDS.Clients.FileShareService.ReadWrite
                 }
 
                 var commitBatchResponse = await response.Content.ReadFromJsonAsync<CommitBatchResponse>(cancellationToken: cancellationToken);
-                if (commitBatchResponse == null)
-                {
-                    return Result.Failure<CommitBatchResponse>("The response content is null or invalid.");
-                }
 
                 return Result.Success(commitBatchResponse);
             }

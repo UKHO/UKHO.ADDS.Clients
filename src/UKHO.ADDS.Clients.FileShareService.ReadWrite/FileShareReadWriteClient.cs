@@ -116,21 +116,23 @@ namespace UKHO.ADDS.Clients.FileShareService.ReadWrite
 
         private async Task<IResult<SetExpiryDateResponse>> SetExpiryDateInternalAsync(string batchId, BatchExpiryModel batchExpiryModel, CancellationToken cancellationToken, string? correlationId = null)
         {
-            var uri = new Uri($"/batch/{batchId}/expiry", UriKind.Relative);
+            var uri = new Uri($"batch/{batchId}/expiry", UriKind.Relative);
 
             try
             {
                 using var httpClient = await CreateHttpClientWithHeadersAsync(correlationId);
 
-                var httpRequestMessage = new HttpRequestMessage(HttpMethod.Put, uri)
-                {
-                    Content = new StringContent(JsonCodec.Encode(batchExpiryModel), Encoding.UTF8, "application/json")
-                };
+                var httpRequestMessage = CreateHttpRequestMessageForSetExpiryDate(uri, batchExpiryModel);
+
                 var response = await httpClient.SendAsync(httpRequestMessage, cancellationToken);
 
-                var result = (response.StatusCode == HttpStatusCode.NoContent);
+                if (response.StatusCode == HttpStatusCode.NoContent)
+                {
+                    return Result.Success(new SetExpiryDateResponse() { IsExpiryDateSet = true });
+                }
 
-                return Result.Success(new SetExpiryDateResponse() { IsExpiryDateSet = result });
+                var errorMetadata = await response.CreateErrorMetadata(ApiNames.FileShareService, correlationId);
+                return Result.Failure<SetExpiryDateResponse>(ErrorFactory.CreateError(response.StatusCode, errorMetadata));
             }
             catch (Exception ex)
             {
@@ -143,6 +145,16 @@ namespace UKHO.ADDS.Clients.FileShareService.ReadWrite
             return new HttpRequestMessage(HttpMethod.Post, uri)
             {
                 Content = new StringContent(JsonCodec.Encode(batchModel), Encoding.UTF8, "application/json")
+            };
+        }
+
+        private HttpRequestMessage CreateHttpRequestMessageForSetExpiryDate(Uri uri, BatchExpiryModel batchExpiryModel)
+        {
+            var formattedExpiryDate = batchExpiryModel.ExpiryDate?.ToUniversalTime().ToString("yyyy-MM-ddTHH:mm:ss.fffZ");
+
+            return new HttpRequestMessage(HttpMethod.Put, uri)
+            {
+                Content = new StringContent(JsonCodec.Encode(new { ExpiryDate = formattedExpiryDate }), Encoding.UTF8, "application/json")
             };
         }
 

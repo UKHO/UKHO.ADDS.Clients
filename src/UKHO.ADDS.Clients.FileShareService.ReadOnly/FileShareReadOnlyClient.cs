@@ -118,6 +118,19 @@ namespace UKHO.ADDS.Clients.FileShareService.ReadOnly
 
         public async Task<IResult<DownloadFileResponse>> DownloadFileAsync(string batchId, string fileName, Stream destinationStream, long fileSizeInBytes = 0, CancellationToken cancellationToken = default)
         {
+            return await DownloadFileInternalAsync(batchId, fileName, destinationStream,
+                cancellationToken, fileSizeInBytes);
+        }
+        public async Task<IResult<DownloadFileResponse>> DownloadFileAsync(string batchId, string fileName, Stream destinationStream, string correlationId, long fileSizeInBytes = 0, CancellationToken cancellationToken = default)
+        {
+            return await DownloadFileInternalAsync(batchId, fileName, destinationStream,
+                cancellationToken, fileSizeInBytes, correlationId);
+        }
+
+        private async Task<IResult<DownloadFileResponse>> DownloadFileInternalAsync(string batchId, string fileName,
+             Stream destinationStream, CancellationToken cancellationToken, long fileSizeInBytes,
+             string? correlationId = null)
+        {
             try
             {
                 long startByte = 0;
@@ -129,7 +142,7 @@ namespace UKHO.ADDS.Clients.FileShareService.ReadOnly
 
                     var uri = $"batch/{batchId}/files/{fileName}";
 
-                    using (var httpClient = await GetAuthenticationHeaderSetClient())
+                    using (var httpClient = await CreateHttpClientWithHeadersAsync(correlationId))
                     using (var httpRequestMessage = new HttpRequestMessage(HttpMethod.Get, uri))
                     {
                         if (fileSizeInBytes != 0 && rangeHeader != null)
@@ -160,7 +173,7 @@ namespace UKHO.ADDS.Clients.FileShareService.ReadOnly
                     }
                 }
 
-                return Result.Success(new DownloadFileResponse());
+                return Result.Success(new DownloadFileResponse() { DownloadFileStream = destinationStream });
             }
             catch (Exception ex)
             {

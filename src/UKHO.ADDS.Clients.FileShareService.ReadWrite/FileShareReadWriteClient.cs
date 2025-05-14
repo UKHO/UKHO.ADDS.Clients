@@ -56,6 +56,43 @@ namespace UKHO.ADDS.Clients.FileShareService.ReadWrite
             return await CreateBatchInternalAsync(batchModel, cancellationToken, correlationId);
         }
 
+        public Task<IResult<BatchStatusResponse>> GetBatchStatusAsync(IBatchHandle batchHandle) => Task.FromResult<IResult<BatchStatusResponse>>(Result.Success(new BatchStatusResponse()));
+
+        public Task<IResult> AddFileToBatchAsync(IBatchHandle batchHandle, Stream stream, string fileName, string mimeType, params KeyValuePair<string, string>[] fileAttributes) => Task.FromResult<IResult>(Result.Success());
+
+        public Task<IResult<AddFileToBatchResponse>> AddFileToBatchAsync(IBatchHandle batchHandle, Stream stream, string fileName, string mimeType, CancellationToken cancellationToken, params KeyValuePair<string, string>[] fileAttributes) => Task.FromResult<IResult<AddFileToBatchResponse>>(Result.Success(new AddFileToBatchResponse()));
+
+        public Task<IResult> AddFileToBatchAsync(IBatchHandle batchHandle, Stream stream, string fileName, string mimeType, Action<(int blocksComplete, int totalBlockCount)> progressUpdate, params KeyValuePair<string, string>[] fileAttributes) => Task.FromResult<IResult>(Result.Success());
+
+        public Task<IResult<AddFileToBatchResponse>> AddFileToBatchAsync(IBatchHandle batchHandle, Stream stream, string fileName, string mimeType, Action<(int blocksComplete, int totalBlockCount)> progressUpdate, CancellationToken cancellationToken, params KeyValuePair<string, string>[] fileAttributes) =>
+            Task.FromResult<IResult<AddFileToBatchResponse>>(Result.Success(new AddFileToBatchResponse()));
+
+        public async Task<IResult<CommitBatchResponse>> CommitBatchAsync(IBatchHandle batchHandle, CancellationToken cancellationToken = default)
+        {
+            return await CommitBatchInternalAsync(batchHandle, cancellationToken);
+        }
+
+        public async Task<IResult<CommitBatchResponse>> CommitBatchAsync(IBatchHandle batchHandle, string correlationId, CancellationToken cancellationToken = default)
+        {
+            return await CommitBatchInternalAsync(batchHandle, cancellationToken, correlationId);
+        }
+        
+        public Task<IResult<ReplaceAclResponse>> ReplaceAclAsync(string batchId, Acl acl, CancellationToken cancellationToken = default) => Task.FromResult<IResult<ReplaceAclResponse>>(Result.Success(new ReplaceAclResponse()));
+
+        public Task<IResult> RollBackBatchAsync(IBatchHandle batchHandle) => Task.FromResult<IResult>(Result.Success());
+
+        public Task<IResult<RollBackBatchResponse>> RollBackBatchAsync(IBatchHandle batchHandle, CancellationToken cancellationToken) => Task.FromResult<IResult<RollBackBatchResponse>>(Result.Success(new RollBackBatchResponse()));
+
+        public async Task<IResult<SetExpiryDateResponse>> SetExpiryDateAsync(string batchId, BatchExpiryModel batchExpiry, CancellationToken cancellationToken = default)
+        {
+            return await SetExpiryDateInternalAsync(batchId, batchExpiry, cancellationToken);
+        }
+
+        public async Task<IResult<SetExpiryDateResponse>> SetExpiryDateAsync(string batchId, BatchExpiryModel batchExpiry, string correlationId, CancellationToken cancellationToken = default)
+        {
+            return await SetExpiryDateInternalAsync(batchId, batchExpiry, cancellationToken ,correlationId);
+        }
+
         private async Task<IResult<IBatchHandle>> CreateBatchInternalAsync(BatchModel batchModel, CancellationToken cancellationToken, string? correlationId = null)
         {
             var uri = new Uri("batch", UriKind.Relative);
@@ -81,37 +118,6 @@ namespace UKHO.ADDS.Clients.FileShareService.ReadWrite
             {
                 return Result.Failure<IBatchHandle>(ex.Message);
             }
-        }
-
-        public Task<IResult<BatchStatusResponse>> GetBatchStatusAsync(IBatchHandle batchHandle) => Task.FromResult<IResult<BatchStatusResponse>>(Result.Success(new BatchStatusResponse()));
-
-        public Task<IResult> AddFileToBatchAsync(IBatchHandle batchHandle, Stream stream, string fileName, string mimeType, params KeyValuePair<string, string>[] fileAttributes) => Task.FromResult<IResult>(Result.Success());
-
-        public Task<IResult<AddFileToBatchResponse>> AddFileToBatchAsync(IBatchHandle batchHandle, Stream stream, string fileName, string mimeType, CancellationToken cancellationToken, params KeyValuePair<string, string>[] fileAttributes) => Task.FromResult<IResult<AddFileToBatchResponse>>(Result.Success(new AddFileToBatchResponse()));
-
-        public Task<IResult> AddFileToBatchAsync(IBatchHandle batchHandle, Stream stream, string fileName, string mimeType, Action<(int blocksComplete, int totalBlockCount)> progressUpdate, params KeyValuePair<string, string>[] fileAttributes) => Task.FromResult<IResult>(Result.Success());
-
-        public Task<IResult<AddFileToBatchResponse>> AddFileToBatchAsync(IBatchHandle batchHandle, Stream stream, string fileName, string mimeType, Action<(int blocksComplete, int totalBlockCount)> progressUpdate, CancellationToken cancellationToken, params KeyValuePair<string, string>[] fileAttributes) =>
-            Task.FromResult<IResult<AddFileToBatchResponse>>(Result.Success(new AddFileToBatchResponse()));
-
-        public Task<IResult> CommitBatchAsync(IBatchHandle batchHandle) => Task.FromResult<IResult>(Result.Success());
-
-        public Task<IResult<CommitBatchResponse>> CommitBatchAsync(IBatchHandle batchHandle, CancellationToken cancellationToken) => Task.FromResult<IResult<CommitBatchResponse>>(Result.Success(new CommitBatchResponse()));
-
-        public Task<IResult<ReplaceAclResponse>> ReplaceAclAsync(string batchId, Acl acl, CancellationToken cancellationToken = default) => Task.FromResult<IResult<ReplaceAclResponse>>(Result.Success(new ReplaceAclResponse()));
-
-        public Task<IResult> RollBackBatchAsync(IBatchHandle batchHandle) => Task.FromResult<IResult>(Result.Success());
-
-        public Task<IResult<RollBackBatchResponse>> RollBackBatchAsync(IBatchHandle batchHandle, CancellationToken cancellationToken) => Task.FromResult<IResult<RollBackBatchResponse>>(Result.Success(new RollBackBatchResponse()));
-
-        public async Task<IResult<SetExpiryDateResponse>> SetExpiryDateAsync(string batchId, BatchExpiryModel batchExpiry, CancellationToken cancellationToken = default)
-        {
-            return await SetExpiryDateInternalAsync(batchId, batchExpiry, cancellationToken);
-        }
-
-        public async Task<IResult<SetExpiryDateResponse>> SetExpiryDateAsync(string batchId, BatchExpiryModel batchExpiry, string correlationId, CancellationToken cancellationToken = default)
-        {
-            return await SetExpiryDateInternalAsync(batchId, batchExpiry, cancellationToken ,correlationId);
         }
 
         private async Task<IResult<SetExpiryDateResponse>> SetExpiryDateInternalAsync(string batchId, BatchExpiryModel batchExpiryModel, CancellationToken cancellationToken, string? correlationId = null)
@@ -140,11 +146,47 @@ namespace UKHO.ADDS.Clients.FileShareService.ReadWrite
             }
         }
 
+        private async Task<IResult<CommitBatchResponse>> CommitBatchInternalAsync(IBatchHandle batchHandle, CancellationToken cancellationToken, string? correlationId = null)
+        {
+            var uri = new Uri($"batch/{batchHandle.BatchId}", UriKind.Relative);
+
+            try
+            {
+                using var httpClient = await CreateHttpClientWithHeadersAsync(correlationId);
+
+                var httpRequestMessage = CreateHttpRequestMessageForCommitBatch(uri, batchHandle);
+
+                var response = await httpClient.SendAsync(httpRequestMessage, cancellationToken);
+
+                if (!response.IsSuccessStatusCode)
+                {
+                    var errorMetadata = await response.CreateErrorMetadata(ApiNames.FileShareService, correlationId);
+                    return Result.Failure<CommitBatchResponse>(ErrorFactory.CreateError(response.StatusCode, errorMetadata));
+                }
+
+                var commitBatchResponse = await response.Content.ReadFromJsonAsync<CommitBatchResponse>(cancellationToken: cancellationToken);
+
+                return Result.Success(commitBatchResponse);
+            }
+            catch (Exception ex)
+            {
+                return Result.Failure<CommitBatchResponse>(ex.Message);
+            }
+        }
+
         private HttpRequestMessage CreateHttpRequestMessage(Uri uri, BatchModel batchModel)
         {
             return new HttpRequestMessage(HttpMethod.Post, uri)
             {
                 Content = new StringContent(JsonCodec.Encode(batchModel), Encoding.UTF8, "application/json")
+            };
+        }
+
+        private HttpRequestMessage CreateHttpRequestMessageForCommitBatch(Uri uri, IBatchHandle batchHandle)
+        {
+            return new HttpRequestMessage(HttpMethod.Put, uri)
+            {
+                Content = new StringContent(JsonCodec.Encode(batchHandle), Encoding.UTF8, "application/json")
             };
         }
 

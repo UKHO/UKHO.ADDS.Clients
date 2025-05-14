@@ -62,6 +62,7 @@ namespace UKHO.ADDS.Clients.FileShareService.ReadWrite.Tests
             {
                 Assert.That(result.IsSuccess(out var value, out _), Is.True);
                 Assert.That(value.IsExpiryDateSet, Is.True);
+                Assert.That(_fakeFssHttpClientFactory.HttpClient.DefaultRequestHeaders.Contains(ApiHeaderKeys.XCorrelationIdHeaderKey), Is.False);
                 Assert.That(_lastRequestUri?.AbsolutePath, Is.EqualTo($"/basePath/batch/validBatchId/expiry"));
             });
         }

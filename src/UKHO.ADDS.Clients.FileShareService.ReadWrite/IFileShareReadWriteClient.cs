@@ -29,8 +29,8 @@ namespace UKHO.ADDS.Clients.FileShareService.ReadWrite
             Action<(int blocksComplete, int totalBlockCount)> progressUpdate, CancellationToken cancellationToken,
             params KeyValuePair<string, string>[] fileAttributes);
 
-        Task<IResult> CommitBatchAsync(IBatchHandle batchHandle);
         Task<IResult<CommitBatchResponse>> CommitBatchAsync(IBatchHandle batchHandle, CancellationToken cancellationToken);
+        Task<IResult<CommitBatchResponse>> CommitBatchAsync(IBatchHandle batchHandle, string correlationId, CancellationToken cancellationToken);
         Task<IResult<ReplaceAclResponse>> ReplaceAclAsync(string batchId, Acl acl, CancellationToken cancellationToken = default);
         Task<IResult> RollBackBatchAsync(IBatchHandle batchHandle);
         Task<IResult<RollBackBatchResponse>> RollBackBatchAsync(IBatchHandle batchHandle, CancellationToken cancellationToken);

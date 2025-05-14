@@ -119,7 +119,7 @@ namespace UKHO.ADDS.Clients.FileShareService.ReadWrite
             {
                 using var httpClient = await CreateHttpClientWithHeadersAsync(correlationId);
 
-                var httpRequestMessage = CreateHttpRequestMessage(uri, batchHandle);
+                var httpRequestMessage = CreateHttpRequestMessageForCommitBatch(uri, batchHandle);
 
                 var response = await httpClient.SendAsync(httpRequestMessage, cancellationToken);
 
@@ -147,7 +147,7 @@ namespace UKHO.ADDS.Clients.FileShareService.ReadWrite
             };
         }
 
-        private HttpRequestMessage CreateHttpRequestMessage(Uri uri, IBatchHandle batchHandle)
+        private HttpRequestMessage CreateHttpRequestMessageForCommitBatch(Uri uri, IBatchHandle batchHandle)
         {
             return new HttpRequestMessage(HttpMethod.Put, uri)
             {

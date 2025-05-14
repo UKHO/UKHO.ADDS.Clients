@@ -214,10 +214,10 @@ namespace UKHO.ADDS.Clients.FileShareService.ReadWrite.Tests
         }
 
         [Test]
-        public void CreateHttpRequestMessage_WithUriAndBatchHandle_ReturnsExpectedHttpRequestMessage()
+        public void CreateHttpRequestMessageForCommitBatch_WithUriAndBatchHandle_ReturnsExpectedHttpRequestMessage()
         {
             var uri = new Uri("https://dummy/batch/test-batch-id");
-            var method = typeof(FileShareReadWriteClient).GetMethod("CreateHttpRequestMessage", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance, null, new[] { typeof(Uri), typeof(IBatchHandle) }, null);
+            var method = typeof(FileShareReadWriteClient).GetMethod("CreateHttpRequestMessageForCommitBatch", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance, null, new[] { typeof(Uri), typeof(IBatchHandle) }, null);
 
             var result = (HttpRequestMessage)method.Invoke(_fileShareReadWriteClient, new object[] { uri, _batchHandle });
 

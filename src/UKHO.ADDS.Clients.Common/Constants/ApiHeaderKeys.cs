@@ -8,5 +8,6 @@ namespace UKHO.ADDS.Clients.Common.Constants
         public const string ErrorOrigin = "X-Error-Origin";
         public const string BearerTokenHeaderKey = "bearer";
         public const string XCorrelationIdHeaderKey = "X-Correlation-ID";
+        public const string ContentType = "application/json";
     }
 }

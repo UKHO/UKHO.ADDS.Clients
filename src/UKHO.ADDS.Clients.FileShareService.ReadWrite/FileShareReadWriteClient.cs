@@ -101,7 +101,10 @@ namespace UKHO.ADDS.Clients.FileShareService.ReadWrite
             {
                 using var httpClient = await CreateHttpClientWithHeadersAsync(correlationId);
 
-                var httpRequestMessage = CreateHttpRequestMessage(uri, batchModel);
+                var httpRequestMessage = new HttpRequestMessage(HttpMethod.Post, uri)
+                {
+                    Content = new StringContent(JsonCodec.Encode(batchModel), Encoding.UTF8, ApiHeaderKeys.ContentType)
+                };
 
                 var response = await httpClient.SendAsync(httpRequestMessage, cancellationToken);
 
@@ -128,7 +131,13 @@ namespace UKHO.ADDS.Clients.FileShareService.ReadWrite
             {
                 using var httpClient = await CreateHttpClientWithHeadersAsync(correlationId);
 
-                var httpRequestMessage = CreateHttpRequestMessageForSetExpiryDate(uri, batchExpiryModel);
+                var formattedExpiryDate = batchExpiryModel.ExpiryDate?.ToUniversalTime().ToString("yyyy-MM-ddTHH:mm:ss.fffZ");
+
+                
+                var httpRequestMessage = new HttpRequestMessage(HttpMethod.Put, uri)
+                {
+                    Content = new StringContent(JsonCodec.Encode(new { ExpiryDate = formattedExpiryDate }), Encoding.UTF8, ApiHeaderKeys.ContentType)
+                };
 
                 var response = await httpClient.SendAsync(httpRequestMessage, cancellationToken);
 
@@ -154,7 +163,10 @@ namespace UKHO.ADDS.Clients.FileShareService.ReadWrite
             {
                 using var httpClient = await CreateHttpClientWithHeadersAsync(correlationId);
 
-                var httpRequestMessage = CreateHttpRequestMessageForCommitBatch(uri, batchHandle);
+                var httpRequestMessage = new HttpRequestMessage(HttpMethod.Put, uri)
+                {
+                    Content = new StringContent(JsonCodec.Encode(batchHandle), Encoding.UTF8, ApiHeaderKeys.ContentType)
+                };
 
                 var response = await httpClient.SendAsync(httpRequestMessage, cancellationToken);
 
@@ -172,32 +184,6 @@ namespace UKHO.ADDS.Clients.FileShareService.ReadWrite
             {
                 return Result.Failure<CommitBatchResponse>(ex.Message);
             }
-        }
-
-        private HttpRequestMessage CreateHttpRequestMessage(Uri uri, BatchModel batchModel)
-        {
-            return new HttpRequestMessage(HttpMethod.Post, uri)
-            {
-                Content = new StringContent(JsonCodec.Encode(batchModel), Encoding.UTF8, "application/json")
-            };
-        }
-
-        private HttpRequestMessage CreateHttpRequestMessageForCommitBatch(Uri uri, IBatchHandle batchHandle)
-        {
-            return new HttpRequestMessage(HttpMethod.Put, uri)
-            {
-                Content = new StringContent(JsonCodec.Encode(batchHandle), Encoding.UTF8, "application/json")
-            };
-        }
-
-        private HttpRequestMessage CreateHttpRequestMessageForSetExpiryDate(Uri uri, BatchExpiryModel batchExpiryModel)
-        {
-            var formattedExpiryDate = batchExpiryModel.ExpiryDate?.ToUniversalTime().ToString("yyyy-MM-ddTHH:mm:ss.fffZ");
-
-            return new HttpRequestMessage(HttpMethod.Put, uri)
-            {
-                Content = new StringContent(JsonCodec.Encode(new { ExpiryDate = formattedExpiryDate }), Encoding.UTF8, "application/json")
-            };
         }
 
         protected async Task<HttpClient> CreateHttpClientWithHeadersAsync(string? correlationId = null)

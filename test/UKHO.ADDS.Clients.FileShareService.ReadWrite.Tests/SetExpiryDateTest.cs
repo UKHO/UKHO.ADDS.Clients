@@ -108,31 +108,6 @@ namespace UKHO.ADDS.Clients.FileShareService.ReadWrite.Tests
         }
 
         [Test]
-        public void WhenCreateHttpRequestMessageForSetExpiryDateIsCalled_ThenHttpRequestMessageIsConfiguredCorrectly()
-        {
-            var uri = new Uri($"batch/TestBatchId/expiry", UriKind.Relative);
-
-            var method = typeof(FileShareReadWriteClient).GetMethod("CreateHttpRequestMessageForSetExpiryDate",
-                System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
-
-            var httpRequestMessage = (HttpRequestMessage)method.Invoke(_fileShareReadWriteClient, new object[] { uri, _batchExpiry })!;
-
-            Assert.Multiple(() =>
-            {
-                Assert.That(httpRequestMessage!.Method, Is.EqualTo(HttpMethod.Put));
-                Assert.That(httpRequestMessage.RequestUri, Is.EqualTo(uri));
-                Assert.That(httpRequestMessage.Content, Is.Not.Null);
-
-                var content = httpRequestMessage.Content!.ReadAsStringAsync().Result;
-                var formattedExpiryDate = _batchExpiry.ExpiryDate?.ToUniversalTime().ToString("yyyy-MM-ddTHH:mm:ss.fffZ");
-                var serializedBatchModel = JsonCodec.Encode(new { ExpiryDate = formattedExpiryDate });
-
-                Assert.That(content, Is.EqualTo(serializedBatchModel));
-                Assert.That(httpRequestMessage.Content.Headers.ContentType!.MediaType, Is.EqualTo("application/json"));
-            });
-        }
-
-        [Test]
         public void WhenFileShareReadWriteClientIsConstructedWithInvalidParameters_ThenThrowsArgumentException()
         {
             Assert.Multiple(() =>

@@ -27,8 +27,8 @@ namespace UKHO.ADDS.Clients.FileShareService.ReadWrite.Tests
         private IAuthenticationTokenProvider _fakeAuthTokenProvider;
         private FileShareReadWriteClient _fileShareReadWriteClient;
 
-        [OneTimeSetUp]
-        public void OneTimeSetUp()
+        [SetUp]
+        public void Setup()
         {
             _batchHandle = A.Fake<IBatchHandle>();
             _fakeAuthTokenProvider = A.Fake<IAuthenticationTokenProvider>();
@@ -204,28 +204,6 @@ namespace UKHO.ADDS.Clients.FileShareService.ReadWrite.Tests
             {
                 Assert.That(result.IsSuccess, Is.False);
                 Assert.That(result.Errors.FirstOrDefault()?.Message, Is.EqualTo(exceptionMessage));
-            });
-        }
-
-        [Test]
-        public void WhenCreateHttpRequestMessageForCommitBatchIsCalledWithUriAndBatchHandle_ThenReturnsExpectedHttpRequestMessage()
-        {
-            var uri = new Uri("https://dummy/batch/test-batch-id");
-            var method = typeof(FileShareReadWriteClient).GetMethod("CreateHttpRequestMessageForCommitBatch", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance, null, new[] { typeof(Uri), typeof(IBatchHandle) }, null);
-
-            var result = (HttpRequestMessage)method.Invoke(_fileShareReadWriteClient, new object[] { uri, _batchHandle });
-
-            Assert.Multiple(() =>
-            {
-                Assert.That(result, Is.Not.Null);
-                Assert.That(result.Method, Is.EqualTo(HttpMethod.Put));
-                Assert.That(result.RequestUri, Is.EqualTo(uri));
-                Assert.That(result.Content, Is.Not.Null);
-                var contentString = result.Content.ReadAsStringAsync().Result;
-                var expectedContent = JsonCodec.Encode(_batchHandle);
-                Assert.That(contentString, Is.EqualTo(expectedContent));
-                Assert.That(result.Content.Headers.ContentType.MediaType, Is.EqualTo("application/json"));
-                Assert.That(result.Content.Headers.ContentType.CharSet, Is.EqualTo(Encoding.UTF8.WebName));
             });
         }
 

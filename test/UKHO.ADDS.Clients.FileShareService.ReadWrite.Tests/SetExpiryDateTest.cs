@@ -46,13 +46,7 @@ namespace UKHO.ADDS.Clients.FileShareService.ReadWrite.Tests
             _fakeAuthTokenProvider = A.Fake<IAuthenticationTokenProvider>();
             A.CallTo(() => _fakeAuthTokenProvider.GetTokenAsync()).Returns(DummyAccessToken);
         }
-
-        [TearDown]
-        public void TearDown()
-        {
-            _fakeFssHttpClientFactory.Dispose();
-        }
-
+        
         [Test]
         public async Task WhenSetExpiryDateAsyncCalledWithValidInputs_ThenReturnsSuccess()
         {
@@ -147,6 +141,12 @@ namespace UKHO.ADDS.Clients.FileShareService.ReadWrite.Tests
                 Assert.Throws<UriFormatException>(() => new FileShareReadWriteClient(A.Fake<IHttpClientFactory>(), string.Empty, A.Fake<IAuthenticationTokenProvider>()));
                 Assert.Throws<UriFormatException>(() => new FileShareReadWriteClient(A.Fake<IHttpClientFactory>(), "invalid-uri", A.Fake<IAuthenticationTokenProvider>()));
             });
+        }
+
+        [TearDown]
+        public void TearDown()
+        {
+            _fakeFssHttpClientFactory.Dispose();
         }
     }
 }

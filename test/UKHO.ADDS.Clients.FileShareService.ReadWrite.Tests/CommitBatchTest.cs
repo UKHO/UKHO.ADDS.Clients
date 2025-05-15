@@ -27,8 +27,8 @@ namespace UKHO.ADDS.Clients.FileShareService.ReadWrite.Tests
         private IAuthenticationTokenProvider _fakeAuthTokenProvider;
         private FileShareReadWriteClient _fileShareReadWriteClient;
 
-        [SetUp]
-        public void Setup()
+        [OneTimeSetUp]
+        public void OneTimeSetUp()
         {
             _batchHandle = A.Fake<IBatchHandle>();
             _fakeAuthTokenProvider = A.Fake<IAuthenticationTokenProvider>();
@@ -44,13 +44,7 @@ namespace UKHO.ADDS.Clients.FileShareService.ReadWrite.Tests
             _nextResponseStatusCode = HttpStatusCode.OK;
             _fileShareReadWriteClient = new FileShareReadWriteClient(_fakeFssHttpClientFactory, $@"{BaseAddress}/basePath/", DummyAccessToken);
         }
-
-        [TearDown]
-        public void TearDown()
-        {
-            _fakeFssHttpClientFactory.Dispose();
-        }
-
+        
         [Test]
         public void WhenHttpClientFactoryIsNull_ThenThrowsArgumentNullException()
         {
@@ -233,6 +227,12 @@ namespace UKHO.ADDS.Clients.FileShareService.ReadWrite.Tests
                 Assert.That(result.Content.Headers.ContentType.MediaType, Is.EqualTo("application/json"));
                 Assert.That(result.Content.Headers.ContentType.CharSet, Is.EqualTo(Encoding.UTF8.WebName));
             });
+        }
+
+        [TearDown]
+        public void TearDown()
+        {
+            _fakeFssHttpClientFactory.Dispose();
         }
     }
 }

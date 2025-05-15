@@ -1,6 +1,4 @@
-﻿using System;
-using System.Net.Http.Json;
-using System.Runtime.Serialization;
+﻿using System.Net.Http.Json;
 using System.Security.Cryptography;
 using System.Text;
 using UKHO.ADDS.Clients.Common.Authentication;
@@ -87,14 +85,14 @@ namespace UKHO.ADDS.Clients.FileShareService.ReadWrite
 
         public Task<IResult<BatchStatusResponse>> GetBatchStatusAsync(IBatchHandle batchHandle) => Task.FromResult<IResult<BatchStatusResponse>>(Result.Success(new BatchStatusResponse()));
 
-        public Task AddFileToBatchAsync(IBatchHandle batchHandle, Stream stream, string fileName, string mimeType,string correlationId, params KeyValuePair<string, string>[] fileAttributes)
+        public Task AddFileToBatchAsync(IBatchHandle batchHandle, Stream stream, string fileName, string mimeType, string correlationId, params KeyValuePair<string, string>[] fileAttributes)
         {
-            return AddFileToBatchAsync(batchHandle, stream, fileName, mimeType, _ => { }, CancellationToken.None, correlationId, fileAttributes);
+            return AddFileToBatchAsync(batchHandle, stream, fileName, mimeType, _ => { }, correlationId, CancellationToken.None, fileAttributes);
         }
 
-        public Task<IResult<AddFileToBatchResponse>> AddFileToBatchAsync(IBatchHandle batchHandle, Stream stream, string fileName, string mimeType, CancellationToken cancellationToken,string correlationId, params KeyValuePair<string, string>[] fileAttributes)
+        public Task<IResult<AddFileToBatchResponse>> AddFileToBatchAsync(IBatchHandle batchHandle, Stream stream, string fileName, string mimeType, string correlationId, CancellationToken cancellationToken, params KeyValuePair<string, string>[] fileAttributes)
         {
-            return AddFileToBatchAsync(batchHandle, stream, fileName, mimeType, _ => { }, cancellationToken, correlationId, fileAttributes);
+            return AddFileToBatchAsync(batchHandle, stream, fileName, mimeType, _ => { }, correlationId, cancellationToken, fileAttributes);
         }
 
         public async Task AddFileToBatchAsync(IBatchHandle batchHandle, Stream stream, string fileName, string mimeType, Action<(int blocksComplete, int totalBlockCount)> progressUpdate, params KeyValuePair<string, string>[] fileAttributes)
@@ -102,7 +100,7 @@ namespace UKHO.ADDS.Clients.FileShareService.ReadWrite
             await AddFileAsync(batchHandle, stream, fileName, mimeType, progressUpdate, CancellationToken.None, fileAttributes);
         }
 
-        public async Task<IResult<AddFileToBatchResponse>> AddFileToBatchAsync(IBatchHandle batchHandle, Stream stream, string fileName, string mimeType, Action<(int blocksComplete, int totalBlockCount)> progressUpdate, CancellationToken cancellationToken,string correlationId, params KeyValuePair<string, string>[] fileAttributes)
+        public async Task<IResult<AddFileToBatchResponse>> AddFileToBatchAsync(IBatchHandle batchHandle, Stream stream, string fileName, string mimeType, Action<(int blocksComplete, int totalBlockCount)> progressUpdate, string correlationId, CancellationToken cancellationToken, params KeyValuePair<string, string>[] fileAttributes)
         {
             return await AddFiles(batchHandle, stream, fileName, mimeType, progressUpdate, cancellationToken, correlationId, fileAttributes);
         }
@@ -225,93 +223,70 @@ namespace UKHO.ADDS.Clients.FileShareService.ReadWrite
            Action<(int blocksComplete, int totalBlockCount)> progressUpdate, CancellationToken cancellationToken, string? correlationId = null,
            params KeyValuePair<string, string>[] fileAttributes)
         {
-            var mappedResult = new Result<AddFileToBatchResponse>();
             if (!stream.CanSeek)
                 throw new ArgumentException("The stream must be seekable.", nameof(stream));
             stream.Seek(0, SeekOrigin.Begin);
 
             var fileUri = $"batch/{batchHandle.BatchId}/files/{fileName}";
+            var fileModel = new FileModel { Attributes = fileAttributes ?? Enumerable.Empty<KeyValuePair<string, string>>() };
+            var requestHeaders = new Dictionary<string, string>
             {
-                var fileModel = new FileModel { Attributes = fileAttributes ?? Enumerable.Empty<KeyValuePair<string, string>>() };
+                { "X-Content-Size", stream.Length.ToString() }
+            };
+            if (!string.IsNullOrEmpty(mimeType))
+                requestHeaders.Add("X-MIME-Type", mimeType);
 
-                var requestHeaders = new Dictionary<string, string>
+            var result = await SendResult<FileModel, AddFileToBatchResponse>(fileUri, HttpMethod.Post, fileModel, cancellationToken, correlationId, requestHeaders);
+            if (result.Errors != null && result.Errors.Any())
+                return (Result<AddFileToBatchResponse>)result;
+
+            var fileBlocks = new List<string>();
+            int fileBlockId = 0;
+            int expectedTotalBlockCount = (int)Math.Ceiling(stream.Length / (double)_maxFileBlockSize);
+            progressUpdate((0, expectedTotalBlockCount));
+            var buffer = new byte[_maxFileBlockSize];
+
+            using (var md5 = MD5.Create())
+            using (var cryptoStream = new CryptoStream(stream, md5, CryptoStreamMode.Read, true))
+            {
+                while (true)
                 {
-                    { "X-Content-Size", "" + stream.Length }
-                };
-
-                if (!string.IsNullOrEmpty(mimeType)) requestHeaders.Add("X-MIME-Type", mimeType);
-
-                var result = await SendResult<FileModel, AddFileToBatchResponse>(fileUri, HttpMethod.Post, fileModel, cancellationToken, correlationId, requestHeaders);
-
-                if (result.Errors != null && result.Errors.Any())
-                {
-                    mappedResult = (Result<AddFileToBatchResponse>)result;
-                }
-                else
-                {
-                    var fileBlocks = new List<string>();
-                    var fileBlockId = 0;
-                    var expectedTotalBlockCount = (int)Math.Ceiling(stream.Length / (double)_maxFileBlockSize);
-                    progressUpdate((0, expectedTotalBlockCount));
-
-                    var buffer = new byte[_maxFileBlockSize];
-
-                    using (var md5 = MD5.Create())
-                    using (var cryptoStream = new CryptoStream(stream, md5, CryptoStreamMode.Read, true))
+                    fileBlockId++;
+                    using (var ms = new MemoryStream())
                     {
-                        while (true)
+                        int read = cryptoStream.Read(buffer, 0, _maxFileBlockSize);
+                        if (read <= 0) break;
+                        ms.Write(buffer, 0, read);
+
+                        var fileBlockIdAsString = fileBlockId.ToString("D5");
+                        var putFileUri = $"batch/{batchHandle.BatchId}/files/{fileName}/{fileBlockIdAsString}";
+                        fileBlocks.Add(fileBlockIdAsString);
+                        ms.Seek(0, SeekOrigin.Begin);
+
+                        var blockMD5 = ms.CalculateMd5();
+                        using (var httpRequestMessage = new HttpRequestMessage(HttpMethod.Put, putFileUri) { Content = new StreamContent(ms) })
                         {
-                            fileBlockId++;
-                            var ms = new MemoryStream();
+                            httpRequestMessage.Content.Headers.ContentType = new System.Net.Http.Headers.MediaTypeHeaderValue("application/octet-stream");
+                            httpRequestMessage.Content.Headers.ContentMD5 = blockMD5;
+                            progressUpdate((fileBlockId, expectedTotalBlockCount));
 
-                            var read = cryptoStream.Read(buffer, 0, _maxFileBlockSize);
-                            if (read <= 0) break;
-                            ms.Write(buffer, 0, read);
-
-                            var fileBlockIdAsString = fileBlockId.ToString("D5");
-                            var putFileUri = $"batch/{batchHandle.BatchId}/files/{fileName}/{fileBlockIdAsString}";
-                            fileBlocks.Add(fileBlockIdAsString);
-                            ms.Seek(0, SeekOrigin.Begin);
-
-                            var blockMD5 = ms.CalculateMd5();
-
-                            using (var httpRequestMessage = new HttpRequestMessage(HttpMethod.Put, putFileUri) { Content = new StreamContent(ms) })
-                            {
-                                httpRequestMessage.Content.Headers.ContentType =
-                                    new System.Net.Http.Headers.MediaTypeHeaderValue("application/octet-stream");
-
-                                httpRequestMessage.Content.Headers.ContentMD5 = blockMD5;
-                                progressUpdate((fileBlockId, expectedTotalBlockCount));
-
-                                result = await SendMessageResult<AddFileToBatchResponse>(httpRequestMessage, cancellationToken);
-                                if (result.Errors != null && result.Errors.Any())
-                                {
-                                    mappedResult = (Result<AddFileToBatchResponse>)result;
-                                    break;
-                                }
-                            }
-                        }
-
-                        if (!(mappedResult.Errors != null && mappedResult.Errors.Any()))
-                        {
-                            var writeBlockFileModel = new WriteBlockFileModel { BlockIds = fileBlocks };
-                            result = await SendResult<WriteBlockFileModel, AddFileToBatchResponse>(fileUri, HttpMethod.Put, writeBlockFileModel, cancellationToken, correlationId);
-
-                            if (result.Errors != null && result.Errors.Any())
-                            {
-                                mappedResult = (Result<AddFileToBatchResponse>)result;
-                            }
-                            else
-                            {
-                                ((BatchHandle)batchHandle).AddFile(fileName, Convert.ToBase64String(md5.Hash));
-                                return result;
-                            }
+                            var blockResult = await SendMessageResult<AddFileToBatchResponse>(httpRequestMessage, cancellationToken);
+                            if (blockResult.Errors != null && blockResult.Errors.Any())
+                                return (Result<AddFileToBatchResponse>)blockResult;
                         }
                     }
                 }
-            }
 
-            return mappedResult;
+                {
+                    var writeBlockFileModel = new WriteBlockFileModel { BlockIds = fileBlocks };
+                    var finalResult = await SendResult<WriteBlockFileModel, AddFileToBatchResponse>(fileUri, HttpMethod.Put, writeBlockFileModel, cancellationToken, correlationId);
+                    if (finalResult.Errors != null && finalResult.Errors.Any())
+                        return (Result<AddFileToBatchResponse>)finalResult;
+
+                    ((BatchHandle)batchHandle).AddFile(fileName, Convert.ToBase64String(md5.Hash));
+                    return finalResult;
+                }
+            }
         }
 
         private async Task<IResult<TResponse>> SendResult<TRequest, TResponse>(string uri, HttpMethod httpMethod, TRequest request, CancellationToken cancellationToken, string correlationId, Dictionary<string, string> requestHeaders = default)
@@ -336,11 +311,17 @@ namespace UKHO.ADDS.Clients.FileShareService.ReadWrite
         {
             using (var httpClient = await CreateHttpClientWithHeadersAsync(correlationId))
             {
-                var response = await httpClient.SendAsync(messageToSend, cancellationToken );
+                var response = await httpClient.SendAsync(messageToSend, cancellationToken);
+                var contentString = await response.Content.ReadAsStringAsync(cancellationToken);
                 if (!response.IsSuccessStatusCode)
                 {
                     var errorMetadata = await response.CreateErrorMetadata(ApiNames.FileShareService, correlationId ?? string.Empty);
                     return Result.Failure<TResponse>(ErrorFactory.CreateError(response.StatusCode, errorMetadata));
+                }
+
+                if (string.IsNullOrWhiteSpace(contentString))
+                {
+                    return Result.Success<TResponse>(default);
                 }
 
                 var responseData = await response.Content.ReadFromJsonAsync<TResponse>(cancellationToken: cancellationToken);

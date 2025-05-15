@@ -20,13 +20,13 @@ namespace UKHO.ADDS.Clients.FileShareService.ReadWrite
             params KeyValuePair<string, string>[] fileAttributes);
 
         Task<IResult<AddFileToBatchResponse>> AddFileToBatchAsync(IBatchHandle batchHandle, Stream stream, string fileName, string mimeType,
-            CancellationToken cancellationToken, string correlationId, params KeyValuePair<string, string>[] fileAttributes);
+            string correlationId, CancellationToken cancellationToken, params KeyValuePair<string, string>[] fileAttributes);
 
         Task AddFileToBatchAsync(IBatchHandle batchHandle, Stream stream, string fileName, string mimeType,
             Action<(int blocksComplete, int totalBlockCount)> progressUpdate, params KeyValuePair<string, string>[] fileAttributes);
 
         Task<IResult<AddFileToBatchResponse>> AddFileToBatchAsync(IBatchHandle batchHandle, Stream stream, string fileName, string mimeType,
-            Action<(int blocksComplete, int totalBlockCount)> progressUpdate, CancellationToken cancellationToken, string correlationId,
+            Action<(int blocksComplete, int totalBlockCount)> progressUpdate,  string correlationId, CancellationToken cancellationToken,
             params KeyValuePair<string, string>[] fileAttributes);
 
         Task<IResult> CommitBatchAsync(IBatchHandle batchHandle);

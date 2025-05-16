@@ -57,9 +57,6 @@ namespace UKHO.ADDS.Clients.FileShareService.ReadOnly.Tests
                 @"https://fss-tests.net/basePath/", DUMMY_ACCESS_TOKEN);
         }
 
-        [TearDown]
-        public void TearDown() => _fakeFssHttpClientFactory.Dispose();
-
         [Test]
         public async Task WhenDownloadFileAsyncIsCalledWithValidBatchIdAndFileName_ThenReturnsSuccessWithExpectedFileContents()
         {
@@ -203,21 +200,6 @@ namespace UKHO.ADDS.Clients.FileShareService.ReadOnly.Tests
         }
 
         [Test]
-        public async Task WhenGetBatchStatusForABatchThatHasBeenDeletedWithCancellationToken_ThenReturnsExpectedResult()
-        {
-            _nextResponses.Enqueue(new MemoryStream(_expectedBytes));
-
-            var result = await _fileShareApiClient.DownloadFileAsync(_batchId, "AFilename.txt", _destStream,
-                _expectedBytes.Length, CancellationToken.None);
-
-            Assert.Multiple(() =>
-            {
-                Assert.That(_lastRequestUri?.AbsolutePath,
-                    Is.EqualTo($"/basePath/batch/{_batchId}/files/AFilename.txt"));
-            });
-        }
-
-        [Test]
         public async Task WhenFileSizeIsGreaterThanMaxDownloadBytes_ThenDownloadsFileInMultipleParts()
         {
             _nextResponseStatusCode = HttpStatusCode.PartialContent;
@@ -235,7 +217,8 @@ namespace UKHO.ADDS.Clients.FileShareService.ReadOnly.Tests
 
             Assert.Multiple(() =>
             {
-                Assert.That(destStream.Length, Is.EqualTo(totalLength));
+                Assert.That(result.IsSuccess(out var value, out _), Is.True);
+                Assert.That(value!.Length, Is.EqualTo(totalLength));
                 Assert.That(_lastRequestUri?.AbsolutePath,
                     Is.EqualTo($"/basePath/batch/{_batchId}/files/AFilename.txt"));
             });
@@ -252,7 +235,76 @@ namespace UKHO.ADDS.Clients.FileShareService.ReadOnly.Tests
 
             Assert.Multiple(() =>
             {
-                Assert.That(destStream.Length, Is.EqualTo(_expectedBytes.Length));
+                Assert.That(result.IsSuccess(out var value, out _), Is.True);
+                Assert.That(value!.Length, Is.EqualTo(_expectedBytes.Length));
+            });
+        }
+
+        [Test]
+        public async Task WhenDownloadFileAsyncIsCalled_ThenReturnsSuccessWithDownloadFileResponseContainingDestinationStream()
+        {
+            var correlationId = Guid.NewGuid().ToString();
+            var sourceStream = new MemoryStream(_expectedBytes);
+            _nextResponses.Enqueue(sourceStream);
+            var destinationStream = new MemoryStream();
+
+            var result = await _fileShareApiClient.DownloadFileAsync(_batchId, _fileName, destinationStream,
+                correlationId, _expectedBytes.Length, CancellationToken.None);
+
+            Assert.Multiple(() =>
+            {
+                Assert.That(result.IsSuccess(out var value, out _), Is.True);
+                Assert.That(destinationStream.ToArray(), Is.EqualTo(_expectedBytes));
+                Assert.That(_lastRequestUri?.AbsolutePath, Is.EqualTo($"/basePath/batch/{_batchId}/files/{_fileName}"));
+            });
+        }
+
+        [Test]
+        public async Task WhenDownloadFileAsyncIsCalledAndBadRequestOccurs_ThenReturnsFailureResult()
+        {
+            _nextResponseStatusCode = HttpStatusCode.BadRequest;
+            var client = new FileShareReadOnlyClient(_fakeFssHttpClientFactory, "https://fss-tests.net/basePath/",
+                fakeAuthProvider);
+
+            var result =
+                await client.DownloadFileAsync(_batchId, _fileName, _destStream, 100, CancellationToken.None);
+
+            Assert.Multiple(() =>
+            {
+                Assert.That(result.IsSuccess(out var value, out var errors), Is.False);
+                Assert.That(errors?.Message, Is.Not.Null);
+            });
+        }
+
+        [Test]
+        public async Task WhenExceptionIsThrownDuringDownloadFileAsync_ThenReturnsFailureResult()
+        {
+            _fakeFssHttpClientFactory = new FakeFssHttpClientFactory(_ => throw new HttpRequestException("Simulated exception"));
+            _fileShareApiClient = new FileShareReadOnlyClient(_fakeFssHttpClientFactory, "https://fss-tests.net/basePath/", fakeAuthProvider);
+
+            var result = await _fileShareApiClient.DownloadFileAsync(_batchId, _fileName);
+
+            Assert.Multiple(() =>
+            {
+                Assert.That(result.IsSuccess(out var value, out var errors), Is.False, "The result should indicate failure.");
+                Assert.That(errors?.Message, Is.EqualTo("Simulated exception"), "The error message should match the simulated exception.");
+            });
+        }
+
+        [Test]
+
+        public async Task WhenExceptionIsThrownDuringDownloadFileAsync_ThenReturnsFailureResultWithExceptionMessage()
+        {
+            const string exceptionMessage = "Test exception";
+
+            _fakeFssHttpClientFactory = new FakeFssHttpClientFactory(_ => throw new Exception(exceptionMessage));
+            _fileShareApiClient = new FileShareReadOnlyClient(_fakeFssHttpClientFactory, @"https://fss-tests.net/basePath/", DUMMY_ACCESS_TOKEN);
+            var result = await _fileShareApiClient.DownloadFileAsync(_batchId, _fileName, _destStream, 100, CancellationToken.None);
+
+            Assert.Multiple(() =>
+            {
+                Assert.That(result.IsSuccess, Is.False);
+                Assert.That(result.Errors.FirstOrDefault()?.Message, Is.EqualTo(exceptionMessage));
             });
         }
 
@@ -349,72 +401,7 @@ namespace UKHO.ADDS.Clients.FileShareService.ReadOnly.Tests
             });
         }
 
-        [Test]
-        public async Task WhenDownloadFileAsyncIsCalled_ThenReturnsSuccessWithDownloadFileResponseContainingDestinationStream()
-        {
-            var correlationId = Guid.NewGuid().ToString();
-            var sourceStream = new MemoryStream(_expectedBytes);
-            _nextResponses.Enqueue(sourceStream);
-            var destinationStream = new MemoryStream();
-
-            var result = await _fileShareApiClient.DownloadFileAsync(_batchId, _fileName, destinationStream,
-                correlationId, _expectedBytes.Length, CancellationToken.None);
-
-            Assert.Multiple(() =>
-            {
-                Assert.That(result.IsSuccess, Is.True);
-                Assert.That(destinationStream.ToArray(), Is.EqualTo(_expectedBytes));
-                Assert.That(_lastRequestUri?.AbsolutePath, Is.EqualTo($"/basePath/batch/{_batchId}/files/{_fileName}"));
-            });
-        }
-
-        [Test]
-        public async Task WhenDownloadFileAsyncIsCalledAndBadRequestOccurs_ThenReturnsFailureResult()
-        {
-            _nextResponseStatusCode = HttpStatusCode.BadRequest;
-            var client = new FileShareReadOnlyClient(_fakeFssHttpClientFactory, "https://fss-tests.net/basePath/",
-                fakeAuthProvider);
-
-            var result =
-                await client.DownloadFileAsync(_batchId, _fileName, _destStream, 100, CancellationToken.None);
-
-            Assert.Multiple(() =>
-            {
-                Assert.That(result.IsSuccess(out var value, out var errors), Is.False);
-                Assert.That(errors?.Message, Is.Not.Null);
-            });
-        }
-
-        [Test]
-        public async Task WhenExceptionIsThrownDuringDownloadFileAsync_ThenReturnsFailureResult()
-        {
-            _fakeFssHttpClientFactory = new FakeFssHttpClientFactory(_ => throw new HttpRequestException("Simulated exception"));
-            _fileShareApiClient = new FileShareReadOnlyClient(_fakeFssHttpClientFactory, "https://fss-tests.net/basePath/", fakeAuthProvider);
-
-            var result = await _fileShareApiClient.DownloadFileAsync(_batchId, _fileName);
-
-            Assert.Multiple(() =>
-            {
-                Assert.That(result.IsSuccess(out var value, out var errors), Is.False, "The result should indicate failure.");
-                Assert.That(errors?.Message, Is.EqualTo("Simulated exception"), "The error message should match the simulated exception.");
-            });
-        }
-
-        [Test]
-
-        public async Task WhenExceptionIsThrownDuringDownloadFileAsync_ThenReturnsFailureResultWithExceptionMessage()
-        {
-            const string exceptionMessage = "Test exception";
-
-            _fakeFssHttpClientFactory = new FakeFssHttpClientFactory(_ => throw new Exception(exceptionMessage));
-            _fileShareApiClient = new FileShareReadOnlyClient(_fakeFssHttpClientFactory, @"https://fss-tests.net/basePath/", DUMMY_ACCESS_TOKEN);
-            var result = await _fileShareApiClient.DownloadFileAsync(_batchId, _fileName, _destStream, 100, CancellationToken.None);
-
-            Assert.Multiple(() =>
-            {
-                Assert.That(result.IsSuccess, Is.False);
-                Assert.That(result.Errors.FirstOrDefault()?.Message, Is.EqualTo(exceptionMessage));
-            });
-        }
+        [TearDown]
+        public void TearDown() => _fakeFssHttpClientFactory.Dispose();
     }
 }

@@ -116,18 +116,18 @@ namespace UKHO.ADDS.Clients.FileShareService.ReadOnly
             }
         }
 
-        public async Task<IResult<DownloadFileResponse>> DownloadFileAsync(string batchId, string fileName, Stream destinationStream, long fileSizeInBytes = 0, CancellationToken cancellationToken = default)
+        public async Task<IResult<Stream>> DownloadFileAsync(string batchId, string fileName, Stream destinationStream, long fileSizeInBytes = 0, CancellationToken cancellationToken = default)
         {
             return await DownloadFileInternalAsync(batchId, fileName, destinationStream,
                 cancellationToken, fileSizeInBytes);
         }
-        public async Task<IResult<DownloadFileResponse>> DownloadFileAsync(string batchId, string fileName, Stream destinationStream, string correlationId, long fileSizeInBytes = 0, CancellationToken cancellationToken = default)
+        public async Task<IResult<Stream>> DownloadFileAsync(string batchId, string fileName, Stream destinationStream, string correlationId, long fileSizeInBytes = 0, CancellationToken cancellationToken = default)
         {
             return await DownloadFileInternalAsync(batchId, fileName, destinationStream,
                 cancellationToken, fileSizeInBytes, correlationId);
         }
 
-        private async Task<IResult<DownloadFileResponse>> DownloadFileInternalAsync(string batchId, string fileName,
+        private async Task<IResult<Stream>> DownloadFileInternalAsync(string batchId, string fileName,
              Stream destinationStream, CancellationToken cancellationToken, long fileSizeInBytes,
              string? correlationId = null)
         {
@@ -151,7 +151,7 @@ namespace UKHO.ADDS.Clients.FileShareService.ReadOnly
                         }
 
                         var response = await httpClient.SendAsync(httpRequestMessage, cancellationToken);
-                        var result = await response.CreateDefaultResultAsync<DownloadFileResponse>();
+                        var result = await response.CreateResultAsync<Stream>(ApiNames.FileShareService, correlationId);
 
                         if (!result.IsSuccess())
                         {
@@ -173,11 +173,11 @@ namespace UKHO.ADDS.Clients.FileShareService.ReadOnly
                     }
                 }
 
-                return Result.Success(new DownloadFileResponse() { DownloadFileStream = destinationStream });
+                return Result.Success(destinationStream);
             }
             catch (Exception ex)
             {
-                return Result.Failure<DownloadFileResponse>(ex);
+                return Result.Failure<Stream>(ex);
             }
         }
 

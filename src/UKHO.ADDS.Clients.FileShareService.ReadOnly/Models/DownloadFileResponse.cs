@@ -2,6 +2,5 @@
 {
     public class DownloadFileResponse
     {
-        public Stream DownloadFileStream { get; set; }
     }
 }

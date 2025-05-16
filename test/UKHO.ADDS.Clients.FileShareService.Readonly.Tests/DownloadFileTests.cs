@@ -8,7 +8,7 @@ using UKHO.ADDS.Clients.FileShareService.ReadOnly.Tests.Helpers;
 
 namespace UKHO.ADDS.Clients.FileShareService.ReadOnly.Tests
 {
-    public class DownloadFilesTests
+    public class DownloadFileTests
     {
         private const string DUMMY_ACCESS_TOKEN = "ACarefullyEncodedSecretAccessToken";
         private FakeFssHttpClientFactory _fakeFssHttpClientFactory;

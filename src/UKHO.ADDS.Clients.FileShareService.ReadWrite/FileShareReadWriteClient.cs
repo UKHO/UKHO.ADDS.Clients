@@ -241,8 +241,8 @@ namespace UKHO.ADDS.Clients.FileShareService.ReadWrite
                 return (Result<AddFileToBatchResponse>)result;
 
             var fileBlocks = new List<string>();
-            int fileBlockId = 0;
-            int expectedTotalBlockCount = (int)Math.Ceiling(stream.Length / (double)_maxFileBlockSize);
+            var fileBlockId = 0;
+            var expectedTotalBlockCount = (int)Math.Ceiling(stream.Length / (double)_maxFileBlockSize);
             progressUpdate((0, expectedTotalBlockCount));
             var buffer = new byte[_maxFileBlockSize];
 
@@ -254,7 +254,7 @@ namespace UKHO.ADDS.Clients.FileShareService.ReadWrite
                     fileBlockId++;
                     using (var ms = new MemoryStream())
                     {
-                        int read = cryptoStream.Read(buffer, 0, _maxFileBlockSize);
+                        var read = cryptoStream.Read(buffer, 0, _maxFileBlockSize);
                         if (read <= 0) break;
                         ms.Write(buffer, 0, read);
 
@@ -292,7 +292,7 @@ namespace UKHO.ADDS.Clients.FileShareService.ReadWrite
         private async Task<IResult<TResponse>> SendResult<TRequest, TResponse>(string uri, HttpMethod httpMethod, TRequest request, CancellationToken cancellationToken, string correlationId, Dictionary<string, string> requestHeaders = default)
             => await SendObjectResult<TResponse>(uri, httpMethod, request, cancellationToken, correlationId, requestHeaders);
 
-        private async Task<IResult<TResponse>> SendObjectResult<TResponse>(string uri, HttpMethod httpMethod, object request, CancellationToken cancellationToken,string correlationId, Dictionary<string, string> requestHeaders = default)
+        private async Task<IResult<TResponse>> SendObjectResult<TResponse>(string uri, HttpMethod httpMethod, object request, CancellationToken cancellationToken, string correlationId, Dictionary<string, string> requestHeaders = default)
         {
             var httpContent = new StringContent(JsonCodec.Encode(request), Encoding.UTF8, "application/json");
 

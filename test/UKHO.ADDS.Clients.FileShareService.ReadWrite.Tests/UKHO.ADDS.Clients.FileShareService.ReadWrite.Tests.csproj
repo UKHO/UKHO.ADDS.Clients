@@ -23,6 +23,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\..\src\UKHO.ADDS.Clients.FileShareService.ReadWrite\UKHO.ADDS.Clients.FileShareService.ReadWrite.csproj" />
+    <ProjectReference Include="..\UKHO.ADDS.Clients.FileShareService.ReadOnly.Tests\UKHO.ADDS.Clients.FileShareService.ReadOnly.Tests.csproj" />
   </ItemGroup>
 
 </Project>

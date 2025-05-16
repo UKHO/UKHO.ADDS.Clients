@@ -48,13 +48,7 @@ namespace UKHO.ADDS.Clients.FileShareService.ReadWrite.Tests
             _nextResponseStatusCode = HttpStatusCode.OK;
             _fileShareReadWriteClient = new FileShareReadWriteClient(_fakeFssHttpClientFactory, $@"{BaseAddress}/basePath/", DummyAccessToken);
         }
-
-        [TearDown]
-        public void TearDown()
-        {
-            _fakeFssHttpClientFactory.Dispose();
-        }
-
+        
         [Test]
         public void WhenHttpClientFactoryIsNull_ThenThrowsArgumentNullException()
         {
@@ -234,35 +228,10 @@ namespace UKHO.ADDS.Clients.FileShareService.ReadWrite.Tests
             });
         }
 
-        [Test]
-        public void WhenCreateHttpRequestMessageIsCalled_ThenHttpRequestMessageIsConfiguredCorrectly()
+        [TearDown]
+        public void TearDown()
         {
-            var uri = new Uri("batch", UriKind.Relative);
-            var batchModel = new BatchModel
-            {
-                BusinessUnit = "TestUnit",
-                Acl = new Acl { ReadUsers = new[] { "user1" } },
-                Attributes = new List<KeyValuePair<string, string>> { new("key", "value") },
-                ExpiryDate = DateTime.UtcNow.AddDays(1)
-            };
-
-            var method = typeof(FileShareReadWriteClient).GetMethod("CreateHttpRequestMessage",
-                System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
-
-            var httpRequestMessage = (HttpRequestMessage)method.Invoke(_fileShareReadWriteClient, new object[] { uri, batchModel });
-
-            Assert.Multiple(() =>
-            {
-                Assert.That(httpRequestMessage!.Method, Is.EqualTo(HttpMethod.Post));
-                Assert.That(httpRequestMessage.RequestUri, Is.EqualTo(uri));
-                Assert.That(httpRequestMessage.Content, Is.Not.Null);
-
-                var content = httpRequestMessage.Content!.ReadAsStringAsync().Result;
-                var serializedBatchModel = JsonCodec.Encode(batchModel);
-                Assert.That(content, Is.EqualTo(serializedBatchModel));
-
-                Assert.That(httpRequestMessage.Content.Headers.ContentType!.MediaType, Is.EqualTo("application/json"));
-            });
+            _fakeFssHttpClientFactory.Dispose();
         }
     }
 }

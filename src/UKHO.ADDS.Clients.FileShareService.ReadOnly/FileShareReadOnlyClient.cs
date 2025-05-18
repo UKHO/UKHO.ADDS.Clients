@@ -116,20 +116,57 @@ namespace UKHO.ADDS.Clients.FileShareService.ReadOnly
             }
         }
 
-        public async Task<IResult<Stream>> DownloadFileAsync(string batchId, string fileName, Stream destinationStream, long fileSizeInBytes = 0, CancellationToken cancellationToken = default)
-        {
-            return await DownloadFileInternalAsync(batchId, fileName, destinationStream,
-                cancellationToken, fileSizeInBytes);
-        }
         public async Task<IResult<Stream>> DownloadFileAsync(string batchId, string fileName, Stream destinationStream, string correlationId, long fileSizeInBytes = 0, CancellationToken cancellationToken = default)
         {
             return await DownloadFileInternalAsync(batchId, fileName, destinationStream,
                 cancellationToken, fileSizeInBytes, correlationId);
         }
 
-        private async Task<IResult<Stream>> DownloadFileInternalAsync(string batchId, string fileName,
-             Stream destinationStream, CancellationToken cancellationToken, long fileSizeInBytes,
-             string? correlationId = null)
+        public async Task<IResult<DownloadFileResponse>> DownloadFileAsync(string batchId, string fileName, Stream destinationStream, long fileSizeInBytes = 0, CancellationToken cancellationToken = default)
+        {
+            long startByte = 0;
+            var endByte = fileSizeInBytes < _maxDownloadBytes ? fileSizeInBytes - 1 : _maxDownloadBytes - 1;
+            IResult<DownloadFileResponse> result = null;
+
+            while (startByte <= endByte)
+            {
+                var rangeHeader = $"bytes={startByte}-{endByte}";
+
+                var uri = $"batch/{batchId}/files/{fileName}";
+
+                using (var httpClient = await GetAuthenticationHeaderSetClient())
+                using (var httpRequestMessage = new HttpRequestMessage(HttpMethod.Get, uri))
+                {
+                    if (fileSizeInBytes != 0 && rangeHeader != null)
+                    {
+                        httpRequestMessage.Headers.Add("Range", rangeHeader);
+                    }
+
+                    var response = await httpClient.SendAsync(httpRequestMessage, cancellationToken);
+                    
+                    result = await response.CreateResultAsync<DownloadFileResponse>();
+
+                    if (!result.IsSuccess()) return result;
+
+                    using (var contentStream = await response.Content.ReadAsStreamAsync())
+                    {
+                        contentStream.CopyTo(destinationStream);
+                    }
+                }
+
+                startByte = endByte + 1;
+                endByte += _maxDownloadBytes - 1;
+
+                if (endByte > fileSizeInBytes - 1)
+                {
+                    endByte = fileSizeInBytes - 1;
+                }
+            }
+
+            return result;
+        }
+
+        private async Task<IResult<Stream>> DownloadFileInternalAsync(string batchId, string fileName, Stream destinationStream, CancellationToken cancellationToken, long fileSizeInBytes, string? correlationId = null)
         {
             try
             {

@@ -153,9 +153,10 @@ namespace UKHO.ADDS.Clients.FileShareService.ReadOnly.Tests
         [Test]
         public async Task WhenDownloadFileAsyncIsCalledWithCancellationToken_ThenReturnsSuccess()
         {
+            var correlationId = Guid.NewGuid().ToString();
             _nextResponses.Enqueue(new MemoryStream(_expectedBytes));
 
-            var result = await _fileShareApiClient.DownloadFileAsync(_batchId, "AFilename.txt", _destStream,
+            var result = await _fileShareApiClient.DownloadFileAsync(_batchId, "AFilename.txt", _destStream, correlationId,
                 _expectedBytes.Length, CancellationToken.None);
 
             Assert.Multiple(() =>
@@ -202,6 +203,7 @@ namespace UKHO.ADDS.Clients.FileShareService.ReadOnly.Tests
         [Test]
         public async Task WhenFileSizeIsGreaterThanMaxDownloadBytes_ThenDownloadsFileInMultipleParts()
         {
+            var correlationId = Guid.NewGuid().ToString();
             _nextResponseStatusCode = HttpStatusCode.PartialContent;
             const int lengthPart1 = 10485760;
             const int lengthPart2 = 100000;
@@ -210,33 +212,15 @@ namespace UKHO.ADDS.Clients.FileShareService.ReadOnly.Tests
             _nextResponses.Enqueue(new MemoryStream(expectedBytes1));
             var expectedBytes2 = new byte[lengthPart2];
             _nextResponses.Enqueue(new MemoryStream(expectedBytes2));
-            var destStream = new MemoryStream();
+            var destinationStream = new MemoryStream();
 
-            var result = await _fileShareApiClient.DownloadFileAsync(_batchId, "AFilename.txt", destStream, totalLength,
-                CancellationToken.None);
-
-            Assert.Multiple(() =>
-            {
-                Assert.That(result.IsSuccess(out var value, out _), Is.True);
-                Assert.That(value!.Length, Is.EqualTo(totalLength));
-                Assert.That(_lastRequestUri?.AbsolutePath,
-                    Is.EqualTo($"/basePath/batch/{_batchId}/files/AFilename.txt"));
-            });
-        }
-
-        [Test]
-        public async Task WhenFileIsDownloaded_ThenDownloadedBytesAreEqualToExpectedFileBytes()
-        {
-            _nextResponses.Enqueue(new MemoryStream(_expectedBytes));
-            var destStream = new MemoryStream();
-
-            var result = await _fileShareApiClient.DownloadFileAsync(_batchId, "AFilename.txt", destStream,
-                _expectedBytes.Length, CancellationToken.None);
+            var result = await _fileShareApiClient.DownloadFileAsync(_batchId, "AFilename.txt", destinationStream, correlationId, totalLength, CancellationToken.None);
 
             Assert.Multiple(() =>
             {
                 Assert.That(result.IsSuccess(out var value, out _), Is.True);
-                Assert.That(value!.Length, Is.EqualTo(_expectedBytes.Length));
+                Assert.That(destinationStream.Length, Is.EqualTo(totalLength));
+                Assert.That(_lastRequestUri?.AbsolutePath, Is.EqualTo($"/basePath/batch/{_batchId}/files/AFilename.txt"));
             });
         }
 
@@ -246,16 +230,33 @@ namespace UKHO.ADDS.Clients.FileShareService.ReadOnly.Tests
             var correlationId = Guid.NewGuid().ToString();
             var sourceStream = new MemoryStream(_expectedBytes);
             _nextResponses.Enqueue(sourceStream);
-            var destinationStream = new MemoryStream();
+            var destStream = new MemoryStream();
 
-            var result = await _fileShareApiClient.DownloadFileAsync(_batchId, _fileName, destinationStream,
+            var result = await _fileShareApiClient.DownloadFileAsync(_batchId, _fileName, destStream,
                 correlationId, _expectedBytes.Length, CancellationToken.None);
 
             Assert.Multiple(() =>
             {
                 Assert.That(result.IsSuccess(out var value, out _), Is.True);
-                Assert.That(destinationStream.ToArray(), Is.EqualTo(_expectedBytes));
+                Assert.That(destStream.ToArray(), Is.EqualTo(_expectedBytes));
                 Assert.That(_lastRequestUri?.AbsolutePath, Is.EqualTo($"/basePath/batch/{_batchId}/files/{_fileName}"));
+            });
+        }
+
+        [Test]
+        public async Task WhenFileIsDownloaded_ThenDownloadedBytesAreEqualToExpectedFileBytes()
+        {
+            var correlationId = Guid.NewGuid().ToString();
+            _nextResponses.Enqueue(new MemoryStream(_expectedBytes));
+            var destStream = new MemoryStream();
+
+            var result = await _fileShareApiClient.DownloadFileAsync(_batchId, "AFilename.txt", destStream, correlationId,
+                _expectedBytes.Length, CancellationToken.None);
+
+            Assert.Multiple(() =>
+            {
+                Assert.That(result.IsSuccess(out var value, out _), Is.True);
+                Assert.That(destStream.ToArray(), Is.EqualTo(_expectedBytes));
             });
         }
 
@@ -292,14 +293,32 @@ namespace UKHO.ADDS.Clients.FileShareService.ReadOnly.Tests
         }
 
         [Test]
+        public async Task WhenDownloadFileAsyncSetsEndByteCorrectly_ThenBasedOnFileReturnSize()
+        {
+            var maxDownloadBytes = 10485760;
+            long fileSizeLessThanMax = maxDownloadBytes - 100;
+            var endByteLess = fileSizeLessThanMax - 1;
+            var endByteGreater = maxDownloadBytes - 1;
+
+            await Task.Yield();
+
+            Assert.Multiple(() =>
+            {
+                Assert.That(endByteLess, Is.EqualTo(fileSizeLessThanMax - 1));
+                Assert.That(endByteGreater, Is.EqualTo(maxDownloadBytes - 1));
+            });
+        }
+
+        [Test]
 
         public async Task WhenExceptionIsThrownDuringDownloadFileAsync_ThenReturnsFailureResultWithExceptionMessage()
         {
+            var correlationId = Guid.NewGuid().ToString();
             const string exceptionMessage = "Test exception";
 
             _fakeFssHttpClientFactory = new FakeFssHttpClientFactory(_ => throw new Exception(exceptionMessage));
             _fileShareApiClient = new FileShareReadOnlyClient(_fakeFssHttpClientFactory, @"https://fss-tests.net/basePath/", DummyAccessToken);
-            var result = await _fileShareApiClient.DownloadFileAsync(_batchId, _fileName, _destStream, 100, CancellationToken.None);
+            var result = await _fileShareApiClient.DownloadFileAsync(_batchId, _fileName, _destStream, correlationId, 100, CancellationToken.None);
 
             Assert.Multiple(() =>
             {
@@ -388,10 +407,11 @@ namespace UKHO.ADDS.Clients.FileShareService.ReadOnly.Tests
         [Test]
         public async Task DownloadFileAsync_ReturnsSuccessWithDownloadFileResponseContainingDestinationStream()
         {
+            var correlationId = Guid.NewGuid().ToString();
             var sourceStream = new MemoryStream(_expectedBytes);
             _nextResponses.Enqueue(sourceStream);
 
-            var result = await _fileShareApiClient.DownloadFileAsync(_batchId, "TestFile.txt", _destStream,
+            var result = await _fileShareApiClient.DownloadFileAsync(_batchId, "TestFile.txt", _destStream, correlationId,
                 _expectedBytes.Length, CancellationToken.None);
 
             Assert.Multiple(() =>

@@ -1,8 +1,8 @@
 ﻿using System.Net;
 using FakeItEasy;
 using NUnit.Framework;
-using UKHO.ADDS.Clients.FileShareService.ReadOnly.Tests.Helpers;
 using UKHO.ADDS.Clients.FileShareService.ReadWrite.Models;
+using UKHO.ADDS.Clients.FileShareService.ReadWrite.Tests.Helpers;
 using FakeFssHttpClientFactory = UKHO.ADDS.Clients.FileShareService.ReadWrite.Tests.Helpers.FakeFssHttpClientFactory;
 
 namespace UKHO.ADDS.Clients.FileShareService.ReadWrite.Tests

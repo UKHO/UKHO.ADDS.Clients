@@ -38,7 +38,7 @@ stages:
         script: |
           gci env:
           $CurrentYear = Get-Date -Format "yyyy"
-          $AssemblyCopyright = "Copyright © UK Hydrographic Office $CurrentYear"
+          $AssemblyCopyright = "Copyright Â© UK Hydrographic Office $CurrentYear"
           echo "##vso[task.setvariable variable=UKHOAssemblyCopyright]${AssemblyCopyright}"
 
     - task: PowerShell@2
@@ -55,7 +55,15 @@ stages:
           -UKHOAssemblyVersionPrefix "$env:UKHOAssemblyVersionPrefix"
           -UKHOAssemblyProduct "$env:UKHOAssemblyProduct"
           -SourceRevisionId "$(Build.SourceVersion)"
-          
+
+    - template: deployment/KiotaGenerateClients.yml
+      parameters:
+        openApiRepo: 'UKHO/Sales-Catalogue-Service-Shared-Assets'
+        openApiBranch: 'main'
+        openApiSpecPath: 'salesCatalogue_ExchangeSetService_API_definition_v1.9.yaml'
+        outputDirectory: '$(Build.SourcesDirectory)\src\UKHO.ADDS.Clients.SalesCatalogueService'
+        language: 'csharp'
+
     - task: UseDotNet@2
       displayName: Use .NET $(SdkVersion) sdk
       inputs:

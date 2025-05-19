@@ -1,0 +1,53 @@
+parameters:
+  - name: openApiSpecUrl
+    type: string
+  - name: outputDirectory
+    type: string
+  - name: language
+    type: string
+    default: 'csharp'
+  - name: openApiRepo
+    type: string
+  - name: openApiBranch
+    type: string
+    default: 'main'
+  - name: openApiSpecPath
+    type: string
+  - name: GeneratedApiClassName
+    type: string
+  - name: NameSpace
+    type: string
+
+steps:
+  - task: UseDotNet@2
+    displayName: 'Install .NET SDK for Kiota'
+    inputs:
+      packageType: sdk
+      version: '8.0.x'
+
+  - script: dotnet tool install --global Microsoft.OpenApi.Kiota
+    displayName: 'Install Kiota CLI'
+
+  # Approach 1: Checkout the private OpenAPI repo using a service connection
+  - checkout: git://${{ parameters.openApiRepo }}@${{ parameters.openApiBranch }}
+    displayName: 'Checkout OpenAPI Spec Repository'
+    persistCredentials: true
+    path: openapi-spec-repo
+
+  - powershell: |
+      $sourcePath = "$(Build.SourcesDirectory)/openapi-spec-repo/${{ parameters.openApiSpecPath }}"
+      $destDir = "$(Pipeline.Workspace)\OpenAPI"
+      $destPath = "$destDir\ADDS-OpenAPI-Docs.yaml"
+      New-Item -ItemType Directory -Force -Path $destDir | Out-Null
+      Copy-Item -Path $sourcePath -Destination $destPath -Force
+    displayName: 'Copy OpenAPI Spec from checked out repo'
+
+  - powershell: |
+      $kiotaPath = "$env:USERPROFILE\.dotnet\tools\kiota.exe"
+      & $kiotaPath generate `
+        --language "${{ parameters.language }}" `
+        --openapi "$(Pipeline.Workspace)\OpenAPI\ADDS-OpenAPI-Docs.yaml" `
+        --output "${{ parameters.outputDirectory }}" `
+        --class-name "${{ parameters.GeneratedApiClassName }}" `
+        --namespace-name "${{ parameters.NameSpace }}"
+    displayName: 'Generate client with Kiota'

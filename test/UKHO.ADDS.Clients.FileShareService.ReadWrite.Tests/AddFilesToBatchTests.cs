@@ -44,12 +44,6 @@ namespace UKHO.ADDS.Clients.FileShareService.ReadWrite.Tests
             _fileShareReadWriteClient = new FileShareReadWriteClient(_fakeFssHttpClientFactory, @"https://fss-tests.net", DummyAccessToken, MaxBlockSize);
         }
 
-        [TearDown]
-        public void TearDown()
-        {
-            _fakeFssHttpClientFactory.Dispose();
-        }
-
         [Test]
         public async Task WhenUnseekableStream_ThenThrowsException()
         {
@@ -438,6 +432,12 @@ namespace UKHO.ADDS.Clients.FileShareService.ReadWrite.Tests
                 Assert.That(_fakeFssHttpClientFactory.HttpClient.DefaultRequestHeaders.Authorization.Parameter, Is.EqualTo(DummyAccessToken));
                 Assert.That(stream1.CanSeek, Is.True);
             });
+        }
+
+        [TearDown]
+        public void TearDown()
+        {
+            _fakeFssHttpClientFactory.Dispose();
         }
     }
 }

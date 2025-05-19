@@ -2,7 +2,7 @@
 using FakeItEasy;
 using NUnit.Framework;
 using UKHO.ADDS.Clients.FileShareService.ReadWrite.Models;
-using UKHO.ADDS.Clients.FileShareService.ReadWrite.Tests.Helpers;
+using UKHO.ADDS.Infrastructure.Serialization.Json;
 using FakeFssHttpClientFactory = UKHO.ADDS.Clients.FileShareService.ReadWrite.Tests.Helpers.FakeFssHttpClientFactory;
 
 namespace UKHO.ADDS.Clients.FileShareService.ReadWrite.Tests
@@ -292,7 +292,7 @@ namespace UKHO.ADDS.Clients.FileShareService.ReadWrite.Tests
                 $"PUT:/batch/{expectedBatchId}/files/{FileName1}"
             };
             var actualRequests = _lastRequestUris.Select(x => $"{x.HttpMethod}:{x.Uri?.AbsolutePath}");
-            var writeBlockFileModel = _lastRequestBodies.Last()?.DeserialiseJson<WriteBlockFileModel>();
+            var writeBlockFileModel = JsonCodec.Decode<WriteBlockFileModel>(_lastRequestBodies.Last());
             var expectedBlockIds = new[] { "00001", "00002", "00003" };
             Assert.Multiple(() =>
             {
@@ -326,7 +326,7 @@ namespace UKHO.ADDS.Clients.FileShareService.ReadWrite.Tests
                         $"PUT:/batch/{expectedBatchId}/files/{FileName1}"
                     };
             var actualRequests = _lastRequestUris.Select(x => $"{x.HttpMethod}:{x.Uri?.AbsolutePath}");
-            var writeBlockFileModel = _lastRequestBodies.Last()?.DeserialiseJson<WriteBlockFileModel>();
+            var writeBlockFileModel = JsonCodec.Decode<WriteBlockFileModel>(_lastRequestBodies.Last());
             var expectedBlockIds = new[] { "00001", "00002", "00003" };
             Assert.Multiple(() =>
             {

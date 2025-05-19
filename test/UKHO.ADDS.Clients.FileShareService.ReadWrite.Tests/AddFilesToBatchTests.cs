@@ -17,6 +17,10 @@ namespace UKHO.ADDS.Clients.FileShareService.ReadWrite.Tests
         private const int MaxBlockSize = 32;
         private FakeFssHttpClientFactory _fakeFssHttpClientFactory;
         private const string DummyAccessToken = "ACarefullyEncodedSecretAccessToken";
+        private const string FileName1 = "File1.bin";
+        private const string FileName2 = "File2.bin";
+        private const string MimeType1 = "application/octet-stream";
+        private const string MimeType2 = "application/octet-stream";
 
         [SetUp]
         public void Setup()
@@ -55,13 +59,11 @@ namespace UKHO.ADDS.Clients.FileShareService.ReadWrite.Tests
 
             var stream1 = A.Fake<Stream>();
             A.CallTo(() => stream1.CanSeek).Returns(false);
-            var filename1 = "File1.bin";
-            var mimeType1 = "application/octet-stream";
             var correlationId = Guid.NewGuid().ToString();
 
             try
             {
-                await _fileShareReadWriteClient.AddFileToBatchAsync(batchHandle, stream1, filename1, mimeType1, correlationId, CancellationToken.None);
+                await _fileShareReadWriteClient.AddFileToBatchAsync(batchHandle, stream1, FileName1, MimeType1, correlationId, CancellationToken.None);
                 Assert.Fail("Expected an exception");
             }
             catch (ArgumentException ex)
@@ -91,13 +93,11 @@ namespace UKHO.ADDS.Clients.FileShareService.ReadWrite.Tests
 
             var stream1 = A.Fake<Stream>();
             A.CallTo(() => stream1.CanSeek).Returns(false);
-            var filename1 = "File1.bin";
-            var mimeType1 = "application/octet-stream";
             var correlationId = Guid.NewGuid().ToString();
 
             try
             {
-                await _fileShareReadWriteClient.AddFileToBatchAsync(batchHandle, stream1, filename1, mimeType1, correlationId, CancellationToken.None);
+                await _fileShareReadWriteClient.AddFileToBatchAsync(batchHandle, stream1, FileName1, MimeType1, correlationId, CancellationToken.None);
                 Assert.Fail("Expected an exception");
             }
             catch (ArgumentException ex)
@@ -127,24 +127,20 @@ namespace UKHO.ADDS.Clients.FileShareService.ReadWrite.Tests
 
             Stream stream1 = new MemoryStream(new byte[] { 1, 2, 3, 4, 5 });
             Stream stream2 = new MemoryStream(new byte[] { 2, 3, 4, 5, 6, 7, 8 });
-            var filename1 = "File1.bin";
-            var filename2 = "File2.bin";
-            var mimeType1 = "application/octet-stream";
-            var mimeType2 = "application/octet-stream";
             var correlationId = Guid.NewGuid().ToString();
 
-            await _fileShareReadWriteClient.AddFileToBatchAsync(batchHandle, stream1, filename1, mimeType1, correlationId);
-            await _fileShareReadWriteClient.AddFileToBatchAsync(batchHandle, stream2, filename2, mimeType2, correlationId);
+            await _fileShareReadWriteClient.AddFileToBatchAsync(batchHandle, stream1, FileName1, MimeType1, correlationId);
+            await _fileShareReadWriteClient.AddFileToBatchAsync(batchHandle, stream2, FileName2, MimeType2, correlationId);
 
             var expectedRequests = new[]
             {
                         "POST:/batch",
-                        $"POST:/batch/{expectedBatchId}/files/{filename1}",
-                        $"PUT:/batch/{expectedBatchId}/files/{filename1}/00001",
-                        $"PUT:/batch/{expectedBatchId}/files/{filename1}",
-                        $"POST:/batch/{expectedBatchId}/files/{filename2}",
-                        $"PUT:/batch/{expectedBatchId}/files/{filename2}/00001",
-                        $"PUT:/batch/{expectedBatchId}/files/{filename2}"
+                        $"POST:/batch/{expectedBatchId}/files/{FileName1}",
+                        $"PUT:/batch/{expectedBatchId}/files/{FileName1}/00001",
+                        $"PUT:/batch/{expectedBatchId}/files/{FileName1}",
+                        $"POST:/batch/{expectedBatchId}/files/{FileName2}",
+                        $"PUT:/batch/{expectedBatchId}/files/{FileName2}/00001",
+                        $"PUT:/batch/{expectedBatchId}/files/{FileName2}"
                     };
             var actualRequests = _lastRequestUris.Select(x => $"{x.HttpMethod}:{x.Uri?.AbsolutePath}");
             Assert.Multiple(() =>
@@ -166,24 +162,20 @@ namespace UKHO.ADDS.Clients.FileShareService.ReadWrite.Tests
 
             Stream stream1 = new MemoryStream(new byte[] { 1, 2, 3, 4, 5 });
             Stream stream2 = new MemoryStream(new byte[] { 2, 3, 4, 5, 6, 7, 8 });
-            var filename1 = "File1.bin";
-            var filename2 = "File2.bin";
-            var mimeType1 = "application/octet-stream";
-            var mimeType2 = "application/octet-stream";
             var correlationId = Guid.NewGuid().ToString();
 
-            await _fileShareReadWriteClient.AddFileToBatchAsync(batchHandle, stream1, filename1, mimeType1, correlationId, CancellationToken.None); // Fixed: Removed 'Data' property access
-            await _fileShareReadWriteClient.AddFileToBatchAsync(batchHandle, stream2, filename2, mimeType2, correlationId, CancellationToken.None); // Fixed: Removed 'Data' property access
+            await _fileShareReadWriteClient.AddFileToBatchAsync(batchHandle, stream1, FileName1, MimeType1, correlationId, CancellationToken.None); // Fixed: Removed 'Data' property access
+            await _fileShareReadWriteClient.AddFileToBatchAsync(batchHandle, stream2, FileName2, MimeType2, correlationId, CancellationToken.None); // Fixed: Removed 'Data' property access
 
             var expectedRequests = new[]
             {
                 "POST:/batch",
-                $"POST:/batch/{expectedBatchId}/files/{filename1}",
-                $"PUT:/batch/{expectedBatchId}/files/{filename1}/00001",
-                $"PUT:/batch/{expectedBatchId}/files/{filename1}",
-                $"POST:/batch/{expectedBatchId}/files/{filename2}",
-                $"PUT:/batch/{expectedBatchId}/files/{filename2}/00001",
-                $"PUT:/batch/{expectedBatchId}/files/{filename2}"
+                $"POST:/batch/{expectedBatchId}/files/{FileName1}",
+                $"PUT:/batch/{expectedBatchId}/files/{FileName1}/00001",
+                $"PUT:/batch/{expectedBatchId}/files/{FileName1}",
+                $"POST:/batch/{expectedBatchId}/files/{FileName2}",
+                $"PUT:/batch/{expectedBatchId}/files/{FileName2}/00001",
+                $"PUT:/batch/{expectedBatchId}/files/{FileName2}"
             };
             var actualRequests = _lastRequestUris.Select(x => $"{x.HttpMethod}:{x.Uri?.AbsolutePath}");
             Assert.Multiple(() =>
@@ -205,24 +197,20 @@ namespace UKHO.ADDS.Clients.FileShareService.ReadWrite.Tests
 
             Stream stream1 = new MemoryStream(new byte[] { 1, 2, 3, 4, 5 });
             Stream stream2 = new MemoryStream(new byte[] { 2, 3, 4, 5, 6, 7, 8 });
-            var filename1 = "File1.bin";
-            var filename2 = "File2.bin";
-            var mimeType1 = "application/octet-stream";
-            var mimeType2 = "application/octet-stream";
             var correlationId = Guid.NewGuid().ToString();
 
-            await _fileShareReadWriteClient.AddFileToBatchAsync(batchHandle, stream1, filename1, mimeType1, correlationId, new KeyValuePair<string, string>("fileAttributeKey1", "fileAttributeValue1"));
-            await _fileShareReadWriteClient.AddFileToBatchAsync(batchHandle, stream2, filename2, mimeType2, correlationId, new KeyValuePair<string, string>("fileAttributeKey2", "fileAttributeValue2"));
+            await _fileShareReadWriteClient.AddFileToBatchAsync(batchHandle, stream1, FileName1, MimeType1, correlationId, new KeyValuePair<string, string>("fileAttributeKey1", "fileAttributeValue1"));
+            await _fileShareReadWriteClient.AddFileToBatchAsync(batchHandle, stream2, FileName2, MimeType2, correlationId, new KeyValuePair<string, string>("fileAttributeKey2", "fileAttributeValue2"));
 
             var expectedRequests = new[]
             {
                 "POST:/batch",
-                $"POST:/batch/{expectedBatchId}/files/{filename1}",
-                $"PUT:/batch/{expectedBatchId}/files/{filename1}/00001",
-                $"PUT:/batch/{expectedBatchId}/files/{filename1}",
-                $"POST:/batch/{expectedBatchId}/files/{filename2}",
-                $"PUT:/batch/{expectedBatchId}/files/{filename2}/00001",
-                $"PUT:/batch/{expectedBatchId}/files/{filename2}"
+                $"POST:/batch/{expectedBatchId}/files/{FileName1}",
+                $"PUT:/batch/{expectedBatchId}/files/{FileName1}/00001",
+                $"PUT:/batch/{expectedBatchId}/files/{FileName1}",
+                $"POST:/batch/{expectedBatchId}/files/{FileName2}",
+                $"PUT:/batch/{expectedBatchId}/files/{FileName2}/00001",
+                $"PUT:/batch/{expectedBatchId}/files/{FileName2}"
             };
             var actualRequests = _lastRequestUris.Select(x => $"{x.HttpMethod}:{x.Uri?.AbsolutePath}");
             var addFile1Request = _lastRequestBodies[1];
@@ -251,24 +239,20 @@ namespace UKHO.ADDS.Clients.FileShareService.ReadWrite.Tests
 
             Stream stream1 = new MemoryStream(new byte[] { 1, 2, 3, 4, 5 });
             Stream stream2 = new MemoryStream(new byte[] { 2, 3, 4, 5, 6, 7, 8 });
-            var filename1 = "File1.bin";
-            var filename2 = "File2.bin";
-            var mimeType1 = "application/octet-stream";
-            var mimeType2 = "application/octet-stream";
             var correlationId = Guid.NewGuid().ToString();
 
-            await _fileShareReadWriteClient.AddFileToBatchAsync(batchHandle, stream1, filename1, mimeType1, correlationId, CancellationToken.None, new KeyValuePair<string, string>("fileAttributeKey1", "fileAttributeValue1"));
-            await _fileShareReadWriteClient.AddFileToBatchAsync(batchHandle, stream2, filename2, mimeType2, correlationId, CancellationToken.None, new KeyValuePair<string, string>("fileAttributeKey2", "fileAttributeValue2"));
+            await _fileShareReadWriteClient.AddFileToBatchAsync(batchHandle, stream1, FileName1, MimeType1, correlationId, CancellationToken.None, new KeyValuePair<string, string>("fileAttributeKey1", "fileAttributeValue1"));
+            await _fileShareReadWriteClient.AddFileToBatchAsync(batchHandle, stream2, FileName2, MimeType2, correlationId, CancellationToken.None, new KeyValuePair<string, string>("fileAttributeKey2", "fileAttributeValue2"));
 
             var expectedRequests = new[]
             {
                         "POST:/batch",
-                        $"POST:/batch/{expectedBatchId}/files/{filename1}",
-                        $"PUT:/batch/{expectedBatchId}/files/{filename1}/00001",
-                        $"PUT:/batch/{expectedBatchId}/files/{filename1}",
-                        $"POST:/batch/{expectedBatchId}/files/{filename2}",
-                        $"PUT:/batch/{expectedBatchId}/files/{filename2}/00001",
-                        $"PUT:/batch/{expectedBatchId}/files/{filename2}"
+                        $"POST:/batch/{expectedBatchId}/files/{FileName1}",
+                        $"PUT:/batch/{expectedBatchId}/files/{FileName1}/00001",
+                        $"PUT:/batch/{expectedBatchId}/files/{FileName1}",
+                        $"POST:/batch/{expectedBatchId}/files/{FileName2}",
+                        $"PUT:/batch/{expectedBatchId}/files/{FileName2}/00001",
+                        $"PUT:/batch/{expectedBatchId}/files/{FileName2}"
                     };
             var actualRequests = _lastRequestUris.Select(x => $"{x.HttpMethod}:{x.Uri?.AbsolutePath}");
             var addFile1Request = _lastRequestBodies[1];
@@ -294,20 +278,18 @@ namespace UKHO.ADDS.Clients.FileShareService.ReadWrite.Tests
             Assert.That(batchHandleResult.IsSuccess(out var batchHandle), Is.True);
 
             Stream stream1 = new MemoryStream(new byte[MaxBlockSize * 3]);
-            var filename1 = "File1.bin";
-            var mimeType1 = "application/octet-stream";
             var correlationId = Guid.NewGuid().ToString();
 
-            await _fileShareReadWriteClient.AddFileToBatchAsync(batchHandle, stream1, filename1, mimeType1, correlationId);
+            await _fileShareReadWriteClient.AddFileToBatchAsync(batchHandle, stream1, FileName1, MimeType1, correlationId);
 
             var expectedRequests = new[]
             {
                 "POST:/batch",
-                $"POST:/batch/{expectedBatchId}/files/{filename1}",
-                $"PUT:/batch/{expectedBatchId}/files/{filename1}/00001",
-                $"PUT:/batch/{expectedBatchId}/files/{filename1}/00002",
-                $"PUT:/batch/{expectedBatchId}/files/{filename1}/00003",
-                $"PUT:/batch/{expectedBatchId}/files/{filename1}"
+                $"POST:/batch/{expectedBatchId}/files/{FileName1}",
+                $"PUT:/batch/{expectedBatchId}/files/{FileName1}/00001",
+                $"PUT:/batch/{expectedBatchId}/files/{FileName1}/00002",
+                $"PUT:/batch/{expectedBatchId}/files/{FileName1}/00003",
+                $"PUT:/batch/{expectedBatchId}/files/{FileName1}"
             };
             var actualRequests = _lastRequestUris.Select(x => $"{x.HttpMethod}:{x.Uri?.AbsolutePath}");
             var writeBlockFileModel = _lastRequestBodies.Last()?.DeserialiseJson<WriteBlockFileModel>();
@@ -330,20 +312,18 @@ namespace UKHO.ADDS.Clients.FileShareService.ReadWrite.Tests
             Assert.That(batchHandle?.BatchId, Is.EqualTo(expectedBatchId));
 
             Stream stream1 = new MemoryStream(new byte[MaxBlockSize * 3]);
-            var filename1 = "File1.bin";
-            var mimeType1 = "application/octet-stream";
             var correlationId = Guid.NewGuid().ToString();
 
-            await _fileShareReadWriteClient.AddFileToBatchAsync(batchHandle, stream1, filename1, mimeType1, correlationId, CancellationToken.None);
+            await _fileShareReadWriteClient.AddFileToBatchAsync(batchHandle, stream1, FileName1, MimeType1, correlationId, CancellationToken.None);
 
             var expectedRequests = new[]
             {
                         "POST:/batch",
-                        $"POST:/batch/{expectedBatchId}/files/{filename1}",
-                        $"PUT:/batch/{expectedBatchId}/files/{filename1}/00001",
-                        $"PUT:/batch/{expectedBatchId}/files/{filename1}/00002",
-                        $"PUT:/batch/{expectedBatchId}/files/{filename1}/00003",
-                        $"PUT:/batch/{expectedBatchId}/files/{filename1}"
+                        $"POST:/batch/{expectedBatchId}/files/{FileName1}",
+                        $"PUT:/batch/{expectedBatchId}/files/{FileName1}/00001",
+                        $"PUT:/batch/{expectedBatchId}/files/{FileName1}/00002",
+                        $"PUT:/batch/{expectedBatchId}/files/{FileName1}/00003",
+                        $"PUT:/batch/{expectedBatchId}/files/{FileName1}"
                     };
             var actualRequests = _lastRequestUris.Select(x => $"{x.HttpMethod}:{x.Uri?.AbsolutePath}");
             var writeBlockFileModel = _lastRequestBodies.Last()?.DeserialiseJson<WriteBlockFileModel>();
@@ -366,11 +346,8 @@ namespace UKHO.ADDS.Clients.FileShareService.ReadWrite.Tests
             Assert.That(batchHandle?.BatchId, Is.EqualTo(expectedBatchId));
 
             var stream1 = new MemoryStream(new byte[MaxBlockSize * 3 - 1]);
-            var filename1 = "File1.bin";
-            var mimeType1 = "application/octet-stream";
-
             var progressReports = new List<(int blocksComplete, int totalBlockCount)>();
-            await _fileShareReadWriteClient.AddFileToBatchAsync(batchHandle, stream1, filename1, mimeType1, progressReports.Add);
+            await _fileShareReadWriteClient.AddFileToBatchAsync(batchHandle, stream1, FileName1, MimeType1, progressReports.Add);
 
             var expectedBlocksComplete = new[] { 0, 1, 2, 3 };
             var expectedTotalBlockCount = new[] { 3, 3, 3, 3 };
@@ -393,12 +370,10 @@ namespace UKHO.ADDS.Clients.FileShareService.ReadWrite.Tests
             Assert.That(batchHandle?.BatchId, Is.EqualTo(expectedBatchId));
 
             var stream1 = new MemoryStream(new byte[MaxBlockSize * 3 - 1]);
-            var filename1 = "File1.bin";
-            var mimeType1 = "application/octet-stream";
             var correlationId = Guid.NewGuid().ToString();
 
             var progressReports = new List<(int blocksComplete, int totalBlockCount)>();
-            await _fileShareReadWriteClient.AddFileToBatchAsync(batchHandle, stream1, filename1, mimeType1, progressReports.Add, correlationId, CancellationToken.None);
+            await _fileShareReadWriteClient.AddFileToBatchAsync(batchHandle, stream1, FileName1, MimeType1, progressReports.Add, correlationId, CancellationToken.None);
 
             var expectedBlocksComplete = new[] { 0, 1, 2, 3 };
             var expectedTotalBlockCount = new[] { 3, 3, 3, 3 };
@@ -419,11 +394,9 @@ namespace UKHO.ADDS.Clients.FileShareService.ReadWrite.Tests
             var batchHandle = new BatchHandle(batchId);
 
             Stream stream1 = new MemoryStream(new byte[] { 1, 2, 3, 4, 5 });
-            var filename1 = "File1.bin";
-            var mimeType1 = "application/octet-stream";
             var correlationId = Guid.NewGuid().ToString();
 
-            await _fileShareReadWriteClient.AddFileToBatchAsync(batchHandle, stream1, filename1, mimeType1, correlationId, CancellationToken.None);
+            await _fileShareReadWriteClient.AddFileToBatchAsync(batchHandle, stream1, FileName1, MimeType1, correlationId, CancellationToken.None);
 
             Assert.That(_fakeFssHttpClientFactory.HttpClient.DefaultRequestHeaders.Authorization, Is.Not.Null);
             Assert.Multiple(() =>

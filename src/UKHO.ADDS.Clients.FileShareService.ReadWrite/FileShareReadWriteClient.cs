@@ -115,7 +115,7 @@ namespace UKHO.ADDS.Clients.FileShareService.ReadWrite
 
                 var httpRequestMessage = new HttpRequestMessage(HttpMethod.Post, uri)
                 {
-                    Content = new StringContent(JsonCodec.Encode(batchModel), Encoding.UTF8, ApiHeaderKeys.ContentType)
+                    Content = new StringContent(JsonCodec.Encode(batchModel), Encoding.UTF8, ApiHeaderKeys.ContentTypeJson)
                 };
 
                 var response = await httpClient.SendAsync(httpRequestMessage, cancellationToken);
@@ -148,7 +148,7 @@ namespace UKHO.ADDS.Clients.FileShareService.ReadWrite
                 
                 var httpRequestMessage = new HttpRequestMessage(HttpMethod.Put, uri)
                 {
-                    Content = new StringContent(JsonCodec.Encode(new { ExpiryDate = formattedExpiryDate }), Encoding.UTF8, ApiHeaderKeys.ContentType)
+                    Content = new StringContent(JsonCodec.Encode(new { ExpiryDate = formattedExpiryDate }), Encoding.UTF8, ApiHeaderKeys.ContentTypeJson)
                 };
 
                 var response = await httpClient.SendAsync(httpRequestMessage, cancellationToken);
@@ -177,7 +177,7 @@ namespace UKHO.ADDS.Clients.FileShareService.ReadWrite
 
                 var httpRequestMessage = new HttpRequestMessage(HttpMethod.Put, uri)
                 {
-                    Content = new StringContent(JsonCodec.Encode(batchHandle), Encoding.UTF8, ApiHeaderKeys.ContentType)
+                    Content = new StringContent(JsonCodec.Encode(batchHandle), Encoding.UTF8, ApiHeaderKeys.ContentTypeJson)
                 };
 
                 var response = await httpClient.SendAsync(httpRequestMessage, cancellationToken);
@@ -223,14 +223,14 @@ namespace UKHO.ADDS.Clients.FileShareService.ReadWrite
                 var fileModel = new FileModel()
                 { Attributes = fileAttributes ?? Enumerable.Empty<KeyValuePair<string, string>>() };
 
-                var httpContent = new StringContent(JsonCodec.Encode(fileModel), Encoding.UTF8, ApiHeaderKeys.ContentType);
+                var httpContent = new StringContent(JsonCodec.Encode(fileModel), Encoding.UTF8, ApiHeaderKeys.ContentTypeJson);
 
                 using (var httpClient = await GetAuthenticationHeaderSetClient())
                 using (var httpRequestMessage = new HttpRequestMessage(HttpMethod.Post, fileUri) { Content = httpContent })
                 {
-                    httpRequestMessage.Headers.Add(ApiHeaderKeys.ContentSize, "" + stream.Length);
+                    httpRequestMessage.Headers.Add(ApiHeaderKeys.ContentSizeHeaderKey, "" + stream.Length);
 
-                    if (!string.IsNullOrEmpty(mimeType)) httpRequestMessage.Headers.Add(ApiHeaderKeys.MimeType, mimeType);
+                    if (!string.IsNullOrEmpty(mimeType)) httpRequestMessage.Headers.Add(ApiHeaderKeys.MimeTypeHeaderKey, mimeType);
 
                     var createFileRecordResponse = await httpClient.SendAsync(httpRequestMessage, cancellationToken);
                     createFileRecordResponse.EnsureSuccessStatusCode();
@@ -280,7 +280,7 @@ namespace UKHO.ADDS.Clients.FileShareService.ReadWrite
 
                 {
                     var writeBlockFileModel = new WriteBlockFileModel { BlockIds = fileBlocks };
-                    var httpContent = new StringContent(JsonCodec.Encode(writeBlockFileModel), Encoding.UTF8, ApiHeaderKeys.ContentType);
+                    var httpContent = new StringContent(JsonCodec.Encode(writeBlockFileModel), Encoding.UTF8, ApiHeaderKeys.ContentTypeJson);
 
                     using (var httpClient = await GetAuthenticationHeaderSetClient())
                     using (var httpRequestMessage = new HttpRequestMessage(HttpMethod.Put, fileUri) { Content = httpContent })
@@ -304,10 +304,10 @@ namespace UKHO.ADDS.Clients.FileShareService.ReadWrite
             var fileModel = new FileModel { Attributes = fileAttributes ?? Enumerable.Empty<KeyValuePair<string, string>>() };
             var requestHeaders = new Dictionary<string, string>
             {
-                { ApiHeaderKeys.ContentSize, stream.Length.ToString() }
+                { ApiHeaderKeys.ContentSizeHeaderKey, stream.Length.ToString() }
             };
             if (!string.IsNullOrEmpty(mimeType))
-                requestHeaders.Add(ApiHeaderKeys.MimeType, mimeType);
+                requestHeaders.Add(ApiHeaderKeys.MimeTypeHeaderKey, mimeType);
 
             var result = await SendResult<FileModel, AddFileToBatchResponse>(fileUri, HttpMethod.Post, fileModel, cancellationToken, correlationId, requestHeaders);
             if (result.Errors != null && result.Errors.Any())
@@ -367,7 +367,7 @@ namespace UKHO.ADDS.Clients.FileShareService.ReadWrite
 
         private async Task<IResult<TResponse>> SendObjectResult<TResponse>(string uri, HttpMethod httpMethod, object request, CancellationToken cancellationToken, string correlationId, Dictionary<string, string> requestHeaders = default)
         {
-            var httpContent = new StringContent(JsonCodec.Encode(request), Encoding.UTF8, ApiHeaderKeys.ContentType);
+            var httpContent = new StringContent(JsonCodec.Encode(request), Encoding.UTF8, ApiHeaderKeys.ContentTypeJson);
 
             using (var httpRequestMessage = new HttpRequestMessage(httpMethod, uri) { Content = httpContent })
             {

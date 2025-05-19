@@ -5,7 +5,7 @@
         string BatchId { get; }
     }
 
-    internal class BatchHandle : IBatchHandle
+    public class BatchHandle : IBatchHandle
     {
         public string BatchId { get; }
 
@@ -16,9 +16,9 @@
             BatchId = batchId;
         }
 
-        internal void AddFile(string filename, string hash)
+        public void AddFile(string filename, string hash)
         {
-            FileDetails.Add(new FileDetail {FileName = filename, Hash = hash});
+            FileDetails.Add(new FileDetail { FileName = filename, Hash = hash });
         }
     }
 }

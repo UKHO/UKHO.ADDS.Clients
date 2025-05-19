@@ -16,7 +16,7 @@ namespace UKHO.ADDS.Clients.FileShareService.ReadWrite.Tests
         private List<string> _lastRequestBodies;
         private const int MaxBlockSize = 32;
         private FakeFssHttpClientFactory _fakeFssHttpClientFactory;
-        private const string DUMMY_ACCESS_TOKEN = "ACarefullyEncodedSecretAccessToken";
+        private const string DummyAccessToken = "ACarefullyEncodedSecretAccessToken";
 
         [SetUp]
         public void Setup()
@@ -41,7 +41,7 @@ namespace UKHO.ADDS.Clients.FileShareService.ReadWrite.Tests
             _nextResponseStatusCode = HttpStatusCode.Created;
             _lastRequestUris = new List<(HttpMethod HttpMethod, Uri Uri)>();
             _lastRequestBodies = new List<string>();
-            _fileShareReadWriteClient = new FileShareReadWriteClient(_fakeFssHttpClientFactory, @"https://fss-tests.net", DUMMY_ACCESS_TOKEN, MaxBlockSize);
+            _fileShareReadWriteClient = new FileShareReadWriteClient(_fakeFssHttpClientFactory, @"https://fss-tests.net", DummyAccessToken, MaxBlockSize);
         }
 
         [TearDown]
@@ -435,7 +435,7 @@ namespace UKHO.ADDS.Clients.FileShareService.ReadWrite.Tests
             Assert.Multiple(() =>
             {
                 Assert.That(_fakeFssHttpClientFactory.HttpClient.DefaultRequestHeaders.Authorization.Scheme, Is.EqualTo("bearer"));
-                Assert.That(_fakeFssHttpClientFactory.HttpClient.DefaultRequestHeaders.Authorization.Parameter, Is.EqualTo(DUMMY_ACCESS_TOKEN));
+                Assert.That(_fakeFssHttpClientFactory.HttpClient.DefaultRequestHeaders.Authorization.Parameter, Is.EqualTo(DummyAccessToken));
                 Assert.That(stream1.CanSeek, Is.True);
             });
         }

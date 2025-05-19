@@ -10,7 +10,7 @@ namespace UKHO.ADDS.Clients.FileShareService.ReadOnly.Tests
 {
     public class DownloadFileTests
     {
-        private const string DUMMY_ACCESS_TOKEN = "ACarefullyEncodedSecretAccessToken";
+        private const string DummyAccessToken = "ACarefullyEncodedSecretAccessToken";
         private FakeFssHttpClientFactory _fakeFssHttpClientFactory;
         private FileShareReadOnlyClient _fileShareApiClient;
         private Uri _lastRequestUri;
@@ -54,7 +54,7 @@ namespace UKHO.ADDS.Clients.FileShareService.ReadOnly.Tests
             });
 
             _fileShareApiClient = new FileShareReadOnlyClient(_fakeFssHttpClientFactory,
-                @"https://fss-tests.net/basePath/", DUMMY_ACCESS_TOKEN);
+                @"https://fss-tests.net/basePath/", DummyAccessToken);
         }
 
         [Test]
@@ -146,7 +146,7 @@ namespace UKHO.ADDS.Clients.FileShareService.ReadOnly.Tests
                 Assert.That(_fakeFssHttpClientFactory.HttpClient.DefaultRequestHeaders.Authorization.Scheme,
                     Is.EqualTo("bearer"));
                 Assert.That(_fakeFssHttpClientFactory.HttpClient.DefaultRequestHeaders.Authorization.Parameter,
-                    Is.EqualTo(DUMMY_ACCESS_TOKEN));
+                    Is.EqualTo(DummyAccessToken));
             });
         }
 
@@ -180,7 +180,7 @@ namespace UKHO.ADDS.Clients.FileShareService.ReadOnly.Tests
                 Assert.That(_fakeFssHttpClientFactory.HttpClient.DefaultRequestHeaders.Authorization.Scheme,
                     Is.EqualTo("bearer"));
                 Assert.That(_fakeFssHttpClientFactory.HttpClient.DefaultRequestHeaders.Authorization.Parameter,
-                    Is.EqualTo(DUMMY_ACCESS_TOKEN));
+                    Is.EqualTo(DummyAccessToken));
             });
         }
 
@@ -298,7 +298,7 @@ namespace UKHO.ADDS.Clients.FileShareService.ReadOnly.Tests
             const string exceptionMessage = "Test exception";
 
             _fakeFssHttpClientFactory = new FakeFssHttpClientFactory(_ => throw new Exception(exceptionMessage));
-            _fileShareApiClient = new FileShareReadOnlyClient(_fakeFssHttpClientFactory, @"https://fss-tests.net/basePath/", DUMMY_ACCESS_TOKEN);
+            _fileShareApiClient = new FileShareReadOnlyClient(_fakeFssHttpClientFactory, @"https://fss-tests.net/basePath/", DummyAccessToken);
             var result = await _fileShareApiClient.DownloadFileAsync(_batchId, _fileName, _destStream, 100, CancellationToken.None);
 
             Assert.Multiple(() =>
@@ -381,7 +381,7 @@ namespace UKHO.ADDS.Clients.FileShareService.ReadOnly.Tests
                 Assert.That(_fakeFssHttpClientFactory.HttpClient.DefaultRequestHeaders.Authorization.Scheme,
                     Is.EqualTo("bearer"));
                 Assert.That(_fakeFssHttpClientFactory.HttpClient.DefaultRequestHeaders.Authorization.Parameter,
-                    Is.EqualTo(DUMMY_ACCESS_TOKEN));
+                    Is.EqualTo(DummyAccessToken));
             });
         }
 

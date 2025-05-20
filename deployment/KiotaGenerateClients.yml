@@ -25,6 +25,7 @@ steps:
 
   - script: dotnet tool install --global Microsoft.OpenApi.Kiota
     displayName: 'Install Kiota CLI'
+    shell: pwsh
 
   # Checkout the GitHub repo using a service connection
   - checkout: git://github.com/${{ parameters.openApiRepo }}@${{ parameters.openApiBranch }}
@@ -32,19 +33,19 @@ steps:
     persistCredentials: true
     path: openapi-spec-repo
 
-  - script: |
-      mkdir -p $(Pipeline.Workspace)/OpenAPI
-      cp $(Build.SourcesDirectory)/openapi-spec-repo/${{ parameters.openApiSpecPath }} $(Pipeline.Workspace)/OpenAPI/ADDS-OpenAPI-Docs.yaml
+  - powershell: |
+      $openApiDir = "$(Pipeline.Workspace)\OpenAPI"
+      New-Item -ItemType Directory -Force -Path $openApiDir | Out-Null
+      Copy-Item -Path "$(Build.SourcesDirectory)\openapi-spec-repo\${{ parameters.openApiSpecPath }}" -Destination "$openApiDir\ADDS-OpenAPI-Docs.yaml" -Force
     displayName: 'Copy OpenAPI Spec from checked out repo'
-    shell: bash
 
-  - script: |
-      export PATH="$PATH:~/.dotnet/tools"
-      kiota generate \
-        --language "${{ parameters.language }}" \
-        --openapi "$(Pipeline.Workspace)/OpenAPI/ADDS-OpenAPI-Docs.yaml" \
-        --output "${{ parameters.outputDirectory }}" \
-        --class-name "${{ parameters.GeneratedApiClassName }}" \
+  - powershell: |
+      $env:PATH += ";$env:USERPROFILE\.dotnet\tools"
+      $kiota = "$env:USERPROFILE\.dotnet\tools\kiota.exe"
+      & $kiota generate `
+        --language "${{ parameters.language }}" `
+        --openapi "$(Pipeline.Workspace)\OpenAPI\ADDS-OpenAPI-Docs.yaml" `
+        --output "${{ parameters.outputDirectory }}" `
+        --class-name "${{ parameters.GeneratedApiClassName }}" `
         --namespace-name "${{ parameters.Namespace }}"
     displayName: 'Generate client with Kiota'
-    shell: bash

@@ -27,7 +27,7 @@ steps:
     displayName: 'Install Kiota CLI'
 
   # Checkout the GitHub repo using a service connection
-  - checkout: git://${{ parameters.openApiRepo }}@${{ parameters.openApiBranch }}
+  - checkout: git://$[ parameters.openApiRepo ]@$[ parameters.openApiBranch ]
     displayName: 'Checkout OpenAPI Spec Repository'
     persistCredentials: true
     path: openapi-spec-repo

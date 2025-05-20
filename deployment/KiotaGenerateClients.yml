@@ -1,6 +1,4 @@
 parameters:
-  - name: openApiSpecUrl
-    type: string
   - name: outputDirectory
     type: string
   - name: language
@@ -15,7 +13,7 @@ parameters:
     type: string
   - name: GeneratedApiClassName
     type: string
-  - name: NameSpace
+  - name: Namespace
     type: string
 
 steps:
@@ -49,5 +47,5 @@ steps:
         --openapi "$(Pipeline.Workspace)\OpenAPI\ADDS-OpenAPI-Docs.yaml" `
         --output "${{ parameters.outputDirectory }}" `
         --class-name "${{ parameters.GeneratedApiClassName }}" `
-        --namespace-name "${{ parameters.NameSpace }}"
+        --namespace-name "${{ parameters.Namespace }}"
     displayName: 'Generate client with Kiota'

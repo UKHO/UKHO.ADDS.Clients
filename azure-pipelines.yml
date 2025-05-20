@@ -63,6 +63,8 @@ stages:
         openApiSpecPath: 'salesCatalogue_ExchangeSetService_API_definition_v1.9.yaml'
         outputDirectory: '$(Build.SourcesDirectory)\src\UKHO.ADDS.Clients.SalesCatalogueService'
         language: 'csharp'
+        GeneratedApiClassName: 'SalesCatalogueService'
+        Namespace: 'UKHO.ADDS.Clients.SalesCatalogueService'
 
     - task: UseDotNet@2
       displayName: Use .NET $(SdkVersion) sdk

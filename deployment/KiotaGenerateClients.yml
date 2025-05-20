@@ -25,7 +25,6 @@ steps:
 
   - script: dotnet tool install --global Microsoft.OpenApi.Kiota
     displayName: 'Install Kiota CLI'
-    shell: pwsh
 
   # Checkout the GitHub repo using a service connection
   - checkout: git://github.com/${{ parameters.openApiRepo }}@${{ parameters.openApiBranch }}

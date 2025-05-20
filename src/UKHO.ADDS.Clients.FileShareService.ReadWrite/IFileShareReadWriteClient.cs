@@ -16,17 +16,17 @@ namespace UKHO.ADDS.Clients.FileShareService.ReadWrite
 
         Task<IResult<BatchStatusResponse>> GetBatchStatusAsync(IBatchHandle batchHandle);
 
-        Task<IResult> AddFileToBatchAsync(IBatchHandle batchHandle, Stream stream, string fileName, string mimeType,
+        Task AddFileToBatchAsync(IBatchHandle batchHandle, Stream stream, string fileName, string mimeType, string correlationId,
             params KeyValuePair<string, string>[] fileAttributes);
 
         Task<IResult<AddFileToBatchResponse>> AddFileToBatchAsync(IBatchHandle batchHandle, Stream stream, string fileName, string mimeType,
-            CancellationToken cancellationToken, params KeyValuePair<string, string>[] fileAttributes);
+            string correlationId, CancellationToken cancellationToken, params KeyValuePair<string, string>[] fileAttributes);
 
-        Task<IResult> AddFileToBatchAsync(IBatchHandle batchHandle, Stream stream, string fileName, string mimeType,
+        Task AddFileToBatchAsync(IBatchHandle batchHandle, Stream stream, string fileName, string mimeType,
             Action<(int blocksComplete, int totalBlockCount)> progressUpdate, params KeyValuePair<string, string>[] fileAttributes);
 
         Task<IResult<AddFileToBatchResponse>> AddFileToBatchAsync(IBatchHandle batchHandle, Stream stream, string fileName, string mimeType,
-            Action<(int blocksComplete, int totalBlockCount)> progressUpdate, CancellationToken cancellationToken,
+            Action<(int blocksComplete, int totalBlockCount)> progressUpdate,  string correlationId, CancellationToken cancellationToken,
             params KeyValuePair<string, string>[] fileAttributes);
 
         Task<IResult<CommitBatchResponse>> CommitBatchAsync(IBatchHandle batchHandle, CancellationToken cancellationToken);

@@ -58,13 +58,13 @@ stages:
 
     - template: deployment/KiotaGenerateClients.yml
       parameters:
-        openApiRepo: 'UKHO/Sales-Catalogue-Service-Shared-Assets'
+        openApiRepo: 'UKHO/exchange-set-service'
         openApiBranch: 'main'
-        openApiSpecPath: 'salesCatalogue_ExchangeSetService_API_definition_v1.9.yaml'
-        outputDirectory: '$(Build.SourcesDirectory)\src\UKHO.ADDS.Clients.SalesCatalogueService'
+        openApiSpecPath: 'exchangeSetService_OpenApi_definition.yaml'
+        outputDirectory: '$(Build.SourcesDirectory)\src\UKHO.ADDS.Clients.ExchangeSetService'
         language: 'csharp'
-        GeneratedApiClassName: 'SalesCatalogueService'
-        Namespace: 'UKHO.ADDS.Clients.SalesCatalogueService'
+        GeneratedApiClassName: 'ExchangeSetService'
+        Namespace: 'UKHO.ADDS.Clients.ExchangeSetService'
 
     - task: UseDotNet@2
       displayName: Use .NET $(SdkVersion) sdk

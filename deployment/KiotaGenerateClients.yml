@@ -26,11 +26,11 @@ steps:
   - script: dotnet tool install --global Microsoft.OpenApi.Kiota
     displayName: 'Install Kiota CLI'
 
-  # Checkout the GitHub repo using a service connection
-  - checkout: git://${{ parameters.openApiRepo }}@${{ parameters.openApiBranch }}
-    displayName: 'Checkout OpenAPI Spec Repository'
-    persistCredentials: true
-    path: openapi-spec-repo
+  # # Checkout the GitHub repo using a service connection
+  # - checkout: git://${{ parameters.openApiRepo }}@${{ parameters.openApiBranch }}
+  #   displayName: 'Checkout OpenAPI Spec Repository'
+  #   persistCredentials: true
+  #   path: openapi-spec-repo
 
   - powershell: |
       $openApiDir = "$(Pipeline.Workspace)\OpenAPI"

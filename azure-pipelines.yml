@@ -21,6 +21,13 @@ variables:
 - name: SdkVersion
   value: "8.0.x"
 
+resources:
+  repositories:
+  - repository: 'UKHO-Sales-Catalogue-Service-Shared-Assets'
+    type: github
+    name: UKHO/Sales-Catalogue-Service-Shared-Assets
+    ref: refs/heads/main
+
 stages:
 - stage: BuildTestPublish
   displayName: Build, test and publish

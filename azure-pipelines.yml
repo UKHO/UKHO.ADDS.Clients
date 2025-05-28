@@ -23,7 +23,7 @@ variables:
 
 resources:
   repositories:
-  - repository: 'UKHO-Sales-Catalogue-Service-Shared-Assets'
+  - repository: openApiSpecSalesCatalogueServiceSharedAssets
     type: github
     name: UKHO/Sales-Catalogue-Service-Shared-Assets
     ref: refs/heads/main
@@ -66,8 +66,7 @@ stages:
 
     - template: deployment/KiotaGenerateClients.yml
       parameters:
-        openApiRepo: 'UKHO-Sales-Catalogue-Service-Shared-Assets'
-        openApiBranch: 'main'
+        openApiRepo: 'openApiSpecSalesCatalogueServiceSharedAssets'
         openApiSpecPath: 'salesCatalogue_ExchangeSetService_API_definition_v1.9.yaml'
         outputDirectory: '$(Build.SourcesDirectory)\src\UKHO.ADDS.Clients.SalesCatalogueService'
         language: 'csharp'

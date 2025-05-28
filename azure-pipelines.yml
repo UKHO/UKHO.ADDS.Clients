@@ -27,6 +27,7 @@ resources:
     type: github
     name: UKHO/Sales-Catalogue-Service-Shared-Assets
     ref: refs/heads/main
+    endpoint: ADDS Client Generation
 
 stages:
 - stage: BuildTestPublish

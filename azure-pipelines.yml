@@ -25,7 +25,7 @@ resources:
   repositories:
     - repository: openApiRepo
       type: git
-      name: 'UKHO/exchange-set-service'
+      name: 'exchange-set-service'
       ref: 'main'
 
 stages:

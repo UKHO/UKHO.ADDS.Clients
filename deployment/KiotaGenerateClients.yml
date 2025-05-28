@@ -32,11 +32,11 @@ steps:
   #   persistCredentials: true
   #   path: openapi-spec-repo
 
-  - powershell: |
-      $openApiDir = "$(Pipeline.Workspace)\OpenAPI"
-      New-Item -ItemType Directory -Force -Path $openApiDir | Out-Null
-      Copy-Item -Path "$(Build.SourcesDirectory)\openapi-spec-repo\${{ parameters.openApiSpecPath }}" -Destination "$openApiDir\ADDS-OpenAPI-Docs.yaml" -Force
-    displayName: 'Copy OpenAPI Spec from checked out repo'
+  - checkout: ${ parameters.openApiRepo }
+
+  - script: |
+      echo "##vso[task.setvariable variable=PATH]$PATH:$HOME/.dotnet/tools"
+    displayName: 'Set PATH for Kiota CLI'
 
   - powershell: |
       $env:PATH += ";$env:USERPROFILE\.dotnet\tools"

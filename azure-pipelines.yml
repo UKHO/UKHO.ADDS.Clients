@@ -21,13 +21,6 @@ variables:
 - name: SdkVersion
   value: "8.0.x"
 
-resources:
-  repositories:
-    - repository: openApiRepo
-      type: git
-      name: 'exchange-set-service'
-      ref: 'main'
-
 stages:
 - stage: BuildTestPublish
   displayName: Build, test and publish
@@ -65,7 +58,7 @@ stages:
 
     - template: deployment/KiotaGenerateClients.yml
       parameters:
-        openApiRepo: 'UKHO/exchange-set-service'
+        openApiRepo: 'exchange-set-service'
         openApiBranch: 'main''main'
         openApiSpecPath: 'exchangeSetService_OpenApi_definition.yaml'
         outputDirectory: '$(Build.SourcesDirectory)\src\UKHO.ADDS.Clients.ExchangeSetService'

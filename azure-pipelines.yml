@@ -25,8 +25,8 @@ resources:
   repositories:
     - repository: openApiRepo
       type: git
-      name: ${{ parameters.openApiRepo }}
-      ref: ${{ parameters.openApiBranch }}
+      name: 'UKHO/exchange-set-service'
+      ref: 'main'
 
 stages:
 - stage: BuildTestPublish
@@ -66,7 +66,7 @@ stages:
     - template: deployment/KiotaGenerateClients.yml
       parameters:
         openApiRepo: 'UKHO/exchange-set-service'
-        openApiBranch: 'main'
+        openApiBranch: 'main''main'
         openApiSpecPath: 'exchangeSetService_OpenApi_definition.yaml'
         outputDirectory: '$(Build.SourcesDirectory)\src\UKHO.ADDS.Clients.ExchangeSetService'
         language: 'csharp'

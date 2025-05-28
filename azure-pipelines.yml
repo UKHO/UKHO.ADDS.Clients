@@ -21,6 +21,13 @@ variables:
 - name: SdkVersion
   value: "8.0.x"
 
+resources:
+  repositories:
+    - repository: openApiRepo
+      type: git
+      name: ${{ parameters.openApiRepo }}
+      ref: ${{ parameters.openApiBranch }}
+
 stages:
 - stage: BuildTestPublish
   displayName: Build, test and publish

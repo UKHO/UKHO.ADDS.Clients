@@ -16,13 +16,6 @@ parameters:
   - name: Namespace
     type: string
 
-resources:
-  repositories:
-    - repository: openApiRepo
-      type: git
-      name: ${{ parameters.openApiRepo }}
-      ref: ${{ parameters.openApiBranch }}
-
 steps:
   - task: UseDotNet@2
     displayName: 'Install .NET SDK for Kiota'

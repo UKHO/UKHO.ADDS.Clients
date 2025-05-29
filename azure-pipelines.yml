@@ -39,8 +39,6 @@ stages:
       clean: all
     displayName: Build, unit test and package
     steps:
-    - checkout: self
-
     - task: PowerShell@2
       displayName: Output environment variables
       inputs:

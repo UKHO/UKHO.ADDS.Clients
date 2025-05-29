@@ -32,8 +32,8 @@ steps:
   #   persistCredentials: true
   #   path: openapi-spec-repo
 
-  - checkout: self
-  - checkout: ${{ parameters.openApiRepo }}
+  # - checkout: self
+  # - checkout: ${{ parameters.openApiRepo }}
 
   - script: |
       echo "##vso[task.setvariable variable=PATH]$PATH:$HOME/.dotnet/tools"

@@ -40,7 +40,7 @@ stages:
     displayName: Build, unit test and package
     steps:
     - checkout: self
-      path: .
+      path: s
 
     - powershell:  |
         Write-Host "Root Checkout:"

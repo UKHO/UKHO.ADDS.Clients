@@ -41,6 +41,13 @@ stages:
     steps:
     - checkout: self
 
+    - script: 
+        echo "Root Checkout:"
+        ls -la $(Build.SourcesDirectory)
+        echo "Deployment Folder"
+        ls -la $(Build.SourcesDirectory)\deployment
+      displayName: 'List source directory contents'
+
     - task: PowerShell@2
       displayName: Output environment variables
       inputs:

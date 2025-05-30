@@ -39,7 +39,7 @@ steps:
     displayName: 'Set PATH for Kiota CLI'
 
   - script: |
-      kiota generate
+      kiota generate `
         --openapi $(Build.SourcesDirectory)/${{ parameters.openApiRepo }}/${{ parameters.openApiSpecPath }} 
         --output $(Build.SourcesDirectory)/${{ parameters.outputDirectory }} 
         --language ${{ parameters.language }} 

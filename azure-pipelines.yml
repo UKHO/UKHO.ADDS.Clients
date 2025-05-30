@@ -41,11 +41,15 @@ stages:
     steps:
     - checkout: self
 
-    - script: |
-        echo "Root Checkout:"
-        ls -la $(Build.SourcesDirectory)
-        echo "Deployment Folder"
-        ls -la $(Build.SourcesDirectory)\deployment || echo "not found"
+    - powershell:  |
+        Write-Host "Root Checkout:"
+        Get-ChildItem -Recurse $(Build.SourcesDirectory) | Foreach-Object { $_.FullName }
+        Write-Host "'nDeployment Folder"
+        if (Test-Path $(Build.SourcesDirectory)\deployment)
+        {
+          Get-ChildItem -Recurse $(Build.SourcesDirectory)\deployment | Foreach-Object { $_.FullName }
+        }
+        else{ || echo "not found"}
       displayName: 'List source directory contents'
 
     - task: PowerShell@2

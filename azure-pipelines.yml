@@ -49,7 +49,7 @@ stages:
         {
           Get-ChildItem -Recurse $(Build.SourcesDirectory)\deployment | Foreach-Object { $_.FullName }
         }
-        else{ || echo "not found"}
+        else{ Write-Host "not found"}
       displayName: 'List source directory contents'
 
     - task: PowerShell@2

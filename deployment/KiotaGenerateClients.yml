@@ -39,10 +39,10 @@ steps:
     displayName: 'Set PATH for Kiota CLI'
 
   - script: |
-      kiota generate `
-        --openapi $(Build.SourcesDirectory)/${{ parameters.openApiRepo }}/${{ parameters.openApiSpecPath }} `
-        --output $(Build.SourcesDirectory)/${{ parameters.outputDirectory }} `
-        --language ${{ parameters.language }} `
-        --class-name ${{ parameters.GeneratedApiClassName }} `
+      kiota generate \
+        --openapi $(Build.SourcesDirectory)/${{ parameters.openApiRepo }}/${{ parameters.openApiSpecPath }} \
+        --output $(Build.SourcesDirectory)/${{ parameters.outputDirectory }} \
+        --language ${{ parameters.language }} \
+        --class-name ${{ parameters.GeneratedApiClassName }} \
         --namespace-name ${{ parameters.Namespace }}
     displayName: 'Generate client with Kiota'

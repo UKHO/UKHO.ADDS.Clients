@@ -38,13 +38,13 @@ steps:
       echo "##vso[task.setvariable variable=PATH]$PATH:$HOME/.dotnet/tools"
     displayName: 'Set PATH for Kiota CLI'
 
-  - powershell: |
-      $env:PATH += ";$env:USERPROFILE\.dotnet\tools"
-      $kiota = "$env:USERPROFILE\.dotnet\tools\kiota.exe"
-      & $kiota generate `
-        --language "${{ parameters.language }}" `
-        --openapi "$(Pipeline.Workspace)\OpenAPI\ADDS-OpenAPI-Docs.yaml" `
-        --output "${{ parameters.outputDirectory }}" `
-        --class-name "${{ parameters.GeneratedApiClassName }}" `
+  - script: |
+      export PATH="$PATH:$HOME/.dotnet/tools"
+      kiota generate \
+        --language "${{ parameters.language }}" \
+        --openapi "$(Pipeline.Workspace)/OpenAPI/ADDS-OpenAPI-Docs.yaml" \
+        --output "${{ parameters.outputDirectory }}" \
+        --class-name "${{ parameters.GeneratedApiClassName }}" \
         --namespace-name "${{ parameters.Namespace }}"
     displayName: 'Generate client with Kiota'
+    shell: bash

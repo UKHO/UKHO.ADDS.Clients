@@ -41,11 +41,11 @@ stages:
     steps:
     - checkout: self
 
-    - script: 
+    - script: |
         echo "Root Checkout:"
         ls -la $(Build.SourcesDirectory)
         echo "Deployment Folder"
-        ls -la $(Build.SourcesDirectory)\deployment
+        ls -la $(Build.SourcesDirectory)\deployment || echo "not found"
       displayName: 'List source directory contents'
 
     - task: PowerShell@2

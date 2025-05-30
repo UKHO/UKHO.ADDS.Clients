@@ -33,6 +33,7 @@ steps:
   #   path: openapi-spec-repo
 
   - checkout: ${{ parameters.openApiRepo }}
+    path: s
 
   - powershell:  |
       Write-Host "Root Checkout:"

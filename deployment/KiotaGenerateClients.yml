@@ -34,6 +34,17 @@ steps:
 
   - checkout: ${{ parameters.openApiRepo }}
 
+  - powershell:  |
+      Write-Host "Root Checkout:"
+      Get-ChildItem -Recurse $(Build.SourcesDirectory) | Foreach-Object { $_.FullName }
+      Write-Host "'nDeployment Folder"
+      if (Test-Path $(Build.SourcesDirectory)\deployment)
+      {
+        Get-ChildItem -Recurse $(Build.SourcesDirectory)\deployment | Foreach-Object { $_.FullName }
+      }
+      else{ Write-Host "not found"}
+    displayName: 'List source directory contents'
+
   - script: |
       echo "##vso[task.setvariable variable=PATH]$PATH:$HOME/.dotnet/tools"
     displayName: 'Set PATH for Kiota CLI'

@@ -32,6 +32,7 @@ steps:
   #   persistCredentials: true
   #   path: openapi-spec-repo
 
+  - checkout: self
   - checkout: ${{ parameters.openApiRepo }}
     path: s
 

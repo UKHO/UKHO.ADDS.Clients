@@ -34,6 +34,7 @@ steps:
 
   - checkout: self
   - checkout: ${{ parameters.openApiRepo }}
+    -Path: openApiSpecPath
 
   - powershell:  |
       Write-Host "Root Checkout:"
@@ -52,7 +53,7 @@ steps:
 
   - script: |
       kiota generate ^
-        --openapi $(Build.SourcesDirectory)/${{ parameters.openApiSpecPath }} ^
+        --openapi $(Build.SourcesDirectory)/openApiSpecPath/${{ parameters.openApiSpecPath }} ^
         --output ${{ parameters.outputDirectory }} ^
         --language ${{ parameters.language }} ^
         --class-name ${{ parameters.GeneratedApiClassName }} ^

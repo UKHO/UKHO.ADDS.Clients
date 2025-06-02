@@ -34,7 +34,7 @@ steps:
 
   - checkout: self
   - checkout: ${{ parameters.openApiRepo }}
-    -Path: openApiSpecPath
+    path: openApiSpecPath
 
   - powershell:  |
       Write-Host "Root Checkout:"

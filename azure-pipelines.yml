@@ -70,7 +70,7 @@ stages:
     - template: deployment/KiotaGenerateClients.yml
       parameters:
         openApiRepo: 'openApiSpecSalesCatalogueServiceSharedAssets'
-        openApiSpecPath: 'Sales-Catalogue-Service-Shared-Assets\salesCatalogue_ExchangeSetService_API_definition_v1.9.yaml'
+        openApiSpecPath: 'salesCatalogue_ExchangeSetService_API_definition_v1.9.yaml'
         outputDirectory: '$(Build.SourcesDirectory)\src\UKHO.ADDS.Clients.SalesCatalogueService'
         language: 'csharp'
         GeneratedApiClassName: 'SalesCatalogueService'

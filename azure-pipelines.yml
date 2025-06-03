@@ -44,18 +44,18 @@ stages:
     - checkout: openApiSpecSalesCatalogueServiceSharedAssets
       #path: s/openApiSpecPath
       
-    # - powershell: |
-    #     Write-Host "Flatten File Structure for ease of use"
-    #     $subFolders = Get-ChildItem -Path "$env:BUILD_SOURCESDIRECTORY" -Directory
-    #     foreach ($folder in $subFolders) {
-    #         $files = Get-ChildItem -Path $folder.FullName -File
-    #         Write-Host "Moving files from $($folder.FullName) to root directory"
-    #         foreach ($file in $files) {
-    #             $destination = Join-Path -Path "$env:BUILD_SOURCESDIRECTORY" -ChildPath $file.Name
-    #             Move-Item -Path $file.FullName -Destination $destination -Force
-    #         }
-    #     }
-    #   displayName: 'Flatten files'
+    - powershell: |
+        Write-Host "Flatten File Structure for ease of use"
+        $subFolders = Get-ChildItem -Path "$env:BUILD_SOURCESDIRECTORY" -Directory
+        foreach ($folder in $subFolders) {
+            $files = Get-ChildItem -Path $folder.FullName -File
+            Write-Host "Moving files from $($folder.FullName) to root directory"
+            foreach ($file in $files) {
+                $destination = Join-Path -Path "$env:BUILD_SOURCESDIRECTORY" -ChildPath $file.Name
+                Move-Item -Path $file.FullName -Destination $destination -Force
+            }
+        }
+      displayName: 'Flatten files'
 
     - powershell:  |
         Write-Host "Root Checkout:"
@@ -77,7 +77,7 @@ stages:
       name: SetAssemblyVersion
       inputs:
         targetType: filePath
-        filePath: '$(Build.SourcesDirectory)\deployment\Apply-AssemblyVersionAndDefaults.ps1'
+        filePath: '$(Build.SourcesDirectory)\Apply-AssemblyVersionAndDefaults.ps1'
         arguments: >
           -buildNumber "$(Build.BuildNumber)"
           -solutionDirectory "$(Build.SourcesDirectory)\"

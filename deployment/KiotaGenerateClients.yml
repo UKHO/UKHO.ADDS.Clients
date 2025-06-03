@@ -41,7 +41,7 @@ steps:
       echo "##vso[task.setvariable variable=PATH]$PATH:$HOME/.dotnet/tools"
     displayName: 'Set PATH for Kiota CLI'
 
-  - script: |
+  - powershell: |
       $cmd = "kiota generate ^
         --openapi $(Build.SourcesDirectory)/${{ parameters.openApiSpecPath }} ^
         --output ${{ parameters.outputDirectory }} ^
@@ -49,6 +49,6 @@ steps:
         --class-name ${{ parameters.GeneratedApiClassName }} ^
         --namespace-name ${{ parameters.Namespace }}"
 
-      echo $cmd
+       Write-Host $cmd
       Invoke-Expression $cmd
     displayName: 'Generate client with Kiota'

@@ -41,7 +41,7 @@ stages:
     steps:
     - checkout: self
       #path: s
-    - checkout: ${{ parameters.openApiRepo }}
+    - checkout: openApiSpecSalesCatalogueServiceSharedAssets
       #path: s/openApiSpecPath
       
     # - powershell: |

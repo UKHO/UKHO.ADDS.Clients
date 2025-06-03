@@ -44,7 +44,7 @@ stages:
       
     - powershell: |
         Write-Host "Flatten File Structure for ease of use"
-        $subFolders = Get-ChildItem -Path "$env:BUILD_SOURCESDIRECTORY\s" -Directory
+        $subFolders = Get-ChildItem -Path "$env:BUILD_SOURCESDIRECTORY" -Directory
         foreach ($folder in $subFolders) {
             $files = Get-ChildItem -Path $folder.FullName -File
             foreach ($file in $files) {

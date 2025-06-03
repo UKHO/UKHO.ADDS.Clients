@@ -43,7 +43,7 @@ steps:
 
   - script: |
       kiota generate ^
-        --openapi $(Build.SourcesDirectory)/openApiSpecPath/${{ parameters.openApiSpecPath }} ^
+        --openapi $(Build.SourcesDirectory)/${{ parameters.openApiSpecPath }} ^
         --output ${{ parameters.outputDirectory }} ^
         --language ${{ parameters.language }} ^
         --class-name ${{ parameters.GeneratedApiClassName }} ^

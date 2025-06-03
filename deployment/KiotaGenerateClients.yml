@@ -49,6 +49,6 @@ steps:
         --class-name ${{ parameters.GeneratedApiClassName }} ^
         --namespace-name ${{ parameters.Namespace }}"
 
-       Write-Host $cmd
+      Write-Host $cmd
       Invoke-Expression $cmd
     displayName: 'Generate client with Kiota'

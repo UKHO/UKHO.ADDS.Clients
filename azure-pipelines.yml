@@ -40,7 +40,20 @@ stages:
     displayName: Build, unit test and package
     steps:
     - checkout: self
+      path: s
       
+    - powershell: |
+        Write-Host "Flatten File Structure for ease of use"
+        $subFolders = Get-ChildItem -Path "$env:BUILD_SOURCESDIRECTORY\s" -Directory
+        foreach ($folder in $subFolders) {
+            $files = Get-ChildItem -Path $folder.FullName -File
+            foreach ($file in $files) {
+                $destination = Join-Path -Path "$env:BUILD_SOURCESDIRECTORY\s" -ChildPath $file.Name
+                Move-Item -Path $file.FullName -Destination $destination -Force
+            }
+        }
+      displayName: 'Flatten files'
+
     - powershell:  |
         Write-Host "Root Checkout:"
         Get-ChildItem -Recurse $(Build.SourcesDirectory) | Foreach-Object { $_.FullName }

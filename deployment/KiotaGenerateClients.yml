@@ -42,10 +42,8 @@ steps:
     displayName: 'Set PATH for Kiota CLI'
 
   - script: |
-      kiota generate ^
-        --openapi $(Build.SourcesDirectory)/${{ parameters.openApiSpecPath }} ^
-        --output ${{ parameters.outputDirectory }} ^
-        --language ${{ parameters.language }} ^
-        --class-name ${{ parameters.GeneratedApiClassName }} ^
-        --namespace-name ${{ parameters.Namespace }}
+      $cmd = "kiota generate --openapi $(Build.SourcesDirectory)/${{ parameters.openApiSpecPath }} --output ${{ parameters.outputDirectory }} --language ${{ parameters.language }} --class-name ${{ parameters.GeneratedApiClassName }} --namespace-name ${{ parameters.Namespace }}"
+      echo $cmd
+      Invoke-Expression $cmd
     displayName: 'Generate client with Kiota'
+    shell: pwsh

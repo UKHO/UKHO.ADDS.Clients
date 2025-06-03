@@ -75,7 +75,7 @@ stages:
       name: SetAssemblyVersion
       inputs:
         targetType: filePath
-        filePath: '$(Build.SourcesDirectory)\deployment\Apply-AssemblyVersionAndDefaults.ps1'
+        filePath: '$(Build.SourcesDirectory)\Apply-AssemblyVersionAndDefaults.ps1'
         arguments: >
           -buildNumber "$(Build.BuildNumber)"
           -solutionDirectory "$(Build.SourcesDirectory)\"

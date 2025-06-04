@@ -39,11 +39,9 @@ steps:
 
   - powershell: |
       & "$(Build.SourcesDirectory)\RunKiota.ps1" `
-        -outputDirectory "$(outputDirectory)" `
-        -language "$(language)" `
-        -openApiRepo "$(openApiRepo)" `
-        -openApiBranch "$(openApiBranch)" `
-        -openApiSpecPath "$(openApiSpecPath)" `
+        -OutputDirectory "$(outputDirectory)" `
+        -Language "$(language)" `
+        -OpenApiSpecPath "$(openApiSpecPath)" `
         -GeneratedApiClassName "$(GeneratedApiClassName)" `
         -Namespace "$(Namespace)"
     displayName: 'Run Kiota to generate clients'

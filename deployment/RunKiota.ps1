@@ -9,23 +9,28 @@ param (
 $env:PATH += ";$env:USERPROFILE\.dotnet\tools"
 
 # Ensure Kiota is installed
+$packageName = "Microsoft.Kiota.Bundle"
 Write-Host "Checking if Kiota is installed on $GeneratedApiClassName.csproj..."
-[xml]$csproj = Get-Content $GeneratedApiClassName.csproj
+$csprojPath = Get-ChildItem -Path . -Recurse -Filter "$GeneratedApiClassName.csproj" | Select-Object -First 1
+if ($null -eq $csprojPath) {
+    Write-Error "Could not find $GeneratedApiClassName.csproj"
+    exit 1
+}
+[xml]$csproj = Get-Content $csprojPath.FullName
 
-$packageExist = $csproj.Project.ItemGroup.PackageReference | Where-Object { $_.Include -eq $packageName}
+$packageExist = $csproj.Project.ItemGroup.PackageReference | Where-Object { $_.Include -eq $packageName }
 
-if(-Not $packageExist)
-{
-    dotnet add package Microsoft.Kiota.Bundle
+if (-Not $packageExist) {
+    dotnet add $csprojPath.FullName package $packageName
 }
 
 $cmd = @(
-"kiota generate",
-"--openapi $OpenApiSpecPath ",
-"--output $OutputDirectory ",
-"--language $Language ",
-"--class-name $GeneratedApiClassName ",
-" --namespace-name $Namespace"
+    "kiota generate",
+    "--openapi $OpenApiSpecPath",
+    "--output $OutputDirectory",
+    "--language $Language",
+    "--class-name $GeneratedApiClassName",
+    "--namespace-name $Namespace"
 ) -join " "
 
 Write-Host "Running Kiota command:"

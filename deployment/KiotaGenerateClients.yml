@@ -44,9 +44,14 @@ steps:
   - powershell: |
       Write-Host "kiota generate --openapi $(Build.SourcesDirectory)/${{ parameters.openApiSpecPath }} --output ${{ parameters.outputDirectory }} --language ${{ parameters.language }} --class-name ${{ parameters.GeneratedApiClassName }} --namespace-name ${{ parameters.Namespace }}"
 
+    displayName: 'Generate client with Kiota'
+
+  - powershell: |
+      Write-Host "kiota generate --openapi $(Build.SourcesDirectory)/${{ parameters.openApiSpecPath }} --output ${{ parameters.outputDirectory }} --language ${{ parameters.language }} --class-name ${{ parameters.GeneratedApiClassName }} --namespace-name ${{ parameters.Namespace }}"
+
       Write-Host "Running Kiota command:"
       Write-Host "----------------------------------------"
       Write-Host $cmd
       Write-Host "----------------------------------------"
       Invoke-Expression $cmd
-    displayName: 'Generate client with Kiota'
+    displayName: 'stop'

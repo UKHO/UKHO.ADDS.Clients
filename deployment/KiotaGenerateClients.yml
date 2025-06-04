@@ -42,13 +42,15 @@ steps:
     displayName: 'Set PATH for Kiota CLI'
 
   - powershell: |
-      $cmd = "kiota generate ^
+      $cmd = @"kiota generate ^
         --openapi $(Build.SourcesDirectory)/${{ parameters.openApiSpecPath }} ^
         --output ${{ parameters.outputDirectory }} ^
         --language ${{ parameters.language }} ^
         --class-name ${{ parameters.GeneratedApiClassName }} ^
-        --namespace-name ${{ parameters.Namespace }}"
-
+        --namespace-name ${{ parameters.Namespace }}"@
+      Write-Host "Running Kiota command:"
+      Write-Host "----------------------------------------"
       Write-Host $cmd
+      Write-Host "----------------------------------------"
       Invoke-Expression $cmd
     displayName: 'Generate client with Kiota'

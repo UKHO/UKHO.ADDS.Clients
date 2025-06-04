@@ -42,7 +42,7 @@ steps:
     displayName: 'Set PATH for Kiota CLI'
 
   - powershell: |
-      Write-Host test
+      Write-Host "test"
     displayName: 'Generate client with Kiota'
 
   - powershell: |

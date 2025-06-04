@@ -42,14 +42,13 @@ steps:
     displayName: 'Set PATH for Kiota CLI'
 
   - powershell: |
-      $cmd = @"
-      kiota generate ^
-        --openapi $(Build.SourcesDirectory)/${{ parameters.openApiSpecPath }} ^
-        --output ${{ parameters.outputDirectory }} ^
-        --language ${{ parameters.language }} ^
-        --class-name ${{ parameters.GeneratedApiClassName }} ^
-        --namespace-name ${{ parameters.Namespace }}
-        "@
+      $cmd = "kiota generate"
+        " --openapi $(Build.SourcesDirectory)/${{ parameters.openApiSpecPath }}" +
+        " --output ${{ parameters.outputDirectory }}" +
+        " --language ${{ parameters.language }}" +
+        " --class-name ${{ parameters.GeneratedApiClassName }}" +
+        " --namespace-name ${{ parameters.Namespace }}"
+
       Write-Host "Running Kiota command:"
       Write-Host "----------------------------------------"
       Write-Host $cmd

@@ -38,19 +38,12 @@ steps:
     displayName: 'List source directory contents'
 
   - powershell: |
-      Write-Host "##vso[task.setvariable variable=PATH]$env:PATH;$env:USERPROFILE\.dotnet\tools"
-    displayName: 'Set PATH for Kiota CLI'
-
-  - powershell: |
-      $cmd = "kiota generate"
-      + ` " --openapi `"$(Build.SourcesDirectory)/${{ parameters.openApiSpecPath }}`""
-      + ` " --output `"${{ parameters.outputDirectory }}`""
-      + ` " --language ${{ parameters.language }}"
-      + ` " --class-name ${{ parameters.GeneratedApiClassName }}"
-      + ` " --namespace-name ${{ parameters.Namespace }}"
-      Write-Host "Running Kiota command:"
-      Write-Host "----------------------------------------"
-      Write-Host $cmd
-      Write-Host "----------------------------------------"
-      Invoke-Expression $cmd
-    displayName: 'Generate Kiota client ${{ parameters.GeneratedApiClassName }}'
+      & "$(Build.SourcesDirectory)\RunKiota.ps1" `
+        -outputDirectory "$(outputDirectory)" `
+        -language "$(language)" `
+        -openApiRepo "$(openApiRepo)" `
+        -openApiBranch "$(openApiBranch)" `
+        -openApiSpecPath "$(openApiSpecPath)" `
+        -GeneratedApiClassName "$(GeneratedApiClassName)" `
+        -Namespace "$(Namespace)"
+    displayName: 'Run Kiota to generate clients'

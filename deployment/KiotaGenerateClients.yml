@@ -49,4 +49,4 @@ steps:
       Write-Host $cmd
       Write-Host "----------------------------------------"
       Invoke-Expression $cmd
-    displayName: 'stop'
+    displayName: 'Generate Kiota client ${{ parameters.GeneratedApiClassName }}'

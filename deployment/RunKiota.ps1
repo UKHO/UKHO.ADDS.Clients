@@ -11,7 +11,7 @@ $env:PATH += ";$env:USERPROFILE\.dotnet\tools"
 # Ensure Kiota is installed
 $packageName = "Microsoft.Kiota.Bundle"
 Write-Host "Checking if Kiota is installed on $GeneratedApiClassName.csproj..."
-$csprojPath = Get-ChildItem -Path . -Recurse -Filter "$GeneratedApiClassName.csproj" | Select-Object -First 1
+$csprojPath = Get-ChildItem -Path . -Recurse -Filter "*$GeneratedApiClassName.csproj" | Select-Object -First 1
 if ($null -eq $csprojPath) {
     Write-Error "Could not find $GeneratedApiClassName.csproj"
     exit 1

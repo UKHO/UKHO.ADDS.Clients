@@ -42,7 +42,7 @@ steps:
     displayName: 'Set PATH for Kiota CLI'
 
   - powershell: |
-      $cmd = "kiota generate"
+      $cmd = "kiota generate" +
         " --openapi $(Build.SourcesDirectory)/${{ parameters.openApiSpecPath }}" +
         " --output ${{ parameters.outputDirectory }}" +
         " --language ${{ parameters.language }}" +

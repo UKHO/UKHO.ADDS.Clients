@@ -50,5 +50,5 @@ steps:
         --namespace-name ${{ parameters.Namespace }}"
 
       Write-Host $cmd
-      Invoke-Command $cmd
+      Invoke-Expression $cmd
     displayName: 'Generate client with Kiota'

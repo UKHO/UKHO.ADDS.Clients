@@ -26,7 +26,7 @@ steps:
   - script: dotnet tool install --global Microsoft.OpenApi.Kiota
     displayName: 'Install Kiota CLI'
 
-  - powershell:  |
+  - powershell: |
       Write-Host "Root Checkout:"
       Get-ChildItem -Recurse $(Build.SourcesDirectory) | Foreach-Object { $_.FullName }
       Write-Host "'nDeployment Folder"
@@ -42,11 +42,11 @@ steps:
     displayName: 'Set PATH for Kiota CLI'
 
   - powershell: |
-      $cmd = @"kiota generate ^
-        --openapi $(Build.SourcesDirectory)/${{ parameters.openApiSpecPath }} ^
-        --output ${{ parameters.outputDirectory }} ^
-        --language ${{ parameters.language }} ^
-        --class-name ${{ parameters.GeneratedApiClassName }} ^
+      $cmd = @"kiota generate
+        --openapi $(Build.SourcesDirectory)/${{ parameters.openApiSpecPath }}
+        --output ${{ parameters.outputDirectory }}
+        --language ${{ parameters.language }}
+        --class-name ${{ parameters.GeneratedApiClassName }}
         --namespace-name ${{ parameters.Namespace }}"@
       Write-Host "Running Kiota command:"
       Write-Host "----------------------------------------"

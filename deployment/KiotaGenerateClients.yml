@@ -37,8 +37,7 @@ steps:
       else{ Write-Host "not found"}
     displayName: 'List source directory contents'
 
-  - script: |
-      echo "##vso[task.setvariable variable=PATH]$PATH:$HOME/.dotnet/tools"
+  - script: echo "##vso[task.setvariable variable=PATH]$PATH:$HOME/.dotnet/tools"
     displayName: 'Set PATH for Kiota CLI'
 
   - powershell: |

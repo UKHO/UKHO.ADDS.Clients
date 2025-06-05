@@ -41,13 +41,11 @@ stages:
     steps:
     - checkout: self
       path: s
-    - checkout: openApiSpecSalesCatalogueServiceSharedAssets
-      path: openapi
       
      # Flatten the checked out file structure, this way we can easily add more OpenAPI specs in the future without having to change the pipeline. 
-    - powershell: |
-          & "$(Build.SourcesDirectory)\deployment\FlattenFiles.ps1"
-      displayName: 'Flatten files'
+    # - powershell: |
+    #       & "$(Build.SourcesDirectory)\deployment\FlattenFiles.ps1"
+    #   displayName: 'Flatten files'
 
     - powershell:  |
         Write-Host "Root Checkout:"

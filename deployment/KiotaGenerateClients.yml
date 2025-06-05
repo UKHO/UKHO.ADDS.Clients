@@ -38,7 +38,7 @@ steps:
     displayName: 'List source directory contents'
 
   - powershell: |
-      & "$(Build.SourcesDirectory)\deployment\RunKiota.ps1" `
+      & "$(Build.SourcesDirectory)\RunKiota.ps1" `
         -OutputDirectory "${{parameters.outputDirectory}}" `
         -Language "${{parameters.language}}" `
         -OpenApiSpecPath "${{ parameters.openApiSpecPath }}" `

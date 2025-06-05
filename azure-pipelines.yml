@@ -44,18 +44,10 @@ stages:
     - checkout: openApiSpecSalesCatalogueServiceSharedAssets
       path: openapi
       
-    # - powershell: |
-    #     Write-Host "Flatten File Structure for ease of use"
-    #     $subFolders = Get-ChildItem -Path "$env:BUILD_SOURCESDIRECTORY" -Directory
-    #     foreach ($folder in $subFolders) {
-    #         $files = Get-ChildItem -Path $folder.FullName -File
-    #         Write-Host "Moving files from $($folder.FullName) to root directory"
-    #         foreach ($file in $files) {
-    #             $destination = Join-Path -Path "$env:BUILD_SOURCESDIRECTORY" -ChildPath $file.Name
-    #             Move-Item -Path $file.FullName -Destination $destination -Force
-    #         }
-    #     }
-    #   displayName: 'Flatten files'
+     # Flatten the checked out file structure, this way we can easily add more OpenAPI specs in the future without having to change the pipeline. 
+    - powershell: |
+          & "$(Build.SourcesDirectory)\FlattenFiles.ps1"
+      displayName: 'Flatten files'
 
     - powershell:  |
         Write-Host "Root Checkout:"
@@ -77,7 +69,7 @@ stages:
       name: SetAssemblyVersion
       inputs:
         targetType: filePath
-        filePath: '$(Build.SourcesDirectory)\deployment\Apply-AssemblyVersionAndDefaults.ps1'
+        filePath: '$(Build.SourcesDirectory)\Apply-AssemblyVersionAndDefaults.ps1'
         arguments: >
           -buildNumber "$(Build.BuildNumber)"
           -solutionDirectory "$(Build.SourcesDirectory)\"
@@ -87,7 +79,7 @@ stages:
           -UKHOAssemblyProduct "$env:UKHOAssemblyProduct"
           -SourceRevisionId "$(Build.SourceVersion)"
 
-    - template: deployment/KiotaGenerateClients.yml
+    - template: KiotaGenerateClients.yml
       parameters:
         openApiRepo: 'openApiSpecSalesCatalogueServiceSharedAssets'
         openApiSpecPath: 'salesCatalogue_ExchangeSetService_API_definition_v1.9.yaml'
@@ -142,19 +134,19 @@ stages:
         path: $(Build.ArtifactStagingDirectory)/packages
         artifact: NuGetPackages
 
-    - template: /deployment/integration-test-build.yml
+    - template: integration-test-build.yml
       parameters:
         ProjectPartialName: FileShareService.ReadOnly
 
-    - template: /deployment/integration-test-build.yml
+    - template: integration-test-build.yml
       parameters:
         ProjectPartialName: FileShareService.ReadWrite
 
-    - template: /deployment/integration-test-build.yml
+    - template: integration-test-build.yml
       parameters:
         ProjectPartialName: PermitService
 
-    - template: /deployment/integration-test-build.yml
+    - template: integration-test-build.yml
       parameters:
         ProjectPartialName: SalesCatalogueService
 

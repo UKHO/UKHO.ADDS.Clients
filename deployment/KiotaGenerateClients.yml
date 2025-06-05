@@ -30,17 +30,6 @@ steps:
     displayName: 'Install Kiota CLI'
 
   - powershell: |
-      Write-Host "Root Checkout:"
-      Get-ChildItem -Recurse $(Build.SourcesDirectory) | Foreach-Object { $_.FullName }
-      Write-Host "'OpenAPI repo Folder"
-      if (Test-Path ${{parameters.openApiRepo}})
-      {
-        Get-ChildItem -Recurse ${{parameters.openApiRepo}} | Foreach-Object { $_.FullName }
-      }
-      else{ Write-Host "not found"}
-    displayName: 'List source directory contents'
-
-  - powershell: |
       & "deployment\RunKiota.ps1" `
         -OpenApiSpecPath "openapi\${{ parameters.openApiSpecPath }}" `
         -OutputDirectory "${{parameters.outputDirectory}}" `

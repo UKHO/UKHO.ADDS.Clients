@@ -79,7 +79,7 @@ stages:
           -UKHOAssemblyProduct "$env:UKHOAssemblyProduct"
           -SourceRevisionId "$(Build.SourceVersion)"
 
-    - template: KiotaGenerateClients.yml
+    - template: deployment/KiotaGenerateClients.yml
       parameters:
         openApiRepo: 'openApiSpecSalesCatalogueServiceSharedAssets'
         openApiSpecPath: 'salesCatalogue_ExchangeSetService_API_definition_v1.9.yaml'

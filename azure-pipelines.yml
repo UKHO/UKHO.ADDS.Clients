@@ -42,7 +42,7 @@ stages:
     - checkout: self
       path: s
     - checkout: openApiSpecSalesCatalogueServiceSharedAssets
-      #path: s/openApiSpecPath
+      path: s
       
     # - powershell: |
     #     Write-Host "Flatten File Structure for ease of use"

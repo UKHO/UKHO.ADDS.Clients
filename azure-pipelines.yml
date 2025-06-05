@@ -46,7 +46,7 @@ stages:
       
      # Flatten the checked out file structure, this way we can easily add more OpenAPI specs in the future without having to change the pipeline. 
     - powershell: |
-          & "$(Build.SourcesDirectory)\FlattenFiles.ps1"
+          & "$(Build.SourcesDirectory)\deployment\FlattenFiles.ps1"
       displayName: 'Flatten files'
 
     - powershell:  |
@@ -69,7 +69,7 @@ stages:
       name: SetAssemblyVersion
       inputs:
         targetType: filePath
-        filePath: '$(Build.SourcesDirectory)\Apply-AssemblyVersionAndDefaults.ps1'
+        filePath: '$(Build.SourcesDirectory)\deployment\Apply-AssemblyVersionAndDefaults.ps1'
         arguments: >
           -buildNumber "$(Build.BuildNumber)"
           -solutionDirectory "$(Build.SourcesDirectory)\"
@@ -134,19 +134,19 @@ stages:
         path: $(Build.ArtifactStagingDirectory)/packages
         artifact: NuGetPackages
 
-    - template: integration-test-build.yml
+    - template: /deployment/integration-test-build.yml
       parameters:
         ProjectPartialName: FileShareService.ReadOnly
 
-    - template: integration-test-build.yml
+    - template: /deployment/integration-test-build.yml
       parameters:
         ProjectPartialName: FileShareService.ReadWrite
 
-    - template: integration-test-build.yml
+    - template: /deployment/integration-test-build.yml
       parameters:
         ProjectPartialName: PermitService
 
-    - template: integration-test-build.yml
+    - template: /deployment/integration-test-build.yml
       parameters:
         ProjectPartialName: SalesCatalogueService
 

@@ -40,7 +40,7 @@ stages:
     displayName: Build, unit test and package
     steps:
     - checkout: self
-      path: s
+      #path: s
     - checkout: openApiSpecSalesCatalogueServiceSharedAssets
       #path: s/openApiSpecPath
       

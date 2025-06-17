@@ -51,7 +51,7 @@ namespace UKHO.ADDS.Clients.Common.Extensions
             }
         }
 
-        public static async Task<IResult<TValue>> CreateResultAsync<TValue>(this HttpResponseMessage response, string applicationName, string correlationId) where TValue : class
+        public static async Task<IResult<TValue>> CreateResultAsync<TValue>(this HttpResponseMessage response, string applicationName, string? correlationId = null) where TValue : class
         {
             try
             {

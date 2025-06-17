@@ -30,6 +30,10 @@ steps:
     displayName: 'Install Kiota CLI'
 
   - powershell: |
+      & "$PSScriptRoot\EnsureKiotaInstalled.ps1" -OutputDirectory $OutputDirectory
+    displayName: 'Ensure Kiota is installed'
+    
+  - powershell: |
       & "deployment\RunKiota.ps1" `
         -OpenApiSpecPath "openapi\${{ parameters.openApiSpecPath }}" `
         -OutputDirectory "${{parameters.outputDirectory}}\GeneratedClient" `

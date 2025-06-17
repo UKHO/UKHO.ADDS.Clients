@@ -30,7 +30,7 @@ steps:
     displayName: 'Install Kiota CLI'
 
   - powershell: |
-      & "deployment\EnsureKiotaInstalled.ps1" -OutputDirectory $OutputDirectory
+      & "deployment\CheckForKiotaDependency.ps1" -OutputDirectory $OutputDirectory
     displayName: 'Ensure Kiota is installed'
 
   - powershell: |

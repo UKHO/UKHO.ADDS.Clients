@@ -29,6 +29,12 @@ resources:
     ref: refs/heads/main
     endpoint: UKHO
 
+  - repository: openApiSpecFileShareService
+    type: github
+    name: UKHO/file-share-service
+    ref: refs/heads/main
+    endpoint: UKHO
+
 stages:
 - stage: BuildTestPublish
   displayName: Build, test and publish
@@ -75,6 +81,24 @@ stages:
         language: 'csharp'
         GeneratedApiClassName: 'SalesCatalogueService'
         Namespace: 'UKHO.ADDS.Clients.SalesCatalogueService'
+
+    - template: deployment/KiotaGenerateClients.yml
+      parameters:
+        openApiRepo: 'openApiSpecFileShareService'
+        openApiSpecPath: 'file-share-service.openApi.yaml'
+        outputDirectory: '$(Build.SourcesDirectory)\src\UKHO.ADDS.Clients.FileShareService.ReadOnly'
+        language: 'csharp'
+        GeneratedApiClassName: 'FileShareService'
+        Namespace: 'UKHO.ADDS.Clients.FileShareService.ReadOnly'
+
+    - template: deployment/KiotaGenerateClients.yml
+      parameters:
+        openApiRepo: 'openApiSpecFileShareService'
+        openApiSpecPath: 'file-share-service.openApi-public.yaml'
+        outputDirectory: '$(Build.SourcesDirectory)\src\UKHO.ADDS.Clients.FileShareService.ReadWrite'
+        language: 'csharp'
+        GeneratedApiClassName: 'FileShareService'
+        Namespace: 'UKHO.ADDS.Clients.FileShareService.ReadWrite'
 
     - task: UseDotNet@2
       displayName: Use .NET $(SdkVersion) sdk

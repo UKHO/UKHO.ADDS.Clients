@@ -80,7 +80,7 @@ stages:
         outputDirectory: '$(Build.SourcesDirectory)\src\UKHO.ADDS.Clients.SalesCatalogueService'
         language: 'csharp'
         GeneratedApiClassName: 'SalesCatalogueService'
-        Namespace: 'UKHO.ADDS.Clients.SalesCatalogueService'
+        Namespace: 'UKHO.ADDS.Clients.Kiota.SalesCatalogueService'
 
     - template: deployment/KiotaGenerateClients.yml
       parameters:
@@ -89,7 +89,7 @@ stages:
         outputDirectory: '$(Build.SourcesDirectory)\src\UKHO.ADDS.Clients.FileShareService.ReadOnly'
         language: 'csharp'
         GeneratedApiClassName: 'FileShareService'
-        Namespace: 'UKHO.ADDS.Clients.FileShareService.ReadOnly'
+        Namespace: 'UKHO.ADDS.Clients.Kiota.FileShareService.ReadOnly'
 
     - template: deployment/KiotaGenerateClients.yml
       parameters:
@@ -98,7 +98,7 @@ stages:
         outputDirectory: '$(Build.SourcesDirectory)\src\UKHO.ADDS.Clients.FileShareService.ReadWrite'
         language: 'csharp'
         GeneratedApiClassName: 'FileShareService'
-        Namespace: 'UKHO.ADDS.Clients.FileShareService.ReadWrite'
+        Namespace: 'UKHO.ADDS.Clients.Kiota.FileShareService.ReadWrite'
 
     - task: UseDotNet@2
       displayName: Use .NET $(SdkVersion) sdk

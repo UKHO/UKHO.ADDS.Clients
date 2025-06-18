@@ -124,7 +124,7 @@ namespace UKHO.ADDS.Clients.SalesCatalogueService
                 var lastModified = httpResponseMessage.Content.Headers.LastModified;
                 if (lastModified != null)
                 {
-                    response.LastModified = ((DateTimeOffset)lastModified).UtcDateTime;
+                    response.LastModified = lastModified.Value.UtcDateTime;
                 }
             }
             return Result.Success(response);

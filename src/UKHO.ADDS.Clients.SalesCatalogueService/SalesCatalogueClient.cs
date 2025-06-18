@@ -50,7 +50,7 @@ namespace UKHO.ADDS.Clients.SalesCatalogueService
                     httpRequestMessage.Headers.Add("If-Modified-Since", headerDateString);
                 }
 
-                HttpResponseMessage response = await httpClient.SendAsync(httpRequestMessage);
+                var response = await httpClient.SendAsync(httpRequestMessage);
 
                 //create response result as per expected output by reading additional values from httpresponse object 
                 return await CreateS100ProductsFromSpecificDateResponse(response, correlationId);
@@ -121,7 +121,7 @@ namespace UKHO.ADDS.Clients.SalesCatalogueService
                     response.ResponseBody = products ?? new List<S100Products>();
                 }
 
-                var lastModified = httpResponseMessage.Content.Headers.LastModified;
+                var lastModified = httpResponseMessage.Content.Headers.LastModified?? httpResponseMessage.Content.Headers.LastModified;
                 if (lastModified != null)
                 {
                     response.LastModified = lastModified.Value.UtcDateTime;

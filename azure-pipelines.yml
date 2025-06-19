@@ -77,7 +77,7 @@ stages:
 
 - stage: BuildTestPublish
   displayName: Build, test and publish
-  dependsOn: []
+  dependsOn: [KiotaGenerateClients]
   jobs:
   - job: MainBuild
     workspace:

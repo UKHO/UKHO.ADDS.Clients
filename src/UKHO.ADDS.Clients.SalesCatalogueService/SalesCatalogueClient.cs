@@ -1,4 +1,6 @@
 ﻿using System.Net;
+using System.Text;
+using System.Text.Json;
 using UKHO.ADDS.Clients.Common.Authentication;
 using UKHO.ADDS.Clients.Common.Constants;
 using UKHO.ADDS.Clients.Common.Extensions;
@@ -91,7 +93,50 @@ namespace UKHO.ADDS.Clients.SalesCatalogueService
             return await Task.FromResult(Result.Success(new SalesCatalogueDataResponse()));
         }
 
+        /// <summary>
+        /// Retrieves S100 product names asynchronously.
+        /// </summary>
+        /// <param name="productNames">List of product names to retrieve information for.</param>
+        /// <param name="correlationId">The correlation ID for the request.</param>
+        /// <param name="cancellationToken">A cancellation token that can be used to cancel the operation.</param>
+        /// <returns>A task that represents the asynchronous operation. The task result contains the S100 product names response.</returns>
+        public async Task<IResult<S100ProductNamesResponse>> GetS100ProductNamesAsync(List<string> productNames, string correlationId, CancellationToken cancellationToken = default)
+        {
+            var uri = new Uri("v2/products/s100/productNames", UriKind.Relative);
 
+            try
+            {
+                using var httpClient = await GetAuthenticatedClientAsync(correlationId);
+                using var httpRequestMessage = new HttpRequestMessage(HttpMethod.Post, uri);
+                
+                var json = JsonSerializer.Serialize(productNames);
+                httpRequestMessage.Content = new StringContent(json, Encoding.UTF8, "application/json");
+                
+                var response = await httpClient.SendAsync(httpRequestMessage, cancellationToken);
+                
+                if (response.StatusCode != HttpStatusCode.OK)
+                {
+                    var errorMetadata = await response.CreateErrorMetadata(ApiNames.SaleCatalogueService, correlationId);
+                    return await Task.FromResult(Result.Failure<S100ProductNamesResponse>(ErrorFactory.CreateError(response.StatusCode, errorMetadata)));
+                }
+                
+                var bodyJson = await response.Content.ReadAsStringAsync(cancellationToken);
+                var productNamesResponse = JsonCodec.Decode<S100ProductNamesResponse>(bodyJson);
+                
+                if (productNamesResponse != null)
+                {
+                    productNamesResponse.ResponseCode = response.StatusCode;
+                    return await Task.FromResult(Result.Success(productNamesResponse));
+                }
+                
+                return await Task.FromResult(Result.Failure<S100ProductNamesResponse>(ErrorFactory.CreateError(HttpStatusCode.BadRequest, 
+                    new Dictionary<string, object> { { "reason", "Failed to deserialize response" } })));
+            }
+            catch (Exception ex)
+            {
+                return await Task.FromResult(Result.Failure<S100ProductNamesResponse>(ex));
+            }
+        }
 
         /// <summary>
         /// Creates a response for S100 products retrieved from a specific date.

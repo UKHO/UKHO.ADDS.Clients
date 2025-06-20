@@ -21,16 +21,72 @@ variables:
 - name: SdkVersion
   value: "8.0.x"
 
+resources:
+  repositories:
+  - repository: openApiSpecSalesCatalogueServiceSharedAssets
+    type: github
+    name: UKHO/Sales-Catalogue-Service-Shared-Assets
+    ref: refs/heads/main
+    endpoint: UKHO
+
+  - repository: openApiSpecFileShareService
+    type: github
+    name: UKHO/file-share-service
+    ref: refs/heads/main
+    endpoint: UKHO
+
 stages:
+- stage: KiotaGenerateClients
+  displayName: Kiota generate clients
+  dependsOn: []
+  jobs:
+  - job: KiotaGenerateClients
+    workspace:
+      clean: all
+    displayName: Kiota generate clients
+    steps:
+    - checkout: self
+      path: s
+
+    - template: deployment/KiotaGenerateClients.yml
+      parameters:
+        openApiRepo: 'openApiSpecSalesCatalogueServiceSharedAssets'
+        openApiSpecPath: 'salesCatalogue_ExchangeSetService_API_definition_v1.9.yaml'
+        outputDirectory: '$(Build.SourcesDirectory)\src\UKHO.ADDS.Clients.SalesCatalogueService'
+        language: 'csharp'
+        GeneratedApiClassName: 'SalesCatalogueService'
+        Namespace: 'UKHO.ADDS.Clients.Kiota.SalesCatalogueService'
+
+    - template: deployment/KiotaGenerateClients.yml
+      parameters:
+        openApiRepo: 'openApiSpecFileShareService'
+        openApiSpecPath: 'file-share-service.openApi-public.yaml'
+        outputDirectory: '$(Build.SourcesDirectory)\src\UKHO.ADDS.Clients.FileShareService.ReadOnly'
+        language: 'csharp'
+        GeneratedApiClassName: 'FileShareService'
+        Namespace: 'UKHO.ADDS.Clients.Kiota.FileShareService.ReadOnly'
+
+    - template: deployment/KiotaGenerateClients.yml
+      parameters:
+        openApiRepo: 'openApiSpecFileShareService'
+        openApiSpecPath: 'file-share-service.openApi.yaml'
+        outputDirectory: '$(Build.SourcesDirectory)\src\UKHO.ADDS.Clients.FileShareService.ReadWrite'
+        language: 'csharp'
+        GeneratedApiClassName: 'FileShareService'
+        Namespace: 'UKHO.ADDS.Clients.Kiota.FileShareService.ReadWrite'
+
 - stage: BuildTestPublish
   displayName: Build, test and publish
-  dependsOn: []
+  dependsOn: [KiotaGenerateClients]
   jobs:
   - job: MainBuild
     workspace:
       clean: all
     displayName: Build, unit test and package
     steps:
+    - checkout: self
+      path: s
+
     - task: PowerShell@2
       displayName: Output environment variables
       inputs:
@@ -38,7 +94,7 @@ stages:
         script: |
           gci env:
           $CurrentYear = Get-Date -Format "yyyy"
-          $AssemblyCopyright = "Copyright © UK Hydrographic Office $CurrentYear"
+          $AssemblyCopyright = "Copyright Â© UK Hydrographic Office $CurrentYear"
           echo "##vso[task.setvariable variable=UKHOAssemblyCopyright]${AssemblyCopyright}"
 
     - task: PowerShell@2
@@ -55,7 +111,8 @@ stages:
           -UKHOAssemblyVersionPrefix "$env:UKHOAssemblyVersionPrefix"
           -UKHOAssemblyProduct "$env:UKHOAssemblyProduct"
           -SourceRevisionId "$(Build.SourceVersion)"
-          
+
+  
     - task: UseDotNet@2
       displayName: Use .NET $(SdkVersion) sdk
       inputs:

@@ -12,83 +12,63 @@ namespace UKHO.ADDS.Clients.SalesCatalogueService.Tests
         private const string DUMMY_ACCESS_TOKEN = "ACarefullyEncodedSecretAccessToken";
         private FakeScsHttpClientFactory _fakeScsHttpClientFactory;
         private SalesCatalogueClient _salesCatalogueApiClient;
-        private object _responseBody;
-        private DateTime _responseHeader;
-        private HttpStatusCode _responseStatusCode;
-
-        [SetUp]
-        public void Setup()
-        {
-            _fakeScsHttpClientFactory = new FakeScsHttpClientFactory(request =>
-            {
-                return (_responseStatusCode, _responseBody, _responseHeader);
-            });
-
-            _responseBody = string.Empty;
-            _responseStatusCode = HttpStatusCode.OK;
-            _salesCatalogueApiClient = new SalesCatalogueClient(_fakeScsHttpClientFactory, @"https://scs-tests.net/basePath/", DUMMY_ACCESS_TOKEN);
-        }
 
         [TearDown]
         public void TearDown()
         {
-            _fakeScsHttpClientFactory.Dispose();
-            if (_responseBody is IDisposable disposableResponse)
-            {
-                disposableResponse.Dispose();
-            }
+            _fakeScsHttpClientFactory?.Dispose();
+        }
+
+        private void InitClient(
+            HttpStatusCode statusCode,
+            object responseBody,
+            DateTime? contentLastModified = null,
+            DateTime? headerLastModified = null)
+        {
+            _fakeScsHttpClientFactory = new FakeScsHttpClientFactory(_ =>
+                (statusCode, responseBody, contentLastModified, headerLastModified)
+            );
+            _salesCatalogueApiClient = new SalesCatalogueClient(
+                _fakeScsHttpClientFactory,
+                @"https://scs-tests.net/basePath/",
+                DUMMY_ACCESS_TOKEN
+            );
         }
 
         [Test]
         public async Task GetS100ProductsFromSpecificDateAsync_Success_ReturnsSuccessResult()
         {
-            // Arrange
             var expectedProducts = new List<S100Products>
             {
-                new S100Products { ProductName = "Product1", LatestEditionNumber = 1, LatestUpdateNumber = 1 },
-                new S100Products { ProductName = "Product2", LatestEditionNumber = 2, LatestUpdateNumber = 2 }
+                new() { ProductName = "Product1", LatestEditionNumber = 1, LatestUpdateNumber = 1 },
+                new() { ProductName = "Product2", LatestEditionNumber = 2, LatestUpdateNumber = 2 }
             };
-
-            var correlationId = Guid.NewGuid().ToString();
-            var apiVersion = "v2";
-            var productType = "s100";
             var sinceDateTime = DateTime.UtcNow.AddDays(-1);
 
-            _responseBody = expectedProducts;
-            _responseStatusCode = HttpStatusCode.OK;
-            _responseHeader = sinceDateTime;
+            InitClient(HttpStatusCode.OK, expectedProducts, sinceDateTime);
 
-            // Act
-            var result = await _salesCatalogueApiClient.GetS100ProductsFromSpecificDateAsync(apiVersion, productType, sinceDateTime, correlationId);
+            var result = await _salesCatalogueApiClient.GetS100ProductsFromSpecificDateAsync(
+                "v2", "s100", sinceDateTime, Guid.NewGuid().ToString());
 
-            // Assert
-            result.IsSuccess(out S100SalesCatalogueResponse? s100SalesCatalogueResponse);
+            result.IsSuccess(out var s100SalesCatalogueResponse);
             CheckResponseMatchesExpectedResponse(s100SalesCatalogueResponse, result);
         }
 
         [Test]
         public async Task GetS100ProductsWithEmptySinceDateAsync_Success_ReturnsSuccessResult()
         {
-            // Arrange
             var expectedProducts = new List<S100Products>
             {
-                new S100Products { ProductName = "Product1", LatestEditionNumber = 1, LatestUpdateNumber = 1 },
-                new S100Products { ProductName = "Product2", LatestEditionNumber = 2, LatestUpdateNumber = 2 }
+                new() { ProductName = "Product1", LatestEditionNumber = 1, LatestUpdateNumber = 1 },
+                new() { ProductName = "Product2", LatestEditionNumber = 2, LatestUpdateNumber = 2 }
             };
-
-            var correlationId = Guid.NewGuid().ToString();
-            var apiVersion = "v2";
-            var productType = "s100";
             var sinceDateTime = DateTime.UtcNow.AddDays(-1);
 
-            _responseBody = expectedProducts;
-            _responseStatusCode = HttpStatusCode.OK;
-            _responseHeader = sinceDateTime;
+            InitClient(HttpStatusCode.OK, expectedProducts, sinceDateTime);
 
-            // Act
-            var result = await _salesCatalogueApiClient.GetS100ProductsFromSpecificDateAsync(apiVersion, productType, null, correlationId);
+            var result = await _salesCatalogueApiClient.GetS100ProductsFromSpecificDateAsync(
+                "v2", "s100", null, Guid.NewGuid().ToString());
 
-            // Assert
             result.IsSuccess(out S100SalesCatalogueResponse? s100SalesCatalogueResponse);
             CheckResponseMatchesExpectedResponse(s100SalesCatalogueResponse, result);
         }
@@ -96,19 +76,13 @@ namespace UKHO.ADDS.Clients.SalesCatalogueService.Tests
         [Test]
         public async Task GetS100ProductsFromSpecificDateAsync_Failure_ReturnsFailureResult()
         {
-            // Arrange
-            var correlationId = Guid.NewGuid().ToString();
-            var apiVersion = "v1";
-            var productType = "s100";
-            var sinceDateTime = DateTime.UtcNow.AddDays(-1);
+            var errorContent = new StringContent("Error message");
 
-            _responseBody = new StringContent("Error message");
-            _responseStatusCode = HttpStatusCode.BadRequest;
+            InitClient(HttpStatusCode.BadRequest, errorContent);
 
-            // Act
-            var result = await _salesCatalogueApiClient.GetS100ProductsFromSpecificDateAsync(apiVersion, productType, sinceDateTime, correlationId);
+            var result = await _salesCatalogueApiClient.GetS100ProductsFromSpecificDateAsync(
+                "v1", "s100", DateTime.UtcNow.AddDays(-1), Guid.NewGuid().ToString());
 
-            // Assert
             var isSuccess = result.IsSuccess(out var value, out var error);
             Assert.Multiple(() =>
             {
@@ -121,19 +95,14 @@ namespace UKHO.ADDS.Clients.SalesCatalogueService.Tests
         [Test]
         public async Task GetS100ProductsFromSpecificDateAsync_SetsCorrelationIdHeader()
         {
-            // Arrange
             var correlationId = Guid.NewGuid().ToString();
-            var apiVersion = "v1";
-            var productType = "s100";
-            var sinceDateTime = DateTime.UtcNow.AddDays(-1);
+            var responseContent = new StringContent("Response content");
 
-            _responseBody = new StringContent("Response content");
-            _responseStatusCode = HttpStatusCode.OK;
+            InitClient(HttpStatusCode.OK, responseContent);
 
-            // Act
-            await _salesCatalogueApiClient.GetS100ProductsFromSpecificDateAsync(apiVersion, productType, sinceDateTime, correlationId);
+            await _salesCatalogueApiClient.GetS100ProductsFromSpecificDateAsync(
+                "v1", "s100", DateTime.UtcNow.AddDays(-1), correlationId);
 
-            // Assert
             var httpClient = _fakeScsHttpClientFactory.HttpClient;
             Assert.Multiple(() =>
             {
@@ -141,11 +110,36 @@ namespace UKHO.ADDS.Clients.SalesCatalogueService.Tests
                 Assert.That(httpClient.DefaultRequestHeaders.GetValues(ApiHeaderKeys.XCorrelationIdHeaderKey).FirstOrDefault(), Is.EqualTo(correlationId));
             });
         }
+
+        [Test]
+        public async Task GetS100ProductsFromSpecificDateAsync_LastModified_IgnoresMainHeader_UsesContentHeader()
+        {
+            var expectedProducts = new List<S100Products>
+            {
+                new() { ProductName = "Product1", LatestEditionNumber = 1, LatestUpdateNumber = 1 }
+            };
+            var contentLastModified = DateTime.UtcNow.AddDays(-2);
+            var headerLastModified = DateTime.UtcNow.AddDays(-5);
+
+            InitClient(HttpStatusCode.OK, expectedProducts, contentLastModified, headerLastModified);
+
+            var result = await _salesCatalogueApiClient.GetS100ProductsFromSpecificDateAsync(
+                "v2", "s100", DateTime.UtcNow.AddDays(-1), Guid.NewGuid().ToString());
+
+            result.IsSuccess(out var s100SalesCatalogueResponse);
+            Assert.That(s100SalesCatalogueResponse, Is.Not.Null);
+            Assert.Multiple(() =>
+            {
+                Assert.That(s100SalesCatalogueResponse!.LastModified, Is.EqualTo(contentLastModified).Within(TimeSpan.FromSeconds(1)));
+                Assert.That(s100SalesCatalogueResponse.LastModified, Is.Not.EqualTo(headerLastModified).Within(TimeSpan.FromSeconds(1)));
+            });
+        }
+
         private static void CheckResponseMatchesExpectedResponse(S100SalesCatalogueResponse? expectedResponse, IResult<S100SalesCatalogueResponse> response)
         {
             var isSuccess = response.IsSuccess(out var responseValue);
 
-            Assert.That(responseValue!.ResponseBody.Count, Is.EqualTo(expectedResponse!.ResponseBody.Count));
+            Assert.That(responseValue!.ResponseBody, Has.Count.EqualTo(expectedResponse!.ResponseBody.Count));
             Assert.Multiple(() =>
             {
                 Assert.That(responseValue.ResponseCode, Is.EqualTo(expectedResponse.ResponseCode));

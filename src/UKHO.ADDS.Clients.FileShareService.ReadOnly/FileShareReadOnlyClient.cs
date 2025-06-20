@@ -62,9 +62,8 @@ namespace UKHO.ADDS.Clients.FileShareService.ReadOnly
         public async Task<IResult<BatchSearchResponse>> SearchAsync(string searchQuery, int? pageSize, int? start,  CancellationToken cancellationToken)
         {
             var response = await SearchResponse(searchQuery, pageSize, start, string.Empty, cancellationToken);
-            var errorMetadata = await response.CreateErrorMetadata(ApiNames.FileShareService, string.Empty);
 
-            return await response.CreateResultAsync<BatchSearchResponse, ErrorResponseModel>((errorResponseModel, status) => TranslateErrors(errorResponseModel, status, errorMetadata));
+            return await response.CreateResultAsync<BatchSearchResponse>(ApiNames.FileShareService);
         }
 
         public async Task<IResult<BatchSearchResponse>> SearchAsync(string searchQuery, string correlationId) => await SearchAsync(searchQuery, null, null, correlationId);
@@ -76,14 +75,8 @@ namespace UKHO.ADDS.Clients.FileShareService.ReadOnly
         public async Task<IResult<BatchSearchResponse>> SearchAsync(string searchQuery, int? pageSize, int? start, string correlationId, CancellationToken cancellationToken)
         {
             var response = await SearchResponse(searchQuery, pageSize, start, correlationId, cancellationToken);
-            var errorMetadata = await response.CreateErrorMetadata(ApiNames.FileShareService, correlationId);
 
-            return await response.CreateResultAsync<BatchSearchResponse, ErrorResponseModel>((errorResponseModel, status) => TranslateErrors(errorResponseModel, status, errorMetadata));
-        }
-
-        protected IError TranslateErrors(ErrorResponseModel errorResponseModel, HttpStatusCode status, IDictionary<string, object> errorMetadata)
-        {
-            return ErrorFactory.CreateError(status, errorMetadata);
+            return await response.CreateResultAsync<BatchSearchResponse>(ApiNames.FileShareService, correlationId);            
         }
 
         protected IError TranslateErrors(ErrorResponseModel errorResponseModel, HttpStatusCode status)

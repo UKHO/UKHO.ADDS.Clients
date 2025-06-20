@@ -4,46 +4,57 @@ using UKHO.ADDS.Infrastructure.Serialization.Json;
 
 namespace UKHO.ADDS.Clients.SalesCatalogueService.Tests.Helpers
 {
-    public class FakeScsHttpClientFactory(Func<HttpRequestMessage, (HttpStatusCode, object, DateTime?)> httpMessageHandler) : DelegatingHandler, IHttpClientFactory
+    public class FakeScsHttpClientFactory : DelegatingHandler, IHttpClientFactory
     {
-        private HttpClient _httpClient;
+        private readonly Func<HttpRequestMessage, (HttpStatusCode, object, DateTime?, DateTime?)> _responseGenerator;
 
-        public HttpClient HttpClient
+        public FakeScsHttpClientFactory(Func<HttpRequestMessage, (HttpStatusCode, object, DateTime?, DateTime?)> responseGenerator)
         {
-            get => _httpClient ?? CreateClient("");
-            private set => _httpClient = value;
+            _responseGenerator = responseGenerator;
+            HttpClient = new HttpClient(this);
         }
 
-        public HttpClient CreateClient(string name)
-        {
-            _httpClient = new HttpClient(this);
-            return HttpClient;
-        }
+        // Backward compatibility constructor
+        public FakeScsHttpClientFactory(Func<HttpRequestMessage, (HttpStatusCode, object, DateTime?)> simpleGenerator)
+            : this(req =>
+            {
+                var (code, body, contentLastModified) = simpleGenerator(req);
+                return (code, body, contentLastModified, null);
+            })
+        { }
+
+        public HttpClient HttpClient { get; private set; }
+
+        public HttpClient CreateClient(string name) => HttpClient;
 
         protected override Task<HttpResponseMessage> SendAsync(HttpRequestMessage request, CancellationToken cancellationToken)
         {
-            var (httpStatusCode, responseValue, responseHeaderLastModifiedValue) = httpMessageHandler(request);
-            var response = new HttpResponseMessage { StatusCode = httpStatusCode };
+            var (statusCode, responseBody, contentLastModified, headerLastModified) = _responseGenerator(request);
 
-            switch (responseValue)
+            var response = new HttpResponseMessage(statusCode)
             {
-                case null:
-                    break;
-                case Stream stream:
-                    response.Content = new StreamContent(stream);
-                    break;
-                default:
-                    response.Content = new StringContent(JsonCodec.Encode(responseValue), Encoding.UTF8, "application/json");
-                    
-                    if (responseHeaderLastModifiedValue.HasValue)
-                    {
-                        response.Content.Headers.LastModified = responseHeaderLastModifiedValue;
-                    }
-                    
-                    break;
-            }
+                Content = responseBody switch
+                {
+                    null => null,
+                    Stream stream => new StreamContent(stream),
+                    HttpContent httpContent => httpContent,
+                    _ => CreateJsonContent(responseBody, contentLastModified)
+                }
+            };
+
+            // Set main response header if provided
+            if (headerLastModified.HasValue)
+                response.Headers.TryAddWithoutValidation("Last-Modified", headerLastModified.Value.ToString("R"));
 
             return Task.FromResult(response);
+        }
+
+        private static StringContent CreateJsonContent(object value, DateTime? contentLastModified)
+        {
+            var content = new StringContent(JsonCodec.Encode(value), Encoding.UTF8, "application/json");
+            if (contentLastModified.HasValue)
+                content.Headers.LastModified = contentLastModified;
+            return content;
         }
     }
 }

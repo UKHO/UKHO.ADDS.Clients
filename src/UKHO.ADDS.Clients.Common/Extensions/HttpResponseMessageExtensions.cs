@@ -1,4 +1,5 @@
 ﻿using System.Net;
+using System.Text.Json;
 using UKHO.ADDS.Clients.Common.Constants;
 using UKHO.ADDS.Infrastructure.Results;
 using UKHO.ADDS.Infrastructure.Serialization.Json;
@@ -124,7 +125,20 @@ namespace UKHO.ADDS.Clients.Common.Extensions
 
             //get error response body
             var errorJson = await response.Content.ReadAsStringAsync();
-            errorMetadata.Add(ErrorMetaDataKeys.ErrorResponseBody, errorJson);
+            try
+            {
+                var jsonElement = JsonSerializer.Deserialize<JsonElement>(errorJson);
+                var formattedJson = JsonSerializer.Serialize(jsonElement, new JsonSerializerOptions
+                {
+                    WriteIndented = true
+                });
+                errorMetadata.Add(ErrorMetaDataKeys.ErrorResponseBody, formattedJson);
+            }
+            catch
+            {
+                // If JSON parsing fails, use the original string
+                errorMetadata.Add(ErrorMetaDataKeys.ErrorResponseBody, errorJson);
+            }
 
             return errorMetadata;
         }

@@ -1,5 +1,6 @@
 ﻿using System.Net;
 using System.Text;
+using UKHO.ADDS.Clients.Common.Constants;
 using UKHO.ADDS.Infrastructure.Serialization.Json;
 
 namespace UKHO.ADDS.Clients.SalesCatalogueService.Tests.Helpers
@@ -51,7 +52,7 @@ namespace UKHO.ADDS.Clients.SalesCatalogueService.Tests.Helpers
 
         private static StringContent CreateJsonContent(object value, DateTime? contentLastModified)
         {
-            var content = new StringContent(JsonCodec.Encode(value), Encoding.UTF8, "application/json");
+            var content = new StringContent(JsonCodec.Encode(value), Encoding.UTF8, ApiHeaderKeys.ContentTypeJson);
             if (contentLastModified.HasValue)
                 content.Headers.LastModified = contentLastModified;
             return content;

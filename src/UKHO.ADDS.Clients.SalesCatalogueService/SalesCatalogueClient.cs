@@ -131,6 +131,7 @@ namespace UKHO.ADDS.Clients.SalesCatalogueService
                 
                 return await Task.FromResult(Result.Failure<S100ProductNamesResponse>(ErrorFactory.CreateError(HttpStatusCode.BadRequest, 
                     new Dictionary<string, object> { { "reason", "Failed to deserialize response" } })));
+
             }
             catch (Exception ex)
             {
@@ -159,8 +160,6 @@ namespace UKHO.ADDS.Clients.SalesCatalogueService
                 if (httpResponseMessage.StatusCode == HttpStatusCode.OK)
                 {
                     var bodyJson = await httpResponseMessage.Content.ReadAsStringAsync();
-
-                    //Deserialize Json response body to list of S100Products
                     var products = JsonCodec.Decode<List<S100Products>>(bodyJson);
 
                     response.ResponseBody = products ?? new List<S100Products>();

@@ -34,7 +34,7 @@ namespace UKHO.ADDS.Clients.SalesCatalogueService.Tests
         }
 
         [Test]
-        public async Task GetS100ProductNamesAsync_Success_ReturnsSuccessResult()
+        public async Task WhenRequestingS100ProductNames_ThenReturnsSuccessResult()
         {
             var productNames = new List<string> { TestProduct2, TestProduct1 };
             var expectedResponse = CreateSampleSuccessResponse();
@@ -82,7 +82,7 @@ namespace UKHO.ADDS.Clients.SalesCatalogueService.Tests
         }
 
         [Test]
-        public async Task GetS100ProductNamesAsync_EmptyProductList_ReturnsFailureResult()
+        public async Task WhenRequestingS100ProductNamesWithEmptyList_ThenReturnsFailureResult()
         {
             var productNames = new List<string>();
 
@@ -94,7 +94,7 @@ namespace UKHO.ADDS.Clients.SalesCatalogueService.Tests
         }
 
         [Test]
-        public async Task GetS100ProductNamesAsync_ServerError_ReturnsFailureResult()
+        public async Task WhenServerReturnsError_ThenReturnsFailureResult()
         {
             var productNames = new List<string> { TestProduct2, TestProduct1 };
 
@@ -107,7 +107,7 @@ namespace UKHO.ADDS.Clients.SalesCatalogueService.Tests
         }
 
         [Test]
-        public async Task GetS100ProductNamesAsync_DeserializationFailure_ReturnsFailureResult()
+        public async Task WhenResponseCannotBeDeserialized_ThenReturnsFailureResult()
         {
             var productNames = new List<string> { TestProduct2, TestProduct1 };
 
@@ -120,7 +120,7 @@ namespace UKHO.ADDS.Clients.SalesCatalogueService.Tests
         }
 
         [Test]
-        public async Task GetS100ProductNamesAsync_ValidatesRequestPayload()
+        public async Task WhenRequestingS100ProductNames_ThenSerializesPayloadCorrectly()
         {
             var productNames = new List<string> { TestProduct2, TestProduct1 };
             string capturedContent = null;
@@ -148,7 +148,7 @@ namespace UKHO.ADDS.Clients.SalesCatalogueService.Tests
         }
 
         [Test]
-        public async Task GetS100ProductNamesAsync_UsesCorrectEndpoint()
+        public async Task WhenRequestingS100ProductNames_ThenUsesCorrectEndpoint()
         {
             var productNames = new List<string> { TestProduct2 };
             Uri capturedUri = null;
@@ -286,11 +286,16 @@ namespace UKHO.ADDS.Clients.SalesCatalogueService.Tests
         [TearDown]
         public void TearDown()
         {
-            _fakeScsHttpClientFactory.Dispose();
             if (_responseBody is IDisposable disposableResponse)
             {
                 disposableResponse.Dispose();
             }
+        }
+        
+        [OneTimeTearDown]
+        public void OneTimeTearDown()
+        {
+            _fakeScsHttpClientFactory?.Dispose();
         }
     }
 }

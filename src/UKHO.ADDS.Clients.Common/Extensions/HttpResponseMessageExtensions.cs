@@ -140,7 +140,7 @@ namespace UKHO.ADDS.Clients.Common.Extensions
                     WriteIndented = true
                 });
             }
-            catch
+            catch (JsonException)
             {
                 return json;
             }

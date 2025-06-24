@@ -125,22 +125,25 @@ namespace UKHO.ADDS.Clients.Common.Extensions
 
             //get error response body
             var errorJson = await response.Content.ReadAsStringAsync();
+            errorMetadata.Add(ErrorMetaDataKeys.ErrorResponseBody, TryFormatJson(errorJson));
+            return errorMetadata;
+        }
+
+        // Helper method to format JSON if valid, otherwise return original string
+        private static string TryFormatJson(string json)
+        {
             try
             {
-                var jsonElement = JsonSerializer.Deserialize<JsonElement>(errorJson);
-                var formattedJson = JsonSerializer.Serialize(jsonElement, new JsonSerializerOptions
+                var jsonElement = JsonSerializer.Deserialize<JsonElement>(json);
+                return JsonSerializer.Serialize(jsonElement, new JsonSerializerOptions
                 {
                     WriteIndented = true
                 });
-                errorMetadata.Add(ErrorMetaDataKeys.ErrorResponseBody, formattedJson);
             }
             catch
             {
-                // If JSON parsing fails, use the original string
-                errorMetadata.Add(ErrorMetaDataKeys.ErrorResponseBody, errorJson);
+                return json;
             }
-
-            return errorMetadata;
         }
         private static bool HasContent(this HttpResponseMessage response) => response.Content.GetType().Name != "EmptyContent";
     }

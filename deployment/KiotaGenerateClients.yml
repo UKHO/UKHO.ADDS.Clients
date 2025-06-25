@@ -1,0 +1,43 @@
+parameters:
+  - name: outputDirectory
+    type: string
+  - name: language
+    type: string
+    default: 'csharp'
+  - name: openApiRepo
+    type: string
+  - name: openApiBranch
+    type: string
+    default: 'main'
+  - name: openApiSpecPath
+    type: string
+  - name: GeneratedApiClassName
+    type: string
+  - name: Namespace
+    type: string
+
+steps:
+  - checkout: ${{parameters.openApiRepo}}
+    path: s/openapi
+
+  - task: UseDotNet@2
+    displayName: 'Install .NET SDK for Kiota'
+    inputs:
+      packageType: sdk
+      version: '8.0.x'
+
+  - script: dotnet tool install --global Microsoft.OpenApi.Kiota
+    displayName: 'Install Kiota CLI'
+
+  - powershell: |
+      & "deployment\CheckForKiotaDependency.ps1" -OutputDirectory $OutputDirectory
+    displayName: 'Ensure Kiota is installed'
+
+  - powershell: |
+      & "deployment\RunKiota.ps1" `
+        -OpenApiSpecPath "openapi\${{ parameters.openApiSpecPath }}" `
+        -OutputDirectory "${{parameters.outputDirectory}}\GeneratedClient" `
+        -Language "${{parameters.language}}" `
+        -GeneratedApiClassName "${{parameters.GeneratedApiClassName}}" `
+        -Namespace "${{parameters.Namespace}}"
+    displayName: 'Run Kiota to generate clients'

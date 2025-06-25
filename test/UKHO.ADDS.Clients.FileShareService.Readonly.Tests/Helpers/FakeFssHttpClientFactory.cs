@@ -1,5 +1,6 @@
 ﻿using System.Net;
 using System.Text;
+using UKHO.ADDS.Clients.Common.Constants;
 using UKHO.ADDS.Infrastructure.Serialization.Json;
 
 namespace UKHO.ADDS.Clients.FileShareService.ReadOnly.Tests.Helpers
@@ -36,7 +37,7 @@ namespace UKHO.ADDS.Clients.FileShareService.ReadOnly.Tests.Helpers
                     response.Content = new StreamContent(stream);
                     break;
                 default:
-                    response.Content = new StringContent(JsonCodec.Encode(responseValue), Encoding.UTF8, "application/json");
+                    response.Content = new StringContent(JsonCodec.Encode(responseValue), Encoding.UTF8, ApiHeaderKeys.ContentTypeJson);
                     break;
             }
 

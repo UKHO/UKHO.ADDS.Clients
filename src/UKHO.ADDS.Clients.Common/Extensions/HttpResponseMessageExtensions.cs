@@ -1,4 +1,5 @@
 ﻿using System.Net;
+using System.Text.Json;
 using UKHO.ADDS.Clients.Common.Constants;
 using UKHO.ADDS.Infrastructure.Results;
 using UKHO.ADDS.Infrastructure.Serialization.Json;
@@ -51,7 +52,7 @@ namespace UKHO.ADDS.Clients.Common.Extensions
             }
         }
 
-        public static async Task<IResult<TValue>> CreateResultAsync<TValue>(this HttpResponseMessage response, string applicationName, string correlationId) where TValue : class
+        public static async Task<IResult<TValue>> CreateResultAsync<TValue>(this HttpResponseMessage response, string applicationName, string? correlationId = null) where TValue : class
         {
             try
             {
@@ -124,9 +125,22 @@ namespace UKHO.ADDS.Clients.Common.Extensions
 
             //get error response body
             var errorJson = await response.Content.ReadAsStringAsync();
-            errorMetadata.Add(ErrorMetaDataKeys.ErrorResponseBody, errorJson);
-
+            errorMetadata.Add(ErrorMetaDataKeys.ErrorResponseBody, TryFormatJson(errorJson));
             return errorMetadata;
+        }
+
+        // Helper method to format JSON if valid, otherwise return original string
+        private static string TryFormatJson(string json)
+        {
+            try
+            {
+                var jsonElement = JsonCodec.Decode<JsonElement>(json);
+                return JsonCodec.Encode(jsonElement, new JsonSerializerOptions { WriteIndented = true });
+            }
+            catch (JsonException)
+            {
+                return json;
+            }
         }
         private static bool HasContent(this HttpResponseMessage response) => response.Content.GetType().Name != "EmptyContent";
     }

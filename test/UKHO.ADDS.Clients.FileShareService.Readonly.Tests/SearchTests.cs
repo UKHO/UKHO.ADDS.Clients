@@ -381,6 +381,24 @@ namespace UKHO.ADDS.Clients.FileShareService.ReadOnly.Tests
             });
         }
 
+        [Test]
+        public async Task TestSimpleSearchStringWithoutCorrelationId()
+        {
+            var expectedResponse = new BatchSearchResponse { Count = 2, Total = 2, Entries = new List<BatchDetails> { new("batch1"), new("batch2") }, Links = new Links(new Link("self")) };
+            _nextResponse = expectedResponse;
+
+            var response = await _fileShareApiClient.SearchAsync("$batch(key) eq 'value'", null, null, CancellationToken.None);
+
+            Assert.Multiple(() =>
+            {
+                Assert.That(_lastRequestUri?.AbsolutePath, Is.EqualTo("/basePath/batch"));
+                Assert.That(_lastRequestUri?.Query, Is.EqualTo("?$filter=$batch(key)%20eq%20%27value%27"));
+                Assert.That(response.IsSuccess, Is.True);
+            });
+
+            CheckResponseMatchesExpectedResponse(expectedResponse, response);
+        }
+
 
         private static void CheckResponseMatchesExpectedResponse(BatchSearchResponse expectedResponse, IResult<BatchSearchResponse> response)
         {

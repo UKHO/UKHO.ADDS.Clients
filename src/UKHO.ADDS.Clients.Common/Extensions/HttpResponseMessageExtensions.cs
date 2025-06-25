@@ -134,11 +134,8 @@ namespace UKHO.ADDS.Clients.Common.Extensions
         {
             try
             {
-                var jsonElement = JsonSerializer.Deserialize<JsonElement>(json);
-                return JsonSerializer.Serialize(jsonElement, new JsonSerializerOptions
-                {
-                    WriteIndented = true
-                });
+                var jsonElement = JsonCodec.Decode<JsonElement>(json);
+                return JsonCodec.Encode(jsonElement, new JsonSerializerOptions { WriteIndented = true });
             }
             catch (JsonException)
             {

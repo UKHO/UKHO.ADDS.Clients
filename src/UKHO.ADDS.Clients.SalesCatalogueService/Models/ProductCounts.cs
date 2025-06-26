@@ -6,6 +6,6 @@
         public int? ReturnedProductCount { get; set; }
         public int? RequestedProductsAlreadyUpToDateCount { get; set; }
 
-        public List<RequestedProductsNotReturned> RequestedProductsNotReturned { get; set; }
+        public List<RequestedProductsNotReturned> RequestedProductsNotReturned { get; set; } = new List<RequestedProductsNotReturned>();
     }
 }

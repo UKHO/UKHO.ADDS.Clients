@@ -20,5 +20,8 @@ namespace UKHO.ADDS.Clients.SalesCatalogueService.Models
         
         [JsonPropertyName("fileSize")]
         public int FileSize { get; set; }
+        
+        [JsonPropertyName("cancellation")]
+        public S100ProductCancellation Cancellation { get; set; }
     }
 }

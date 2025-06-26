@@ -5,6 +5,7 @@ using UKHO.ADDS.Clients.Common.Constants;
 using UKHO.ADDS.Clients.SalesCatalogueService.Models;
 using UKHO.ADDS.Clients.SalesCatalogueService.Tests.Helpers;
 using UKHO.ADDS.Infrastructure.Results;
+using UKHO.ADDS.Infrastructure.Serialization.Json;
 
 namespace UKHO.ADDS.Clients.SalesCatalogueService.Tests
 {
@@ -15,6 +16,8 @@ namespace UKHO.ADDS.Clients.SalesCatalogueService.Tests
         private const string TestProduct1 = "101GB007645NUTS57";
         private const string TestProduct2 = "101GB007645NUTS58";
         private const string BaseUri = "https://scs-tests.net/basePath/";
+        private const string ApiVersion = "v2";
+        private const string ProductType = "s100";
         private const string ProductEndpoint = "v2/products/s100/productNames";
         private const string CorrelationId = "Test_CorrelationId";
 
@@ -42,7 +45,7 @@ namespace UKHO.ADDS.Clients.SalesCatalogueService.Tests
             _responseBody = expectedResponse;
             _responseStatusCode = HttpStatusCode.OK;
 
-            var result = await _salesCatalogueApiClient.GetS100ProductNamesAsync(productNames, CorrelationId);
+            var result = await _salesCatalogueApiClient.GetS100ProductNamesAsync(ApiVersion, ProductType, productNames, CorrelationId);
 
             var isSuccess = result.IsSuccess(out var response, out var error);
             
@@ -89,7 +92,7 @@ namespace UKHO.ADDS.Clients.SalesCatalogueService.Tests
             _responseBody = "Bad Request";
             _responseStatusCode = HttpStatusCode.BadRequest;
 
-            var result = await _salesCatalogueApiClient.GetS100ProductNamesAsync(productNames, CorrelationId);
+            var result = await _salesCatalogueApiClient.GetS100ProductNamesAsync(ApiVersion, ProductType, productNames, CorrelationId);
             AssertFailureResult(result);
         }
 
@@ -101,7 +104,7 @@ namespace UKHO.ADDS.Clients.SalesCatalogueService.Tests
             _responseBody = "Internal Server Error";
             _responseStatusCode = HttpStatusCode.InternalServerError;
 
-            var result = await _salesCatalogueApiClient.GetS100ProductNamesAsync(productNames, CorrelationId);
+            var result = await _salesCatalogueApiClient.GetS100ProductNamesAsync(ApiVersion, ProductType, productNames, CorrelationId);
 
             AssertFailureResult(result);
         }
@@ -114,7 +117,7 @@ namespace UKHO.ADDS.Clients.SalesCatalogueService.Tests
             _responseBody = "{ invalid json }";
             _responseStatusCode = HttpStatusCode.OK;
 
-            var result = await _salesCatalogueApiClient.GetS100ProductNamesAsync(productNames, CorrelationId);
+            var result = await _salesCatalogueApiClient.GetS100ProductNamesAsync(ApiVersion, ProductType, productNames, CorrelationId);
 
             AssertFailureResult(result);
         }
@@ -136,13 +139,13 @@ namespace UKHO.ADDS.Clients.SalesCatalogueService.Tests
 
             var client = new SalesCatalogueClient(factory, BaseUri, DummyAccessToken);
 
-            await client.GetS100ProductNamesAsync(productNames, CorrelationId);
+            await client.GetS100ProductNamesAsync(ApiVersion, ProductType, productNames, CorrelationId);
 
             Assert.Multiple(() =>
             {
                 Assert.That(capturedContent, Is.Not.Null, "Request content should be captured");
                 
-                var deserializedContent = JsonSerializer.Deserialize<List<string>>(capturedContent!);
+                var deserializedContent = JsonCodec.Decode<List<string>>(capturedContent!);
                 Assert.That(deserializedContent, Is.EquivalentTo(productNames), "Request payload should match input product names");
             });
         }
@@ -161,7 +164,7 @@ namespace UKHO.ADDS.Clients.SalesCatalogueService.Tests
 
             var client = new SalesCatalogueClient(factory, BaseUri, DummyAccessToken);
 
-            await client.GetS100ProductNamesAsync(productNames, CorrelationId);
+            await client.GetS100ProductNamesAsync(ApiVersion, ProductType, productNames, CorrelationId);
 
             Assert.Multiple(() =>
             {

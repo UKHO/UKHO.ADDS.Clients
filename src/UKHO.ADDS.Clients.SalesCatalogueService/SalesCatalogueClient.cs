@@ -96,40 +96,42 @@ namespace UKHO.ADDS.Clients.SalesCatalogueService
         /// <summary>
         /// Retrieves S100 product names asynchronously.
         /// </summary>
+        /// <param name="apiVersion">The API version to use.</param>
+        /// <param name="productType">The type of product to retrieve.</param>
         /// <param name="productNames">List of product names to retrieve information for.</param>
         /// <param name="correlationId">The correlation ID for the request.</param>
         /// <param name="cancellationToken">A cancellation token that can be used to cancel the operation.</param>
         /// <returns>A task that represents the asynchronous operation. The task result contains the S100 product names response.</returns>
-        public async Task<IResult<S100ProductNamesResponse>> GetS100ProductNamesAsync(List<string> productNames, string correlationId, CancellationToken cancellationToken = default)
+        public async Task<IResult<S100ProductNamesResponse>> GetS100ProductNamesAsync(string apiVersion, string productType, List<string> productNames, string correlationId, CancellationToken cancellationToken = default)
         {
-            var uri = new Uri("v2/products/s100/productNames", UriKind.Relative);
+            var uri = new Uri($"{apiVersion}/products/{productType}/productNames", UriKind.Relative);
 
             try
             {
                 using var httpClient = await GetAuthenticatedClientAsync(correlationId);
                 using var httpRequestMessage = new HttpRequestMessage(HttpMethod.Post, uri);
-                
-                var json = JsonSerializer.Serialize(productNames);
-                httpRequestMessage.Content = new StringContent(json, Encoding.UTF8, "application/json");
-                
+
+                var json = JsonCodec.Encode(productNames);
+                httpRequestMessage.Content = new StringContent(json, Encoding.UTF8, ApiHeaderKeys.ContentTypeJson);
+
                 var response = await httpClient.SendAsync(httpRequestMessage, cancellationToken);
-                
+
                 if (response.StatusCode != HttpStatusCode.OK)
                 {
                     var errorMetadata = await response.CreateErrorMetadata(ApiNames.SaleCatalogueService, correlationId);
                     return Result.Failure<S100ProductNamesResponse>(ErrorFactory.CreateError(response.StatusCode, errorMetadata));
                 }
-                
+
                 var bodyJson = await response.Content.ReadAsStringAsync(cancellationToken);
                 var productNamesResponse = JsonCodec.Decode<S100ProductNamesResponse>(bodyJson);
-                
+
                 if (productNamesResponse != null)
                 {
                     productNamesResponse.ResponseCode = response.StatusCode;
                     return Result.Success(productNamesResponse);
                 }
-                
-                return Result.Failure<S100ProductNamesResponse>(ErrorFactory.CreateError(HttpStatusCode.BadRequest, 
+
+                return Result.Failure<S100ProductNamesResponse>(ErrorFactory.CreateError(HttpStatusCode.BadRequest,
                     new Dictionary<string, object> { { "reason", "Failed to deserialize response" } }));
 
             }

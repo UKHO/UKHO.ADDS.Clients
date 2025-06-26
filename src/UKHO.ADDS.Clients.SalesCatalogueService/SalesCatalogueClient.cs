@@ -117,7 +117,7 @@ namespace UKHO.ADDS.Clients.SalesCatalogueService
                 if (response.StatusCode != HttpStatusCode.OK)
                 {
                     var errorMetadata = await response.CreateErrorMetadata(ApiNames.SaleCatalogueService, correlationId);
-                    return await Task.FromResult(Result.Failure<S100ProductNamesResponse>(ErrorFactory.CreateError(response.StatusCode, errorMetadata)));
+                    return Result.Failure<S100ProductNamesResponse>(ErrorFactory.CreateError(response.StatusCode, errorMetadata));
                 }
                 
                 var bodyJson = await response.Content.ReadAsStringAsync(cancellationToken);
@@ -126,16 +126,16 @@ namespace UKHO.ADDS.Clients.SalesCatalogueService
                 if (productNamesResponse != null)
                 {
                     productNamesResponse.ResponseCode = response.StatusCode;
-                    return await Task.FromResult(Result.Success(productNamesResponse));
+                    return Result.Success(productNamesResponse);
                 }
                 
-                return await Task.FromResult(Result.Failure<S100ProductNamesResponse>(ErrorFactory.CreateError(HttpStatusCode.BadRequest, 
-                    new Dictionary<string, object> { { "reason", "Failed to deserialize response" } })));
+                return Result.Failure<S100ProductNamesResponse>(ErrorFactory.CreateError(HttpStatusCode.BadRequest, 
+                    new Dictionary<string, object> { { "reason", "Failed to deserialize response" } }));
 
             }
             catch (Exception ex)
             {
-                return await Task.FromResult(Result.Failure<S100ProductNamesResponse>(ex));
+                return Result.Failure<S100ProductNamesResponse>(ex);
             }
         }
 

@@ -125,13 +125,13 @@ namespace UKHO.ADDS.Clients.SalesCatalogueService.Tests
             var productNames = new List<string> { TestProduct2, TestProduct1 };
             string capturedContent = null;
 
-            var factory = new FakeScsHttpClientFactory(request =>
+            var factory = new FakeScsHttpClientFactory(async (HttpRequestMessage request) =>
             {
                 if (request.RequestUri!.ToString().EndsWith("productNames") && request.Method == HttpMethod.Post)
                 {
-                    capturedContent = request.Content!.ReadAsStringAsync().Result;
+                    capturedContent = await request.Content!.ReadAsStringAsync();
                 }
-                return (HttpStatusCode.OK, new S100ProductNamesResponse(), null);
+                return (HttpStatusCode.OK, new S100ProductNamesResponse(), null, null);
             });
 
             var client = new SalesCatalogueClient(factory, BaseUri, DummyAccessToken);
@@ -142,7 +142,7 @@ namespace UKHO.ADDS.Clients.SalesCatalogueService.Tests
             {
                 Assert.That(capturedContent, Is.Not.Null, "Request content should be captured");
                 
-                var deserializedContent = JsonSerializer.Deserialize<List<string>>(capturedContent);
+                var deserializedContent = JsonSerializer.Deserialize<List<string>>(capturedContent!);
                 Assert.That(deserializedContent, Is.EquivalentTo(productNames), "Request payload should match input product names");
             });
         }
@@ -166,7 +166,7 @@ namespace UKHO.ADDS.Clients.SalesCatalogueService.Tests
             Assert.Multiple(() =>
             {
                 Assert.That(capturedUri, Is.Not.Null, "Request URI should be captured");
-                Assert.That(capturedUri.ToString(), Does.EndWith(ProductEndpoint), "Endpoint should match expected URI");
+                Assert.That(capturedUri!.ToString(), Does.EndWith(ProductEndpoint), "Endpoint should match expected URI");
             });
         }
 

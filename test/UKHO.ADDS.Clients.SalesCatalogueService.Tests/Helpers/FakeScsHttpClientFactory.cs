@@ -7,11 +7,21 @@ namespace UKHO.ADDS.Clients.SalesCatalogueService.Tests.Helpers
 {
     public class FakeScsHttpClientFactory : DelegatingHandler, IHttpClientFactory
     {
-        private readonly Func<HttpRequestMessage, (HttpStatusCode, object, DateTime?, DateTime?)> _responseGenerator;
+        private readonly Func<HttpRequestMessage, Task<(HttpStatusCode, object, DateTime?, DateTime?)>> _asyncResponseGenerator;
+        private readonly Func<HttpRequestMessage, (HttpStatusCode, object, DateTime?, DateTime?)> _syncResponseGenerator;
+        private readonly bool _isAsync;
+
+        public FakeScsHttpClientFactory(Func<HttpRequestMessage, Task<(HttpStatusCode, object, DateTime?, DateTime?)>> asyncResponseGenerator)
+        {
+            _asyncResponseGenerator = asyncResponseGenerator;
+            _isAsync = true;
+            HttpClient = new HttpClient(this);
+        }
 
         public FakeScsHttpClientFactory(Func<HttpRequestMessage, (HttpStatusCode, object, DateTime?, DateTime?)> responseGenerator)
         {
-            _responseGenerator = responseGenerator;
+            _syncResponseGenerator = responseGenerator;
+            _isAsync = false;
             HttpClient = new HttpClient(this);
         }
 
@@ -28,9 +38,11 @@ namespace UKHO.ADDS.Clients.SalesCatalogueService.Tests.Helpers
 
         public HttpClient CreateClient(string name) => HttpClient;
 
-        protected override Task<HttpResponseMessage> SendAsync(HttpRequestMessage request, CancellationToken cancellationToken)
+        protected override async Task<HttpResponseMessage> SendAsync(HttpRequestMessage request, CancellationToken cancellationToken)
         {
-            var (statusCode, responseBody, contentLastModified, headerLastModified) = _responseGenerator(request);
+            var (statusCode, responseBody, contentLastModified, headerLastModified) = _isAsync 
+                ? await _asyncResponseGenerator(request) 
+                : _syncResponseGenerator(request);
 
             var response = new HttpResponseMessage(statusCode)
             {
@@ -47,7 +59,7 @@ namespace UKHO.ADDS.Clients.SalesCatalogueService.Tests.Helpers
             if (headerLastModified.HasValue)
                 response.Headers.TryAddWithoutValidation("Last-Modified", headerLastModified.Value.ToString("R"));
 
-            return Task.FromResult(response);
+            return response;
         }
 
         private static StringContent CreateJsonContent(object value, DateTime? contentLastModified)

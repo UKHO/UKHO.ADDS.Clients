@@ -1,6 +1,5 @@
 ﻿using System.Net;
 using System.Text;
-using System.Text.Json;
 using UKHO.ADDS.Clients.Common.Authentication;
 using UKHO.ADDS.Clients.Common.Constants;
 using UKHO.ADDS.Clients.Common.Extensions;

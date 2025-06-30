@@ -97,11 +97,11 @@ namespace UKHO.ADDS.Clients.SalesCatalogueService
         /// </summary>
         /// <param name="apiVersion">The API version to use.</param>
         /// <param name="productType">The type of product to retrieve.</param>
-        /// <param name="productNames">List of product names to retrieve information for.</param>
+        /// <param name="productNames">Enumerable of product names to retrieve information for.</param>
         /// <param name="correlationId">The correlation ID for the request.</param>
         /// <param name="cancellationToken">A cancellation token that can be used to cancel the operation.</param>
         /// <returns>A task that represents the asynchronous operation. The task result contains the S100 product names response.</returns>
-        public async Task<IResult<S100ProductNamesResponse>> GetS100ProductNamesAsync(string apiVersion, string productType, List<string> productNames, string correlationId, CancellationToken cancellationToken = default)
+        public async Task<IResult<S100ProductNamesResponse>> GetS100ProductNamesAsync(string apiVersion, string productType, IEnumerable<string> productNames, string correlationId, CancellationToken cancellationToken = default)
         {
             var uri = new Uri($"{apiVersion}/products/{productType}/productNames", UriKind.Relative);
 
@@ -110,7 +110,7 @@ namespace UKHO.ADDS.Clients.SalesCatalogueService
                 using var httpClient = await GetAuthenticatedClientAsync(correlationId);
                 using var httpRequestMessage = new HttpRequestMessage(HttpMethod.Post, uri);
 
-                var json = JsonCodec.Encode(productNames);
+                var json = JsonCodec.Encode(productNames.ToList());
                 httpRequestMessage.Content = new StringContent(json, Encoding.UTF8, ApiHeaderKeys.ContentTypeJson);
 
                 var response = await httpClient.SendAsync(httpRequestMessage, cancellationToken);

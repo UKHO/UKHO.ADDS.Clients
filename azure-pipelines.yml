@@ -144,7 +144,7 @@ stages:
 
 - stage: KiotaGenerateClients
   displayName: Kiota generate clients
-  dependsOn: [BuildTestPublish]
+  dependsOn: [MainBuild]
   jobs:
   - job: KiotaGenerateClients
     workspace:

@@ -142,47 +142,7 @@ stages:
         path: $(Build.BinariesDirectory)\IntegrationTests
         artifact: IntegrationTests
 
-- stage: KiotaGenerateClients
-  displayName: Kiota generate clients
-  dependsOn: [MainBuild]
-  jobs:
-  - job: KiotaGenerateClients
-    workspace:
-      clean: all
-    displayName: Kiota generate clients
-    steps:
-    - checkout: self
-      path: s
-
-    - template: deployment/KiotaGenerateClients.yml
-      parameters:
-        openApiRepo: 'openApiSpecSalesCatalogueServiceSharedAssets'
-        openApiSpecPath: 'salesCatalogue_ExchangeSetService_API_definition_v1.10.yaml'
-        outputDirectory: '$(Build.SourcesDirectory)\src\UKHO.ADDS.Clients.KiotaSalesCatalogueService\GeneratedClient'
-        language: 'csharp'
-        GeneratedApiClassName: 'KiotaSalesCatalogueService'
-        Namespace: 'UKHO.ADDS.Clients.Kiota.SalesCatalogueService'
-
-    - template: deployment/KiotaGenerateClients.yml
-      parameters:
-        openApiRepo: 'openApiSpecFileShareService'
-        openApiSpecPath: 'file-share-service.openApi-public.yaml'
-        outputDirectory: '$(Build.SourcesDirectory)\src\UKHO.ADDS.Clients.FileShareService.ReadOnly\GeneratedClient'
-        language: 'csharp'
-        GeneratedApiClassName: 'KiotaFileShareService'
-        Namespace: 'UKHO.ADDS.Clients.Kiota.FileShareService.ReadOnly'
-
-    - template: deployment/KiotaGenerateClients.yml
-      parameters:
-        openApiRepo: 'openApiSpecFileShareService'
-        openApiSpecPath: 'file-share-service.openApi.yaml'
-        outputDirectory: '$(Build.SourcesDirectory)\src\UKHO.ADDS.Clients.FileShareService.ReadWrite\GeneratedClient'
-        language: 'csharp'
-        GeneratedApiClassName: 'KiotaFileShareService'
-        Namespace: 'UKHO.ADDS.Clients.Kiota.FileShareService.ReadWrite'
-
   - job:
-    dependsOn: KiotaGenerateClients
     displayName: Integration tests
     # variables:
     # - group: clients-integration-tests
@@ -231,6 +191,45 @@ stages:
     #       $(Pipeline.Workspace)\IntegrationTests\PermitService\UKHO.ADDS.Clients.PermitService.IntegrationTests.dll
     #       $(Pipeline.Workspace)\IntegrationTests\SalesCatalogueService\UKHO.ADDS.Clients.SalesCatalogueService.IntegrationTests.dll
     #     testRunTitle: IntegrationTests
+
+- stage: KiotaGenerateClients
+  displayName: Kiota generate clients
+  dependsOn: [BuildTestPublish]
+  jobs:
+  - job: KiotaGenerateClients
+    workspace:
+      clean: all
+    displayName: Kiota generate clients
+    steps:
+    - checkout: self
+      path: s
+
+    - template: deployment/KiotaGenerateClients.yml
+      parameters:
+        openApiRepo: 'openApiSpecSalesCatalogueServiceSharedAssets'
+        openApiSpecPath: 'salesCatalogue_ExchangeSetService_API_definition_v1.10.yaml'
+        outputDirectory: '$(Build.SourcesDirectory)\src\UKHO.ADDS.Clients.KiotaSalesCatalogueService\GeneratedClient'
+        language: 'csharp'
+        GeneratedApiClassName: 'KiotaSalesCatalogueService'
+        Namespace: 'UKHO.ADDS.Clients.Kiota.SalesCatalogueService'
+
+    - template: deployment/KiotaGenerateClients.yml
+      parameters:
+        openApiRepo: 'openApiSpecFileShareService'
+        openApiSpecPath: 'file-share-service.openApi-public.yaml'
+        outputDirectory: '$(Build.SourcesDirectory)\src\UKHO.ADDS.Clients.FileShareService.ReadOnly\GeneratedClient'
+        language: 'csharp'
+        GeneratedApiClassName: 'KiotaFileShareService'
+        Namespace: 'UKHO.ADDS.Clients.Kiota.FileShareService.ReadOnly'
+
+    - template: deployment/KiotaGenerateClients.yml
+      parameters:
+        openApiRepo: 'openApiSpecFileShareService'
+        openApiSpecPath: 'file-share-service.openApi.yaml'
+        outputDirectory: '$(Build.SourcesDirectory)\src\UKHO.ADDS.Clients.FileShareService.ReadWrite\GeneratedClient'
+        language: 'csharp'
+        GeneratedApiClassName: 'KiotaFileShareService'
+        Namespace: 'UKHO.ADDS.Clients.Kiota.FileShareService.ReadWrite'
 
 - stage: ProGet
   condition: and(succeeded(), eq(variables['Build.SourceBranch'], 'refs/heads/main'))

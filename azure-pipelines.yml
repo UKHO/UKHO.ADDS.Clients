@@ -48,7 +48,7 @@ stages:
     - checkout: self
       path: s
 
-    - template: deployment/KiotaGenerateAllClients.yml
+    - template: deployment/KiotaClientGeneration.yml
 
     - task: PowerShell@2
       displayName: Output environment variables

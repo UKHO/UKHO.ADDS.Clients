@@ -233,7 +233,7 @@ stages:
         Namespace: 'UKHO.ADDS.Clients.Kiota.FileShareService.ReadWrite'
 
 - stage: ProGet
-  condition: and(succeeded(), eq(variables['Build.SourceBranch'], 'refs/heads/main'))
+  # condition: and(succeeded(), eq(variables['Build.SourceBranch'], 'refs/heads/main'))
   variables:
   - group: nuget-deployment-vars
   jobs:

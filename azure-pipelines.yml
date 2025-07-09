@@ -48,6 +48,8 @@ stages:
     - checkout: self
       path: s
 
+    - template: deployment/KiotaGenerateAllClients.yml
+
     - task: PowerShell@2
       displayName: Output environment variables
       inputs:
@@ -192,32 +194,6 @@ stages:
     #       $(Pipeline.Workspace)\IntegrationTests\SalesCatalogueService\UKHO.ADDS.Clients.SalesCatalogueService.IntegrationTests.dll
     #     testRunTitle: IntegrationTests
 
-    - template: deployment/KiotaGenerateClients.yml
-      parameters:
-        openApiRepo: 'openApiSpecSalesCatalogueServiceSharedAssets'
-        openApiSpecPath: 'salesCatalogue_ExchangeSetService_API_definition_v1.10.yaml'
-        outputDirectory: '$(Build.SourcesDirectory)\src\UKHO.ADDS.Clients.KiotaSalesCatalogueService\GeneratedClient'
-        language: 'csharp'
-        GeneratedApiClassName: 'KiotaSalesCatalogueService'
-        Namespace: 'UKHO.ADDS.Clients.Kiota.SalesCatalogueService'
-
-    - template: deployment/KiotaGenerateClients.yml
-      parameters:
-        openApiRepo: 'openApiSpecFileShareService'
-        openApiSpecPath: 'file-share-service.openApi-public.yaml'
-        outputDirectory: '$(Build.SourcesDirectory)\src\UKHO.ADDS.Clients.FileShareService.ReadOnly\GeneratedClient'
-        language: 'csharp'
-        GeneratedApiClassName: 'KiotaFileShareService'
-        Namespace: 'UKHO.ADDS.Clients.Kiota.FileShareService.ReadOnly'
-
-    - template: deployment/KiotaGenerateClients.yml
-      parameters:
-        openApiRepo: 'openApiSpecFileShareService'
-        openApiSpecPath: 'file-share-service.openApi.yaml'
-        outputDirectory: '$(Build.SourcesDirectory)\src\UKHO.ADDS.Clients.FileShareService.ReadWrite\GeneratedClient'
-        language: 'csharp'
-        GeneratedApiClassName: 'KiotaFileShareService'
-        Namespace: 'UKHO.ADDS.Clients.Kiota.FileShareService.ReadWrite'
 
 - stage: ProGet
   # condition: and(succeeded(), eq(variables['Build.SourceBranch'], 'refs/heads/main'))

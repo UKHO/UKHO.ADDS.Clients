@@ -24,3 +24,4 @@ steps:
       outputDirectory: '$(Build.SourcesDirectory)\src\UKHO.ADDS.Clients.FileShareService.ReadWrite\GeneratedClient'
       language: 'csharp'
       GeneratedApiClassName: 'KiotaFileShareService'
+      Namespace: 'UKHO.ADDS.Clients.Kiota.FileShareService.ReadWrite'

@@ -73,7 +73,6 @@ stages:
           -UKHOAssemblyProduct "$env:UKHOAssemblyProduct"
           -SourceRevisionId "$(Build.SourceVersion)"
 
-  
     - task: UseDotNet@2
       displayName: Use .NET $(SdkVersion) sdk
       inputs:
@@ -192,18 +191,6 @@ stages:
     #       $(Pipeline.Workspace)\IntegrationTests\PermitService\UKHO.ADDS.Clients.PermitService.IntegrationTests.dll
     #       $(Pipeline.Workspace)\IntegrationTests\SalesCatalogueService\UKHO.ADDS.Clients.SalesCatalogueService.IntegrationTests.dll
     #     testRunTitle: IntegrationTests
-
-- stage: KiotaGenerateClients
-  displayName: Kiota generate clients
-  dependsOn: [BuildTestPublish]
-  jobs:
-  - job: KiotaGenerateClients
-    workspace:
-      clean: all
-    displayName: Kiota generate clients
-    steps:
-    - checkout: self
-      path: s
 
     - template: deployment/KiotaGenerateClients.yml
       parameters:

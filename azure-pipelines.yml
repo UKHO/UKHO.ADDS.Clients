@@ -38,7 +38,7 @@ resources:
 stages:
 - stage: BuildTestPublish
   displayName: Build, test and publish
-  dependsOn: [KiotaGenerateClients]
+  dependsOn: []
   jobs:
   - job: MainBuild
     workspace:
@@ -144,7 +144,7 @@ stages:
 
 - stage: KiotaGenerateClients
   displayName: Kiota generate clients
-  dependsOn: []
+  dependsOn: [BuildTestPublish]
   jobs:
   - job: KiotaGenerateClients
     workspace:

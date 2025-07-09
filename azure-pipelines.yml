@@ -36,11 +36,6 @@ resources:
     endpoint: UKHO
 
 stages:
-- stage: KiotaGenerateClients
-  displayName: Kiota generate clients
-  dependsOn: []
-  jobs:
-
 - stage: BuildTestPublish
   displayName: Build, test and publish
   dependsOn: [KiotaGenerateClients]
@@ -147,6 +142,10 @@ stages:
         path: $(Build.BinariesDirectory)\IntegrationTests
         artifact: IntegrationTests
 
+- stage: KiotaGenerateClients
+  displayName: Kiota generate clients
+  dependsOn: []
+  jobs:
   - job: KiotaGenerateClients
     workspace:
       clean: all

@@ -16,10 +16,6 @@ parameters:
   - name: Namespace
     type: string
 
-steps:
-  - checkout: ${{parameters.openApiRepo}}
-    path: s/openapi
-
   - task: UseDotNet@2
     displayName: 'Install .NET SDK for Kiota'
     inputs:

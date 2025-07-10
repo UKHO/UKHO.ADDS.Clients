@@ -3,7 +3,7 @@ steps:
     parameters:
       openApiRepo: 'openApiSpecSalesCatalogueServiceSharedAssets'
       openApiSpecPath: 'salesCatalogue_ExchangeSetService_API_definition_v1.10.yaml'
-      outputDirectory: '$(Build.SourcesDirectory)\src\UKHO.ADDS.Clients.KiotaSalesCatalogueService\GeneratedClient'
+      outputDirectory: '$(Build.SourcesDirectory)\src\UKHO.ADDS.Clients.SalesCatalogueService\GeneratedClient'
       language: 'csharp'
       GeneratedApiClassName: 'KiotaSalesCatalogueService'
       Namespace: 'UKHO.ADDS.Clients.Kiota.SalesCatalogueService'

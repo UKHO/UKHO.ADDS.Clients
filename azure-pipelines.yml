@@ -104,37 +104,20 @@ stages:
     - template: deployment/KiotaClientGeneration.yml
 
     - task: PowerShell@2
-      displayName: List .cs files included in UKHO.ADDS.Clients.SalesCatalogueService.csproj
+      displayName: List all .cs files included in UKHO.ADDS.Clients.SalesCatalogueService.csproj
       inputs:
         targetType: inline
         script: |
           $csproj = Get-ChildItem -Path "$(Build.SourcesDirectory)" -Recurse -Filter UKHO.ADDS.Clients.SalesCatalogueService.csproj | Select-Object -First 1
           if ($csproj) {
-            Write-Host "Project file: $($csproj.FullName)"
-            [xml]$xml = Get-Content $csproj.FullName
-            $includes = @()
-            foreach ($itemGroup in $xml.Project.ItemGroup) {
-              foreach ($compile in $itemGroup.Compile) {
-                if ($compile.Include) {
-                  $includes += $compile.Include
-                }
-              }
-            }
-            Write-Host "Included .cs files (wildcards will be expanded):"
-            foreach ($inc in $includes) {
-              $resolved = Join-Path (Split-Path $csproj.FullName) $inc
-              if ($inc -like '*\*') {
-                Get-ChildItem -Path (Split-Path $csproj.FullName) -Recurse -Include ($inc -replace '\\','/') -File | ForEach-Object { Write-Host $_.FullName }
-              } elseif (Test-Path $resolved) {
-                Write-Host $resolved
-              } else {
-                Write-Host "Not found: $resolved"
-              }
-            }
+            $projDir = Split-Path $csproj.FullName
+            Write-Host "Listing all .cs files under $projDir (excluding bin/obj):"
+            Get-ChildItem -Path $projDir -Recurse -Include *.cs -File | Where-Object {
+              $_.FullName -notmatch '\\bin\\' -and $_.FullName -notmatch '\\obj\\'
+            } | ForEach-Object { Write-Host $_.FullName }
           } else {
             Write-Host "No UKHO.ADDS.Clients.SalesCatalogueService.csproj found."
           }
-
     
     - task: DotNetCoreCLI@2
       displayName: Pack libraries

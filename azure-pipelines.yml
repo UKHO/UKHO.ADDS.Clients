@@ -104,14 +104,35 @@ stages:
     - template: deployment/KiotaClientGeneration.yml
 
     - task: PowerShell@2
-      displayName: List contents of UKHO.ADDS.Clients.SalesCatalogueService.csproj
+      displayName: List .cs files included in UKHO.ADDS.Clients.SalesCatalogueService.csproj
       inputs:
         targetType: inline
         script: |
-          Get-ChildItem -Path "$(Build.SourcesDirectory)" -Recurse -Filter UKHO.ADDS.Clients.SalesCatalogueService.csproj | ForEach-Object {
-            Write-Host "Contents of $($_.FullName):"
-            Get-Content $_.FullName
-            Write-Host "`n---`n"
+          $csproj = Get-ChildItem -Path "$(Build.SourcesDirectory)" -Recurse -Filter UKHO.ADDS.Clients.SalesCatalogueService.csproj | Select-Object -First 1
+          if ($csproj) {
+            Write-Host "Project file: $($csproj.FullName)"
+            [xml]$xml = Get-Content $csproj.FullName
+            $includes = @()
+            foreach ($itemGroup in $xml.Project.ItemGroup) {
+              foreach ($compile in $itemGroup.Compile) {
+                if ($compile.Include) {
+                  $includes += $compile.Include
+                }
+              }
+            }
+            Write-Host "Included .cs files (wildcards will be expanded):"
+            foreach ($inc in $includes) {
+              $resolved = Join-Path (Split-Path $csproj.FullName) $inc
+              if ($inc -like '*\*') {
+                Get-ChildItem -Path (Split-Path $csproj.FullName) -Recurse -Include ($inc -replace '\\','/') -File | ForEach-Object { Write-Host $_.FullName }
+              } elseif (Test-Path $resolved) {
+                Write-Host $resolved
+              } else {
+                Write-Host "Not found: $resolved"
+              }
+            }
+          } else {
+            Write-Host "No UKHO.ADDS.Clients.SalesCatalogueService.csproj found."
           }
 
     
@@ -127,6 +148,22 @@ stages:
           **/UKHO.ADDS.Clients.SalesCatalogueService.csproj
         packDirectory: $(Build.ArtifactStagingDirectory)/packages
         arguments:  '--configuration $(BuildConfiguration)'
+
+    - task: PowerShell@2
+      displayName: List files in SalesCatalogueService NuGet package
+      inputs:
+        targetType: inline
+        script: |
+          $package = Get-ChildItem "$(Build.ArtifactStagingDirectory)/packages" -Recurse -Filter "UKHO.ADDS.Clients.SalesCatalogueService.*.nupkg" | Select-Object -First 1
+          if ($package) {
+            Write-Host "Listing contents of $($package.FullName):"
+            Add-Type -AssemblyName System.IO.Compression.FileSystem
+            [System.IO.Compression.ZipFile]::OpenRead($package.FullName).Entries | ForEach-Object {
+              Write-Host $_.FullName
+            }
+          } else {
+            Write-Host "No package found for UKHO.ADDS.Clients.SalesCatalogueService."
+          }
           
     - powershell: Get-ChildItem "$(Build.ArtifactStagingDirectory)/packages" -Recurse
       displayName: List packed NuGet packages

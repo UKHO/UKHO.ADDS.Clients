@@ -48,7 +48,6 @@ stages:
     - checkout: self
       path: s
 
-    - template: deployment/KiotaClientGeneration.yml
 
     - task: PowerShell@2
       displayName: Output environment variables
@@ -102,6 +101,19 @@ stages:
         testRunTitle: UnitTests
         workingDirectory: '$(Build.SourcesDirectory)'
 
+    - template: deployment/KiotaClientGeneration.yml
+
+    - task: PowerShell@2
+      displayName: List contents of UKHO.ADDS.Clients.SalesCatalogueService.csproj
+      inputs:
+        targetType: inline
+        script: |
+          Get-ChildItem -Path "$(Build.SourcesDirectory)" -Recurse -Filter UKHO.ADDS.Clients.SalesCatalogueService.csproj | ForEach-Object {
+            Write-Host "Contents of $($_.FullName):"
+            Get-Content $_.FullName
+            Write-Host "`n
+
+    
     - task: DotNetCoreCLI@2
       displayName: Pack libraries
       inputs:

@@ -115,6 +115,9 @@ stages:
         packDirectory: $(Build.ArtifactStagingDirectory)/packages
         arguments:  '--configuration $(BuildConfiguration)'
           
+    - powershell: Get-ChildItem "$(Build.ArtifactStagingDirectory)/packages" -Recurse
+      displayName: List packed NuGet packages
+
     - task: PublishPipelineArtifact@1
       displayName: Publish NuGet packages
       inputs:

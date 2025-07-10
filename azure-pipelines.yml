@@ -111,7 +111,8 @@ stages:
           Get-ChildItem -Path "$(Build.SourcesDirectory)" -Recurse -Filter UKHO.ADDS.Clients.SalesCatalogueService.csproj | ForEach-Object {
             Write-Host "Contents of $($_.FullName):"
             Get-Content $_.FullName
-            Write-Host "`n
+            Write-Host "`n---`n"
+          }
 
     
     - task: DotNetCoreCLI@2

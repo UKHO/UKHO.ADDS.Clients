@@ -16,6 +16,7 @@ parameters:
   - name: Namespace
     type: string
 
+steps:
   - task: UseDotNet@2
     displayName: 'Install .NET SDK for Kiota'
     inputs:

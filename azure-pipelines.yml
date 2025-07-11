@@ -36,26 +36,18 @@ resources:
     endpoint: UKHO
 
 stages:
-- stage: KiotaClientGeneration
-  displayName: Kiota Client Generation
-  dependsOn: []
-  jobs:
-  - job: GenerateClients
-    displayName: Generate Kiota clients
-    steps:
-    - checkout: self
-      path: s
-    - template: deployment/KiotaClientGeneration.yml
-
 - stage: BuildTestPublish
   displayName: Build, test and publish
-  dependsOn: [KiotaClientGeneration]
+  dependsOn: []
   jobs:
   - job: MainBuild
     workspace:
       clean: all
     displayName: Build, unit test and package
     steps:
+    - checkout: self
+      path: s
+
     - task: PowerShell@2
       displayName: Output environment variables
       inputs:
@@ -107,6 +99,8 @@ stages:
           **/*.Tests.csproj
         testRunTitle: UnitTests
         workingDirectory: '$(Build.SourcesDirectory)'
+
+    - template: deployment/KiotaClientGeneration.yml
 
     - task: PowerShell@2
       displayName: List all .cs files included in UKHO.ADDS.Clients.SalesCatalogueService.csproj

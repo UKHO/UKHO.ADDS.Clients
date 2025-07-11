@@ -36,48 +36,9 @@ resources:
     endpoint: UKHO
 
 stages:
-- stage: KiotaGenerateClients
-  displayName: Kiota generate clients
-  dependsOn: []
-  jobs:
-  - job: KiotaGenerateClients
-    workspace:
-      clean: all
-    displayName: Kiota generate clients
-    steps:
-    - checkout: self
-      path: s
-
-    - template: deployment/KiotaGenerateClients.yml
-      parameters:
-        openApiRepo: 'openApiSpecSalesCatalogueServiceSharedAssets'
-        openApiSpecPath: 'salesCatalogue_ExchangeSetService_API_definition_v1.10.yaml'
-        outputDirectory: '$(Build.SourcesDirectory)\src\UKHO.ADDS.Clients.KiotaSalesCatalogueService\GeneratedClient'
-        language: 'csharp'
-        GeneratedApiClassName: 'KiotaSalesCatalogueService'
-        Namespace: 'UKHO.ADDS.Clients.Kiota.SalesCatalogueService'
-
-    - template: deployment/KiotaGenerateClients.yml
-      parameters:
-        openApiRepo: 'openApiSpecFileShareService'
-        openApiSpecPath: 'file-share-service.openApi-public.yaml'
-        outputDirectory: '$(Build.SourcesDirectory)\src\UKHO.ADDS.Clients.FileShareService.ReadOnly\GeneratedClient'
-        language: 'csharp'
-        GeneratedApiClassName: 'KiotaFileShareService'
-        Namespace: 'UKHO.ADDS.Clients.Kiota.FileShareService.ReadOnly'
-
-    - template: deployment/KiotaGenerateClients.yml
-      parameters:
-        openApiRepo: 'openApiSpecFileShareService'
-        openApiSpecPath: 'file-share-service.openApi.yaml'
-        outputDirectory: '$(Build.SourcesDirectory)\src\UKHO.ADDS.Clients.FileShareService.ReadWrite\GeneratedClient'
-        language: 'csharp'
-        GeneratedApiClassName: 'KiotaFileShareService'
-        Namespace: 'UKHO.ADDS.Clients.Kiota.FileShareService.ReadWrite'
-
 - stage: BuildTestPublish
   displayName: Build, test and publish
-  dependsOn: [KiotaGenerateClients]
+  dependsOn: []
   jobs:
   - job: MainBuild
     workspace:
@@ -112,7 +73,6 @@ stages:
           -UKHOAssemblyProduct "$env:UKHOAssemblyProduct"
           -SourceRevisionId "$(Build.SourceVersion)"
 
-  
     - task: UseDotNet@2
       displayName: Use .NET $(SdkVersion) sdk
       inputs:
@@ -140,6 +100,24 @@ stages:
         testRunTitle: UnitTests
         workingDirectory: '$(Build.SourcesDirectory)'
 
+    - template: deployment/KiotaClientGeneration.yml
+
+    - task: PowerShell@2
+      displayName: List all .cs files included in UKHO.ADDS.Clients.SalesCatalogueService.csproj
+      inputs:
+        targetType: inline
+        script: |
+          $csproj = Get-ChildItem -Path "$(Build.SourcesDirectory)" -Recurse -Filter UKHO.ADDS.Clients.SalesCatalogueService.csproj | Select-Object -First 1
+          if ($csproj) {
+            $projDir = Split-Path $csproj.FullName
+            Write-Host "Listing all .cs files under $projDir (excluding bin/obj):"
+            Get-ChildItem -Path $projDir -Recurse -Include *.cs -File | Where-Object {
+              $_.FullName -notmatch '\\bin\\' -and $_.FullName -notmatch '\\obj\\'
+            } | ForEach-Object { Write-Host $_.FullName }
+          } else {
+            Write-Host "No UKHO.ADDS.Clients.SalesCatalogueService.csproj found."
+          }
+    
     - task: DotNetCoreCLI@2
       displayName: Pack libraries
       inputs:
@@ -152,7 +130,10 @@ stages:
           **/UKHO.ADDS.Clients.SalesCatalogueService.csproj
         packDirectory: $(Build.ArtifactStagingDirectory)/packages
         arguments:  '--configuration $(BuildConfiguration)'
-          
+
+    - powershell: Get-ChildItem "$(Build.ArtifactStagingDirectory)/packages" -Recurse
+      displayName: List packed NuGet packages
+
     - task: PublishPipelineArtifact@1
       displayName: Publish NuGet packages
       inputs:
@@ -231,6 +212,7 @@ stages:
     #       $(Pipeline.Workspace)\IntegrationTests\PermitService\UKHO.ADDS.Clients.PermitService.IntegrationTests.dll
     #       $(Pipeline.Workspace)\IntegrationTests\SalesCatalogueService\UKHO.ADDS.Clients.SalesCatalogueService.IntegrationTests.dll
     #     testRunTitle: IntegrationTests
+
 
 - stage: ProGet
   condition: and(succeeded(), eq(variables['Build.SourceBranch'], 'refs/heads/main'))

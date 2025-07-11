@@ -36,6 +36,17 @@ resources:
     endpoint: UKHO
 
 stages:
+- stage: KiotaClientGeneration
+  displayName: Kiota Client Generation
+  dependsOn: []
+  jobs:
+  - job: GenerateClients
+    workspace:
+      clean: all
+    displayName: Generate Kiota clients
+    steps:
+    - template: deployment/KiotaClientGeneration.yml
+
 - stage: BuildTestPublish
   displayName: Build, test and publish
   dependsOn: []
@@ -47,7 +58,6 @@ stages:
     steps:
     - checkout: self
       path: s
-
 
     - task: PowerShell@2
       displayName: Output environment variables
@@ -101,8 +111,6 @@ stages:
         testRunTitle: UnitTests
         workingDirectory: '$(Build.SourcesDirectory)'
 
-    - template: deployment/KiotaClientGeneration.yml
-
     - task: PowerShell@2
       displayName: List all .cs files included in UKHO.ADDS.Clients.SalesCatalogueService.csproj
       inputs:
@@ -132,22 +140,6 @@ stages:
         packDirectory: $(Build.ArtifactStagingDirectory)/packages
         arguments:  '--configuration $(BuildConfiguration)'
 
-    - task: PowerShell@2
-      displayName: List files in SalesCatalogueService NuGet package
-      inputs:
-        targetType: inline
-        script: |
-          $package = Get-ChildItem "$(Build.ArtifactStagingDirectory)/packages" -Recurse -Filter "UKHO.ADDS.Clients.SalesCatalogueService.*.nupkg" | Select-Object -First 1
-          if ($package) {
-            Write-Host "Listing contents of $($package.FullName):"
-            Add-Type -AssemblyName System.IO.Compression.FileSystem
-            [System.IO.Compression.ZipFile]::OpenRead($package.FullName).Entries | ForEach-Object {
-              Write-Host $_.FullName
-            }
-          } else {
-            Write-Host "No package found for UKHO.ADDS.Clients.SalesCatalogueService."
-          }
-          
     - powershell: Get-ChildItem "$(Build.ArtifactStagingDirectory)/packages" -Recurse
       displayName: List packed NuGet packages
 

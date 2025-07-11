@@ -49,7 +49,7 @@ stages:
 
 - stage: BuildTestPublish
   displayName: Build, test and publish
-  dependsOn: []
+  dependsOn: [KiotaClientGeneration]
   jobs:
   - job: MainBuild
     workspace:

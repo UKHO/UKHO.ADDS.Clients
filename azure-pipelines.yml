@@ -43,6 +43,8 @@ stages:
   - job: GenerateClients
     displayName: Generate Kiota clients
     steps:
+    - checkout: self
+      path: s
     - template: deployment/KiotaClientGeneration.yml
 
 - stage: BuildTestPublish
@@ -54,9 +56,6 @@ stages:
       clean: all
     displayName: Build, unit test and package
     steps:
-    - checkout: self
-      path: s
-
     - task: PowerShell@2
       displayName: Output environment variables
       inputs:

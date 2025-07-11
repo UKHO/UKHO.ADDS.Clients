@@ -41,8 +41,6 @@ stages:
   dependsOn: []
   jobs:
   - job: GenerateClients
-    workspace:
-      clean: all
     displayName: Generate Kiota clients
     steps:
     - template: deployment/KiotaClientGeneration.yml

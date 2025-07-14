@@ -1,0 +1,27 @@
+steps:
+  - template: KiotaGenerateClients.yml
+    parameters:
+      openApiRepo: 'openApiSpecSalesCatalogueServiceSharedAssets'
+      openApiSpecPath: 'salesCatalogue_ExchangeSetService_API_definition_v1.10.yaml'
+      outputDirectory: '$(Build.SourcesDirectory)\src\UKHO.ADDS.Clients.SalesCatalogueService\GeneratedClient'
+      language: 'csharp'
+      GeneratedApiClassName: 'KiotaSalesCatalogueService'
+      Namespace: 'UKHO.ADDS.Clients.Kiota.SalesCatalogueService'
+
+  - template: KiotaGenerateClients.yml
+    parameters:
+      openApiRepo: 'openApiSpecFileShareService'
+      openApiSpecPath: 'file-share-service.openApi-public.yaml'
+      outputDirectory: '$(Build.SourcesDirectory)\src\UKHO.ADDS.Clients.FileShareService.ReadOnly\GeneratedClient'
+      language: 'csharp'
+      GeneratedApiClassName: 'KiotaFileShareServiceReadOnly'
+      Namespace: 'UKHO.ADDS.Clients.Kiota.FileShareService.ReadOnly'
+
+  - template: KiotaGenerateClients.yml
+    parameters:
+      openApiRepo: 'openApiSpecFileShareService'
+      openApiSpecPath: 'file-share-service.openApi.yaml'
+      outputDirectory: '$(Build.SourcesDirectory)\src\UKHO.ADDS.Clients.FileShareService.ReadWrite\GeneratedClient'
+      language: 'csharp'
+      GeneratedApiClassName: 'KiotaFileShareServiceReadWrite'
+      Namespace: 'UKHO.ADDS.Clients.Kiota.FileShareService.ReadWrite'

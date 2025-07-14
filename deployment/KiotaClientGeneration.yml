@@ -14,7 +14,7 @@ steps:
       openApiSpecPath: 'file-share-service.openApi-public.yaml'
       outputDirectory: '$(Build.SourcesDirectory)\src\UKHO.ADDS.Clients.FileShareService.ReadOnly\GeneratedClient'
       language: 'csharp'
-      GeneratedApiClassName: 'KiotaFileShareService'
+      GeneratedApiClassName: 'KiotaFileShareServiceReadOnly'
       Namespace: 'UKHO.ADDS.Clients.Kiota.FileShareService.ReadOnly'
 
   - template: KiotaGenerateClients.yml
@@ -23,5 +23,5 @@ steps:
       openApiSpecPath: 'file-share-service.openApi.yaml'
       outputDirectory: '$(Build.SourcesDirectory)\src\UKHO.ADDS.Clients.FileShareService.ReadWrite\GeneratedClient'
       language: 'csharp'
-      GeneratedApiClassName: 'KiotaFileShareService'
+      GeneratedApiClassName: 'KiotaFileShareServiceReadWrite'
       Namespace: 'UKHO.ADDS.Clients.Kiota.FileShareService.ReadWrite'

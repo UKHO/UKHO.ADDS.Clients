@@ -4,7 +4,7 @@ using Microsoft.Kiota.Http.HttpClientLibrary;
 
 namespace UKHO.ADDS.Clients.Common.MiddlewareExtensions
 {
-    public class ClientFactory(IAuthenticationProvider authProvider, HttpClient httpClient)
+    public class ClientFactory(IAuthenticationProvider authProvider, IHttpClientFactory httpClientFactory)
     {
         public TClient GetClient<TClient>() where TClient : class
         {
@@ -14,6 +14,10 @@ namespace UKHO.ADDS.Clients.Common.MiddlewareExtensions
             {
                 throw new InvalidOperationException($"{typeof(TClient).Name} must have a constructor with IRequestAdapter parameter.");
             }
+
+
+            var httpClient = httpClientFactory.CreateClient(typeof(TClient).Name);
+
             return (TClient)ctor.Invoke([new HttpClientRequestAdapter(authProvider, httpClient: httpClient)]);
         }
     }

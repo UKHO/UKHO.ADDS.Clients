@@ -10,6 +10,12 @@ namespace UKHO.ADDS.Clients.Common.MiddlewareExtensions
     /// </summary>
     public static class KiotaServiceCollectionExtensions
     {
+        /// <summary>
+        /// Register the default kiota handlers, add the client factory and authentication provider to the service collection.
+        /// </summary>
+        /// <typeparam name="T">The type of auth provider you wish you use with the kiota clients</typeparam>
+        /// <param name="services">Serivces to injects kiota services</param>
+        /// <param name="authProvider">The Auth provider that will be used during client creation</param>
         public static void AddKiotaDefaults<T>(this IServiceCollection services, T authProvider) where T : IAuthenticationProvider
         {
             services.AddKiotaHandlers();
@@ -62,7 +68,7 @@ namespace UKHO.ADDS.Clients.Common.MiddlewareExtensions
         /// <param name="services">Service Collection for the target application</param>
         /// <param name="endpointConfigKey">EndPoint configuration value</param>
         /// <returns></returns>
-        public static IHttpClientBuilder AddConfiguredHttpClient<TClient>(this IServiceCollection services, string endpointConfigKey,
+        private static IHttpClientBuilder AddConfiguredHttpClient<TClient>(this IServiceCollection services, string endpointConfigKey,
                                                                           IDictionary<string, string>? headers = null)
             where TClient : class
         {
@@ -70,7 +76,7 @@ namespace UKHO.ADDS.Clients.Common.MiddlewareExtensions
             {
                 var config = provider.GetRequiredService<IConfiguration>();
                 var endpoint = config[endpointConfigKey]!;
-                client.BaseAddress = new Uri(endpoint);
+                client.BaseAddress = new Uri(endpoint); 
 
                 if (headers != null)
                 {
@@ -82,6 +88,13 @@ namespace UKHO.ADDS.Clients.Common.MiddlewareExtensions
             }).AttachKiotaHandlers();
         }
 
+        /// <summary>
+        ///     Register a Kiota client with the service collection.
+        /// </summary>
+        /// <typeparam name="TClient">The Kiota client to register with the service collection</typeparam>
+        /// <param name="services">The services to register the http client</param>
+        /// <param name="endpointConfigKey">The config key that points to the endpoint value in the configuration</param>
+        /// <param name="headers"></param>
         public static void RegisterKiotaClient<TClient>(this IServiceCollection services, string endpointConfigKey, IDictionary<string, string>? headers = null)
             where TClient : class
         {

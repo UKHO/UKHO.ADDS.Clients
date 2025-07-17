@@ -22,48 +22,83 @@ To get started with using or contributing to these packages, follow these steps:
 2. Navigate to the package you're interested in (located in /src) and follow the instructions in the README.md file.
 
 ## Kiota Clients
-Kiota is a http client generation tool developed by Microsoft which we have used to generate clients using the openApi documents found on the UKHO github. For more infomation please refer to the documents here: [Kiota](https://learn.microsoft.com/en-us/openapi/kiota/overview).
+Kiota is a http client generation tool developed by Microsoft which we have used to generate clients using the OpenApi documents found on the UKHO github. For more infomation please refer to the documents here: [Kiota](https://learn.microsoft.com/en-us/openapi/kiota/overview).
 
 
 1. **Consuming the client**
-When consuming a kiota client a client request adpater is required. HttpClientRequestAdapter can be found in the library Microsoft.Kiota.Http.HttpClientLibrary.
+The Kiota Client can be easily consumed by registering the client using the helper methods found in the KiotaMiddlewareExtensions.cs
 
-Set the baseUrl:
-  
-   ```sh
-   adapter.BaseUrl = {baseURL}
-   ```
+# Kiota Middleware & Client Registration Helpers
 
-To inspect headers in the client, pass in 
-   
-   ```sh
-   HeadersInspectionHandlerOption headers = new HeadersInspectionHandlerOption() { InspectResponseHeaders = true, InspectRequestHeaders = true };
-   ```
+This library provides extension methods to simplify the registration and configuration of Kiota-generated API clients in ASP.NET Core applications using dependency injection. It ensures that Kiota middleware handlers, authentication providers, and HTTP clients are set up in a consistent and maintainable way.
 
-consume the header handler option via
+## Features
 
-   ```sh
-    response = await {path}.PostAsync(requestConfiguration => requestConfiguration.Options.Add(headers));
-   ```
-Inspect the headers by inspecting the HeadersInspectionHandlerOption object.
+- **Automatic registration of Kiota middleware handlers**
+- **Centralized configuration of HTTP clients for Kiota clients**
+- **Flexible authentication provider injection**
+- **Simple client factory for creating Kiota clients with correct adapters**
 
-2. **Authentication**
-   An AuthenticationProvider must be provided to the adapter. This can be achieved by implementing the interface IAuthenticationProvider found in the library Microsoft.Kiota.Abstractions.Authentication.
-   An example implementation can be found below:
+## Usage
+
+### 1. Register Kiota Defaults
+
+Register the default Kiota handlers, client factory, and your authentication provider:
 
    ```sh
-        public Task AuthenticateRequestAsync(RequestInformation request, Dictionary<string, object> additionalAuthenticationContext = null, CancellationToken cancellationToken = default)
-        {
-            if (request == null)
-            {
-                throw new ArgumentNullException(nameof(request), "Request information cannot be null.");
-            }
-            return GetManagedIdentityAuthAsync(resourceId).ContinueWith(task =>
-            {
-                request.Headers.Add("Authorization", "Bearer " + task.Result);
-            }, cancellationToken);
-        }
+   services.RegisterKiotaClient<MyKiotaClient>( "MyApi:Endpoint", new Dictionary<string, string> { { "Authorization", "Bearer my-token" }, { "Custom-Header", "Value" } } );
    ```
+
+- `"MyApi:Endpoint"` is the configuration key for the API base URL.
+- Optional headers can be provided as a dictionary.
+
+### 3. Configuration Example
+
+Add your endpoint to `appsettings.json`: { "MyApi:Endpoint": "https://api.example.com/" }
+
+
+### 4. Dependency Injection
+
+After registration, inject your Kiota client anywhere in your application:
+
+```sh
+public class MyService { private readonly MyKiotaClient _client;
+public MyService(MyKiotaClient client)
+{
+    _client = client;
+}
+
+// Use _client to call your API
+}
+```
+
+## Extension Methods Overview
+
+- `AddKiotaDefaults<T>(IServiceCollection, T authProvider)`
+  - Registers Kiota handlers, client factory, and authentication provider.
+
+- `RegisterKiotaClient<TClient>(IServiceCollection, string endpointConfigKey, IDictionary<string, string>? headers = null)`
+  - Registers a Kiota client and configures its HTTP client.
+
+- Internal helpers:
+  - `AddKiotaHandlers(IServiceCollection)`
+  - `AddConfiguredHttpClient<TClient>(IServiceCollection, string endpointConfigKey, IDictionary<string, string>? headers = null)`
+
+## Requirements
+
+- .NET 8
+- C# 12
+- [Kiota](https://github.com/microsoft/kiota) generated clients
+- ASP.NET Core Dependency Injection
+
+## Notes
+
+- Middleware handlers are discovered via `KiotaClientFactory.GetDefaultHandlerActivatableTypes()`.
+- The client factory uses constructor injection for `IRequestAdapter`.
+
+---
+
+For further customization, extend or override the provided helpers as needed.
 
 ## Feedback
 Your feedback is crucial to improving these packages. If you encounter issues or have suggestions, please open an issue on GitHub or contact the maintainers.

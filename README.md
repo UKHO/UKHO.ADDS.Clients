@@ -46,7 +46,29 @@ This library provides extension methods to simplify the registration and configu
 Register the default Kiota handlers, client factory, and your authentication provider:
 
    ```sh
-   services.RegisterKiotaClient<MyKiotaClient>( "MyApi:Endpoint", new Dictionary<string, string> { { "Authorization", "Bearer my-token" }, { "Custom-Header", "Value" } } );
+   services.AddKiotaDefaults(new T()); where T implemented IAuthenticationProvider
+   ```
+
+There are some standard AuthenticationProviders that can be used out of the box:
+
+- When no authentication is required (interacting with mock services): AnonymousAuthenticationProvider
+    
+    ```sh
+    services.AddKiotaDefaults(new AnonymousAuthenticationProvider());
+    ```
+
+- For Authentication with Azure:  AzureIdentityAuthenticationProvider
+- 
+    ```sh
+    services.AddKiotaDefaults(new AzureIdentityAuthenticationProvider(new DefaultAzureCredential()));
+    ```
+
+### 2. Register Kiota Client
+
+Register the kiota client which will work with the previous defaults that have been registered:
+
+   ```sh
+   services.RegisterKiotaClient<MyKiotaClient>( "MyApi:Endpoint", new Dictionary<string, string> { { "Custom-Header", "Value" } } );
    ```
 
 - `"MyApi:Endpoint"` is the configuration key for the API base URL.

@@ -101,22 +101,6 @@ stages:
         workingDirectory: '$(Build.SourcesDirectory)'
 
     - template: deployment/KiotaClientGeneration.yml
-
-    - task: PowerShell@2
-      displayName: List all .cs files included in UKHO.ADDS.Clients.SalesCatalogueService.csproj
-      inputs:
-        targetType: inline
-        script: |
-          $csproj = Get-ChildItem -Path "$(Build.SourcesDirectory)" -Recurse -Filter UKHO.ADDS.Clients.SalesCatalogueService.csproj | Select-Object -First 1
-          if ($csproj) {
-            $projDir = Split-Path $csproj.FullName
-            Write-Host "Listing all .cs files under $projDir (excluding bin/obj):"
-            Get-ChildItem -Path $projDir -Recurse -Include *.cs -File | Where-Object {
-              $_.FullName -notmatch '\\bin\\' -and $_.FullName -notmatch '\\obj\\'
-            } | ForEach-Object { Write-Host $_.FullName }
-          } else {
-            Write-Host "No UKHO.ADDS.Clients.SalesCatalogueService.csproj found."
-          }
     
     - task: DotNetCoreCLI@2
       displayName: Pack libraries

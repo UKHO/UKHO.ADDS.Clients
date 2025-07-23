@@ -58,7 +58,7 @@ There are some standard AuthenticationProviders that can be used out of the box:
     ```
 
 - For Authentication with Azure:  AzureIdentityAuthenticationProvider
-- 
+ 
     ```sh
     services.AddKiotaDefaults(new AzureIdentityAuthenticationProvider(new DefaultAzureCredential()));
     ```

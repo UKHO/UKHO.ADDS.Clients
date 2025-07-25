@@ -1,7 +1,11 @@
-﻿using Microsoft.Extensions.Configuration;
+﻿using System.Net.Sockets;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Logging;
 using Microsoft.Kiota.Abstractions.Authentication;
 using Microsoft.Kiota.Http.HttpClientLibrary;
+using Microsoft.Kiota.Http.HttpClientLibrary.Middleware;
+using Microsoft.Kiota.Http.HttpClientLibrary.Middleware.Options;
 
 namespace UKHO.ADDS.Clients.Common.MiddlewareExtensions
 {
@@ -21,6 +25,23 @@ namespace UKHO.ADDS.Clients.Common.MiddlewareExtensions
             services.AddKiotaHandlers();
             services.AddSingleton<ClientFactory>();
             services.AddSingleton<IAuthenticationProvider>(authProvider);
+        }
+
+        /// <summary>
+        /// Registers a Kiota client in the service collection, including its configured HTTP client and factory.
+        /// </summary>
+        /// <typeparam name="TClient">The Kiota client type to register.</typeparam>
+        /// <param name="services">The service collection to register the client with.</param>
+        /// <param name="endpointConfigKey">The configuration key for the endpoint URL.</param>
+        /// <param name="headers">Optional default headers to add to the HTTP client.</param>
+        public static void RegisterKiotaClient<TClient>(
+            this IServiceCollection services,
+            string endpointConfigKey,
+            IDictionary<string, string>? headers = null)
+            where TClient : class
+        {
+            services.AddConfiguredHttpClient<TClient>(endpointConfigKey, headers);
+            services.AddSingleton(sp => sp.GetRequiredService<ClientFactory>().GetClient<TClient>());
         }
 
         /// <summary>
@@ -50,6 +71,9 @@ namespace UKHO.ADDS.Clients.Common.MiddlewareExtensions
             {
                 builder.AddHttpMessageHandler(sp => (DelegatingHandler)sp.GetRequiredService(handler));
             }
+            builder.AddHttpMessageHandler(sp => new HeadersInspectionHandler(new HeadersInspectionHandlerOption() { InspectResponseHeaders = true }));
+
+            Console.WriteLine(builder.GetType().Name + " has been configured with Kiota handlers.");
             return builder;
         }
 
@@ -80,24 +104,9 @@ namespace UKHO.ADDS.Clients.Common.MiddlewareExtensions
                         client.DefaultRequestHeaders.Add(header.Key, header.Value);
                     }
                 }
+                var logger = provider.GetRequiredService<ILogger<TClient>>();
+                logger.LogInformation("Configured HTTP client for " + typeof(TClient).Name + " with base address: " + endpoint);
             }).AttachKiotaHandlers();
-        }
-
-        /// <summary>
-        /// Registers a Kiota client in the service collection, including its configured HTTP client and factory.
-        /// </summary>
-        /// <typeparam name="TClient">The Kiota client type to register.</typeparam>
-        /// <param name="services">The service collection to register the client with.</param>
-        /// <param name="endpointConfigKey">The configuration key for the endpoint URL.</param>
-        /// <param name="headers">Optional default headers to add to the HTTP client.</param>
-        public static void RegisterKiotaClient<TClient>(
-            this IServiceCollection services,
-            string endpointConfigKey,
-            IDictionary<string, string>? headers = null)
-            where TClient : class
-        {
-            services.AddConfiguredHttpClient<TClient>(endpointConfigKey, headers);
-            services.AddSingleton(sp => sp.GetRequiredService<ClientFactory>().GetClient<TClient>());
         }
     }
 }

@@ -1,10 +1,8 @@
-﻿using System.Net.Sockets;
-using Microsoft.Extensions.Configuration;
+﻿using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Microsoft.Kiota.Abstractions.Authentication;
 using Microsoft.Kiota.Http.HttpClientLibrary;
-using Microsoft.Kiota.Http.HttpClientLibrary.Middleware;
 using Microsoft.Kiota.Http.HttpClientLibrary.Middleware.Options;
 
 namespace UKHO.ADDS.Clients.Common.MiddlewareExtensions
@@ -22,7 +20,6 @@ namespace UKHO.ADDS.Clients.Common.MiddlewareExtensions
         /// <param name="authProvider">The authentication provider to use for client creation.</param>
         public static void AddKiotaDefaults<T>(this IServiceCollection services, T authProvider) where T : IAuthenticationProvider
         {
-            services.AddKiotaHandlers();
             services.AddSingleton<ClientFactory>();
             services.AddSingleton<IAuthenticationProvider>(authProvider);
         }
@@ -45,33 +42,17 @@ namespace UKHO.ADDS.Clients.Common.MiddlewareExtensions
         }
 
         /// <summary>
-        /// Registers all Kiota middleware handlers in the service collection.
-        /// </summary>
-        /// <param name="services">The service collection to add the handlers to.</param>
-        /// <returns>The updated service collection.</returns>
-        public static IServiceCollection AddKiotaHandlers(this IServiceCollection services)
-        {
-            var kiotaHandlers = KiotaClientFactory.GetDefaultHandlerActivatableTypes();
-            foreach (var handler in kiotaHandlers)
-            {
-                services.AddTransient(handler);
-            }
-            return services;
-        }
-
-        /// <summary>
         /// Attaches all registered Kiota middleware handlers to the HTTP client builder.
         /// </summary>
         /// <param name="builder">The HTTP client builder to attach handlers to.</param>
         /// <returns>The updated HTTP client builder.</returns>
         private static IHttpClientBuilder AttachKiotaHandlers(this IHttpClientBuilder builder)
         {
-            var kiotaHandlers = KiotaClientFactory.GetDefaultHandlerActivatableTypes();
+            var kiotaHandlers = KiotaClientFactory.CreateDefaultHandlers([new HeadersInspectionHandlerOption() { InspectResponseHeaders = true}]);
             foreach (var handler in kiotaHandlers)
             {
-                builder.AddHttpMessageHandler(sp => (DelegatingHandler)sp.GetRequiredService(handler));
+                builder.AddHttpMessageHandler(() => handler);
             }
-            builder.AddHttpMessageHandler(sp => new HeadersInspectionHandler(new HeadersInspectionHandlerOption() { InspectResponseHeaders = true }));
 
             Console.WriteLine(builder.GetType().Name + " has been configured with Kiota handlers.");
             return builder;

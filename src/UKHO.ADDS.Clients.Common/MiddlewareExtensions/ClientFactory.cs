@@ -16,13 +16,23 @@ namespace UKHO.ADDS.Clients.Common.MiddlewareExtensions
         /// <exception cref="InvalidOperationException">
         /// Thrown if the client type does not have a constructor accepting an IRequestAdapter.
         /// </exception>
-        public TClient GetClient<TClient>() where TClient : class
+        public TClient GetClient<TClient>(IAuthenticationProvider? authenticationProvider = null) where TClient : class
         {
             // Find a constructor that takes IRequestAdapter
             var ctor = typeof(TClient).GetConstructor([typeof(IRequestAdapter)]);
             if (ctor == null)
             {
                 throw new InvalidOperationException($"{typeof(TClient).Name} must have a constructor with IRequestAdapter parameter.");
+            }
+
+            // If an authenitcationProvider is specified then use it, otherwise use the registered authentication provider in the Service Provider
+            if (authenticationProvider != null)
+            {
+                authProvider = authenticationProvider;
+            }
+            if (authProvider == null)
+            {
+                throw new InvalidOperationException($"{typeof(TClient).Name} must have a Authentication Provider registered.");
             }
 
             // Create the Http client here to make sure it is configured correctly

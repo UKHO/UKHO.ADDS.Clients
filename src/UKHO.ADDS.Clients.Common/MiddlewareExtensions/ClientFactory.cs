@@ -5,8 +5,13 @@ using Microsoft.Kiota.Http.HttpClientLibrary;
 
 namespace UKHO.ADDS.Clients.Common.MiddlewareExtensions
 {
-    public class ClientFactory(IAuthenticationProvider authProvider, IHttpClientFactory httpClientFactory, ILogger<ClientFactory> logger)
+    public class ClientFactory(
+        IAuthenticationProvider defaultAuthProvider,
+        IHttpClientFactory httpClientFactory,
+        ILogger<ClientFactory> logger)
     {
+        private readonly IAuthenticationProvider _defaultAuthProvider = defaultAuthProvider;
+
         /// <summary>
         /// Creates an instance of the specified Kiota client type using the provided authentication provider and an HttpClient
         /// obtained from the IHttpClientFactory. The client type must have a constructor that accepts an IRequestAdapter.
@@ -26,19 +31,16 @@ namespace UKHO.ADDS.Clients.Common.MiddlewareExtensions
             }
 
             // If an authenitcationProvider is specified then use it, otherwise use the registered authentication provider in the Service Provider
-            if (authenticationProvider != null)
+            var provider = authenticationProvider ?? _defaultAuthProvider;
+            if (provider == null)
             {
-                authProvider = authenticationProvider;
-            }
-            if (authProvider == null)
-            {
-                throw new InvalidOperationException($"{typeof(TClient).Name} must have a Authentication Provider registered.");
+                throw new InvalidOperationException($"{typeof(TClient).Name} must have an Authentication Provider registered.");
             }
 
             // Create the Http client here to make sure it is configured correctly
             var httpClient = httpClientFactory.CreateClient(typeof(TClient).Name);
             logger.LogInformation("Creating client for {ClientType} with base address: {baseAddress}", typeof(TClient).Name, httpClient.BaseAddress);
-            return (TClient)ctor.Invoke([new HttpClientRequestAdapter(authProvider, httpClient: httpClient)]);
+            return (TClient)ctor.Invoke([new HttpClientRequestAdapter(provider, httpClient: httpClient)]);
         }
     }
 }

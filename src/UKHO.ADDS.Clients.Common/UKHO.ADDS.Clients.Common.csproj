@@ -9,8 +9,6 @@
     <RepositoryUrl>https://github.com/UKHO/UKHO.ADDS.Clients</RepositoryUrl>
     <PackageReadmeFile>README.md</PackageReadmeFile>
     <GeneratePackageOnBuild>True</GeneratePackageOnBuild>
-    <PackageOutputPath>C:\localNuget</PackageOutputPath>
-    <Version>8.0.0</Version>
   </PropertyGroup>
 
   <ItemGroup>

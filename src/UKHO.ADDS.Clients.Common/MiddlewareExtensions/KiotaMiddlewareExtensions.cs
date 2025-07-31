@@ -31,17 +31,19 @@ namespace UKHO.ADDS.Clients.Common.MiddlewareExtensions
         /// <param name="services">The service collection to register the client with.</param>
         /// <param name="endpointConfigKey">The configuration key for the endpoint URL.</param>
         /// <param name="headers">Optional default headers to add to the HTTP client.</param>
+        /// <param name="authenticationProvider">Optional authentication provider to use for the client.</param>"
         public static void RegisterKiotaClient<TClient>(
             this IServiceCollection services,
             string endpointConfigKey,
-            IDictionary<string, string>? headers = null)
+            IDictionary<string, string>? headers = null,
+            IAuthenticationProvider? authenticationProvider = null)
             where TClient : class
         {
             // Ensure Inspection Handler is configured to inspect response headers
             var headersOption = new HeadersInspectionHandlerOption { InspectResponseHeaders = true };
             services.AddSingleton(headersOption);
             services.AddConfiguredHttpClient<TClient>(endpointConfigKey, headers);
-            services.AddSingleton(sp => sp.GetRequiredService<ClientFactory>().GetClient<TClient>());
+            services.AddSingleton(sp => sp.GetRequiredService<ClientFactory>().GetClient<TClient>(authenticationProvider));
         }
 
         /// <summary>

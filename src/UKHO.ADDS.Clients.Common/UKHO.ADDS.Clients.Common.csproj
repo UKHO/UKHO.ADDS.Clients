@@ -8,7 +8,6 @@
     <PackageProjectUrl>https://github.com/UKHO/UKHO.ADDS.Clients</PackageProjectUrl>
     <RepositoryUrl>https://github.com/UKHO/UKHO.ADDS.Clients</RepositoryUrl>
     <PackageReadmeFile>README.md</PackageReadmeFile>
-    <GeneratePackageOnBuild>True</GeneratePackageOnBuild>
   </PropertyGroup>
 
   <ItemGroup>

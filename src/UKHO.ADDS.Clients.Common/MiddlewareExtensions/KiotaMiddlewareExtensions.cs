@@ -31,7 +31,6 @@ namespace UKHO.ADDS.Clients.Common.MiddlewareExtensions
         /// <param name="services">The service collection to register the client with.</param>
         /// <param name="endpointConfigKey">The configuration key for the endpoint URL.</param>
         /// <param name="headers">Optional default headers to add to the HTTP client.</param>
-        /// <param name="authenticationProvider">Optional authentication provider to use for the client.</param>"
         public static void RegisterKiotaClient<TClient>(
             this IServiceCollection services,
             string endpointConfigKey,

@@ -35,7 +35,7 @@ steps:
 
   - powershell: |
       & "deployment\RunKiota.ps1" `
-        -OpenApiSpecPath "${{ parameters.openApiSpecPath }}" `
+        -OpenApiSpecPath "deployment\${{ parameters.openApiSpecPath }}" `
         -OutputDirectory "${{parameters.outputDirectory}}" `
         -Language "${{parameters.language}}" `
         -GeneratedApiClassName "${{parameters.GeneratedApiClassName}}" `

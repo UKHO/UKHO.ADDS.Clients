@@ -1,0 +1,857 @@
+openapi: 3.0.1
+info:
+  title: UKHO File Share Service APIs
+  description: |
+    The UKHO File Share Service APIs allow querying and downloading of files from the File Share Service.
+  contact:
+    email: martin.rock-evans@ukho.gov.uk
+    name: Martin Rock-Evans
+  version: 0.0.4
+servers:
+  - url: http://fss.ukho.gov.uk
+    description: Proposed Live URL
+security:
+  - jwtBearerAuth: []
+paths:
+  /batch:
+    get:
+      summary: List non-expired batches.
+      operationId: getBatches
+      description: |
+        Returns a list of batches in FSS with their files. Only committed batches that have not expired will be returned.
+      parameters:
+        - $ref: "#/components/parameters/paginationLimit"
+        - $ref: "#/components/parameters/paginationStart"
+        - $ref: "#/components/parameters/batchAndFileFilter"
+      responses:
+        200:
+          description: OK - returns a list of batches.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  count:
+                    type: integer
+                    description: Number of batches that are in this page of the result. If there is only one page of results, this will equal `total`.
+                  total:
+                    type: integer
+                    description: Total number of batches that match the query.
+                  entries:
+                    type: array
+                    items:
+                      $ref: "#/components/schemas/batchDetails"
+                  _links:
+                    $ref: "#/components/schemas/_links"
+        400:
+          description: |
+            Bad request - there are one or more errors in the specified parameters, for example: a malformed query in the $filter; a request for results beyond the total count; an invalid page size (limit).
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/errorDescription"
+        401:
+          $ref: "#/components/responses/unauthorised"
+        403:
+          $ref: "#/components/responses/forbidden"
+        429:
+          $ref: "#/components/responses/tooManyRequests"
+
+  /batch/{batchId}/status:
+    get:
+      summary: Display the status of a batch
+      operationId: getBatchStatus
+      description: |
+        Returns the status of a batch. A batch status can be Incomplete, CommitInProgress, Committed, Rolledback or Failed.
+      parameters:
+        - name: batchId
+          in: path
+          description: A Batch ID.
+          required: true
+          schema:
+            type: string
+            format: GUID
+      responses:
+        200:
+          description: OK - returns the status of the batch.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  batchId:
+                    type: string
+                    format: GUID
+                  status:
+                    type: string
+                    enum:
+                      [
+                        Incomplete,
+                        CommitInProgress,
+                        Committed,
+                        Rolledback,
+                        Failed,
+                      ]
+        400:
+          description: Bad request - Could be a bad batch ID or a batch ID that doesn't exist.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/errorDescription"
+        401:
+          $ref: "#/components/responses/unauthorised"
+        403:
+          $ref: "#/components/responses/forbidden"
+        410:
+          $ref: "#/components/responses/batchGone"
+        429:
+          $ref: "#/components/responses/tooManyRequests"
+
+  /batch/{batchId}/files:
+    get:
+      summary: Download batch as zip.
+      operationId: getFilesAsZip
+      description: Download all the files in a batch as a single Zip file.
+      parameters:
+        - name: batchId
+          in: path
+          description: A Batch ID (GUID).
+          required: true
+          schema:
+            type: string
+            format: GUID
+        - $ref: "#/components/parameters/range"
+
+      responses:
+        200:
+          description: OK - returns the file content.
+          headers:
+            Content-Length:
+              description: The size of the content returned in bytes. This will also be the full file size.
+              schema:
+                type: integer
+            Last-Modified:
+              description: Returns the date and time the file was last modified. The date is in RFC 1123 format.
+              schema:
+                type: string
+                format: date-time
+            Content-Type:
+              description: The content type specified for the file. If no content type was specified, the default content type is `application/octet-stream`.
+              schema:
+                type: string
+                format: MIME
+            Accept-Ranges:
+              description: The `Accept-Ranges` header indicates the that the service supports range requests for the target resource. This response will include `Accept-Ranges:bytes` to indicate that a partial range request is supported.
+              schema:
+                type: string
+            Content-Disposition:
+              description: The `Content-Disposition` header indicates that the response should be downloaded and saved, along with the suggested filename. e.g. `Content-Disposition:attachment; filename="filename.jpg"`.
+              schema:
+                type: string
+          content:
+            "*/*":
+              schema:
+                type: string
+                format: binary
+        206:
+          $ref: "#/components/responses/partialContent"
+        307:
+          $ref: "#/components/responses/redirect"
+        400:
+          description: Bad request - Could be a bad batch ID or a batch ID that doesn't exist; a bad format in the range header (note that invalid values in the range header would result in a 416 response (Range Not Satisfiable)).
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/errorDescription"
+        401:
+          $ref: "#/components/responses/unauthorised"
+        403:
+          $ref: "#/components/responses/forbidden"
+        404:
+          description: |
+            File not found - The whole batch zip is not ready yet, but may be available in the future. Subsequent requests by the client are expected.
+
+            Creation of the whole batch zip file is a background process. The service will return 404 on this endpoint until the whole batch zip file is ready.
+        410:
+          $ref: "#/components/responses/batchGone"
+        416:
+          description: |
+            Range Not Satisfiable - If the offset in the Range header is invalid and exceeds the file’s total length, the request will return status code 416 (Range Not Satisfiable).
+        429:
+          $ref: "#/components/responses/tooManyRequests"
+
+  /batch/{batchId}/files/{filename}:
+    get:
+      summary: Download a file
+      operationId: getFile
+      description: Downloads an individual specified file from FSS.
+      parameters:
+        - name: batchId
+          in: path
+          description: A Batch ID (GUID).
+          required: true
+          schema:
+            type: string
+            format: GUID
+        - name: filename
+          in: path
+          description: Filename of the file.
+          required: true
+          schema:
+            type: string
+        - $ref: "#/components/parameters/range"
+
+      responses:
+        200:
+          description: OK - returns the file content.
+          headers:
+            Content-Length:
+              description: The size of the content returned in bytes. This will also be the full file size.
+              schema:
+                type: integer
+            Last-Modified:
+              description: Returns the date and time the file was last modified. The date is in RFC 1123 format.
+              schema:
+                type: string
+                format: date-time
+            Content-Type:
+              description: The content type specified for the file. If no content type was specified, the default content type is `application/octet-stream`.
+              schema:
+                type: string
+                format: MIME
+            Accept-Ranges:
+              description: The `Accept-Ranges` header indicates the that the service supports range requests for the target resource. This response will include `Accept-Ranges:bytes` to indicate that a partial range request is supported.
+              schema:
+                type: string
+            Content-Disposition:
+              description: The `Content-Disposition` header indicates that the response should be downloaded and saved, along with the suggested filename. e.g. `Content-Disposition:attachment; filename="filename.jpg"`.
+              schema:
+                type: string
+          content:
+            "*/*":
+              schema:
+                type: string
+                format: binary
+        206:
+          $ref: "#/components/responses/partialContent"
+        307:
+          $ref: "#/components/responses/redirect"
+        400:
+          description: Bad request - Could be a bad batch ID; a batch ID that doesn't exist; a bad filename; a bad format in the range header (note that invalid values in the range header would result in a 416 response (Range Not Satisfiable)).
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/errorDescription"
+        401:
+          $ref: "#/components/responses/unauthorised"
+        403:
+          $ref: "#/components/responses/forbidden"
+        404:
+          description: File not found.
+        410:
+          $ref: "#/components/responses/batchGone"
+        416:
+          description: |
+            Range Not Satisfiable - If the offset in the Range header is invalid and exceeds the file’s total length, the request will return status code 416 (Range Not Satisfiable).
+        429:
+          $ref: "#/components/responses/tooManyRequests"
+
+  /batch/{batchId}:
+    get:
+      summary: Get details of the batch including links to all the files in the batch.
+      operationId: getBatchDetails
+      description: |
+        This get will include full details of the batch, for example it's status, the files in the batch.
+      parameters:
+        - name: batchId
+          in: path
+          description: A Batch ID.
+          required: true
+          schema:
+            type: string
+            format: GUID
+      responses:
+        200:
+          description: OK - Return details about the batch.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/batchDetails"
+        400:
+          description: Bad request - could be an invalid batch ID format. Batch IDs should be a GUID. A valid GUID that doesn't match a batch ID will return status code 404 (Not Found).
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/errorDescription"
+        401:
+          $ref: "#/components/responses/unauthorised"
+        403:
+          $ref: "#/components/responses/forbidden"
+        404:
+          description: Not Found - Could be that the batch ID doesn't exist.
+        410:
+          $ref: "#/components/responses/batchGone"
+        429:
+          $ref: "#/components/responses/tooManyRequests"
+
+  /attributes:
+    get:
+      summary: Get a list of batch attributes.
+      operationId: getBatchAttributesList
+      description: Get a list of the batch attributes that have been applied to batches that the user has access to and can be used to query the list of batches.
+      responses:
+        200:
+          description: Returns a list of the batch attributes that exist, in order of the ones applied to the most batches first.
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: string
+              example:
+                [
+                  "Product Type",
+                  "Year",
+                  "Product ID",
+                  "Media Type",
+                  "Exchange Set Type",
+                  "Week Number",
+                  "S63 Version",
+                ]
+        401:
+          $ref: "#/components/responses/unauthorised"
+        403:
+          $ref: "#/components/responses/forbidden"
+        429:
+          $ref: "#/components/responses/tooManyRequests"
+
+  /attributes/search:
+    get:
+      summary: Get a list of batch attributes and their values for a batch search.
+      operationId: getBatchAttributesAndValuesForSearch
+      description: |
+        Get a list of the batch attributes and their values that have been applied to batches for a batch search.
+      parameters:
+        - $ref: "#/components/parameters/batchAndFileFilter"
+        - $ref: "#/components/parameters/batchAttributeValueMaxCount"
+      responses:
+        200:
+          description: |
+            Returns a dictionary of the batch attributes and values that exist for the batches identified by the search.
+
+            Note : Some attributes (such as `TraceID`) are excluded from this list because they are likely to unique values for each batch. Also, the number of values returned for each attribute is limited to 25. If the attribute value list is truncated, the last entry will be `...`.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  searchBatchCount:
+                    type: integer
+                    description: Total number of batches that match the query.
+                  batchAttributes:
+                    type: object
+                    additionalProperties:
+                      type: array
+                      items:
+                        type: string
+              example:
+                {
+                  "searchBatchCount": 123,
+                  "batchAttributes":
+                    {
+                      "Product Type": ["AVCS", "ADP"],
+                      "Year": ["2021", "2022"],
+                      "Media Type": ["CD", "DVD", "Zip"],
+                      "Exchange Set Type": ["Base", "Update"],
+                      "Week Number":
+                        [
+                          "24",
+                          "25",
+                          "26",
+                          "27",
+                          "28",
+                          "29",
+                          "30",
+                          "31",
+                          "32",
+                          "33",
+                          "34",
+                          "35",
+                          "36",
+                          "37",
+                          "38",
+                          "39",
+                          "40",
+                          "41",
+                          "42",
+                          "43",
+                          "44",
+                          "45",
+                          "46",
+                          "47",
+                          "48",
+                          "...",
+                        ],
+                      "S63 Version": ["1.2"],
+                    }
+                }
+        400:
+          description: |
+            Bad request - there are one or more errors in the specified parameters, for example: a malformed query in the $filter.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/errorDescription"
+        401:
+          $ref: "#/components/responses/unauthorised"
+        403:
+          $ref: "#/components/responses/forbidden"
+        429:
+          $ref: "#/components/responses/tooManyRequests"
+  /auth/client_credentials:
+    post:
+      summary: Get token from AAD.
+      operationId: getTokenUsingClientCredentials
+      description: |
+        Returns a token direct from AAD using Client Credentials.
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                client_id:
+                  type: string
+                  description: The application ID that's assigned to the distributor's app. This will be provided to the distributor when they register their application.
+                client_secret:
+                  type: string
+                  description: The client secret that was generated for the distributor's app when the app was registered. The client secret must be URL-encoded before being sent.
+      responses:
+        200:
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  token_type:
+                    type: string
+                  expires_in:
+                    type: string
+                  ext_expires_in:
+                    type: string
+                  access_token:
+                    type: string
+              example: |
+                {
+                  "token_type": "Bearer",
+                  "expires_in": 3599,
+                  "ext_expires_in": 3599,
+                  "access_token": "eyJ0eXAiOiJKV1QiLCJhbGciOiJSUzI1NiIsImtpZCI6Imwzc1EtNTBjQ0g0eEJWWkxIVEd3blNSNzY4MCJ9.eyJhdWQiOiI0ZTE1NGYyYi0wNWM2LTQwZDEtODdiNy0wYWYwNTI5ZTBhNTEiLCJpc3MiOiJodHRwczovL2xvZ2luLm1pY3Jvc29mdG9ubGluZS5jb20vZTkyYzk4MWItZDY4OS00Y2MzLTgyNDUtMGQ3MTBlMjQ2YmNhL3YyLjAiLCJpYXQiOjE2MzI0NzU1OTAsIm5iZiI6MTYzMjQ3NTU5MCwiZXhwIjoxNjMyNDc5NDkwLCJhaW8iOiJFMlpnWUdpZTJhSmhQT0ZDWTdQR3NxYUhaWi9tQXdBPSIsImF6cCI6IjJmMzJmNmY3LTFmMmYtNDNjZS1hZmQ3LWYzM2Y5M2NiN2U2MSIsImF6cGFjciI6IjEiLCJvaWQiOiJkNmY4ZDg0My0zZTY1LTQ5YTAtODdkNy0zMTBkMGNiM2UzOGUiLCJyaCI6IjAuQVNJQUc1Z3M2WW5XdzB5Q1JRMXhEaVJyeXZmMk1pOHZIODVEcjlmelA1UExmbUVpQUFBLiIsInN1YiI6ImQ2ZjhkODQzLTNlNjUtNDlhMC04N2Q3LTMxMGQwY2IzZTM4ZSIsInRpZCI6ImU5MmM5ODFiLWQ2ODktNGNjMy04MjQ1LTBkNzEwZTI0NmJjYSIsInV0aSI6IlREVmtmenZuS2txVEdRUXNEWjItQUEiLCJ2ZXIiOiIyLjAifQ.W-TB97v6D56UuPCstaSrfLFbc9gE6W1VHD5t0RLo_EK-1LuaTvQ0aqJtaYCRnXnd6RmMIIml3ckHxFL0lZlYUoSjszIMFkb1w0aH5SxD-GOfY-dktvGKdMVxqtyjJJg1IV7V3Dv1BYI24RnGPfcJG73-af7vcTRjE5KFeW_kOMVAfCAcZOV9dJ7BJULfEdHlK8ZFUb2hEzFkoORGdlrpNIJ7-QEhB9Kcnxa9QtA4z8lMtWESx-q17N88fmlaz87kEKEjX3pIP7k2l_y5BNtNAxK0h995pZ9hHNe4-UBH-xjvfuDa6IbCsZD1J1IW7AO1bXCjGGvc31PtJqEc5FRdQQ"
+                }
+        400:
+          description: Bad request - Request missing client_id and/or client_secret.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/errorDescription"
+              example:
+                {
+                  "correlationId": "184ef711-b039-4c24-b81a-89081d8f324c",
+                  "errors":
+                    [
+                      {
+                        "source": "request",
+                        "description": "request missing client_id and/or client_secret"
+                      }
+                    ]
+                }
+        401:
+          $ref: "#/components/responses/unauthorised"
+        403:
+          $ref: "#/components/responses/forbidden"
+        429:
+          $ref: "#/components/responses/tooManyRequests"
+
+components:
+  parameters:
+    paginationLimit:
+      name: limit
+      description: Specify the limit of the number of results returned in one page. Also known as page size. Optional parameter and defaults to 10 results per page. If specified, must be greater or equal to 1.
+      in: query
+      required: false
+      schema:
+        type: integer
+    paginationStart:
+      name: start
+      description: Specify the index of the first item returned in the results. Defaults to 0 (the first item). Used with pagination. If specified, must be greater than or equal to 0. If greater than the number of results, the service will return status code 400 (Bad Request).
+      in: query
+      required: false
+      schema:
+        type: integer
+    batchAndFileFilter:
+      name: $filter
+      description: |
+        The search `$filter` allows callers to filter the returned results loosely based on the OData 4.01 `$filter` syntax (See <http://docs.oasis-open.org/odata/odata/v4.01/odata-v4.01-part2-url-conventions.html#sec_QueryOptions> for a full description of the OData query options).
+
+
+        ## User Attributes
+
+        User attributes can be used as part of the filter with the attribute name enclosed within `$batch( )` or `$file( )` e.g. `$batch(Attribute Name)` or `$file(Attribute Name)`. User Attribute names are not case sensitive, e.g. `$batch(Product)` and `$Batch(product)` are the same.
+
+        This allows the string operators below to be used, for example: `$filter=$batch(Product) eq 'AVCS'` or `$filter=endswith($file(Week Number), '/52')`
+
+        Batches and files within the batch have user attributes. For filtering, a batch is considered to have the combination of its own attributes and all the attributes of the files in that batch. Operators will then match on any of the attributes, so an operator could match on one or more of the batch's attributes, or any of the file's attributes.
+
+        A batch that has no instances of the attribute and no files with an instance of the attribute will be considered to have a null value for that attribute. Combined with the `null` literal, this can be used to test for the presence or absence of a user attribute.  (e.g. `$filter=$batch(Product) eq null` will return batches that don't have a `Product` attribute and `$filter=$file(Product) eq null` will return all batches for which files don't have a `Product` attribute.)
+
+        **Note**: user attribute values can only be compared with a literal value. It is not possible to compare one user attribute value with another user attribute value. e.g. `$filter=$batch(Product) eq $batch(Service)` or `$filter=$file(Product) eq $file(Service)` is an invalid filter and will return HTTP Status Code 400 - Bad Request.
+
+        Additionally, you can search for any batch user attribute that has a value that contains a search term. `$batchContains('searchTerm')` will look for any batch with any attribute that contains the 'searchTerm'. Whereas `$batch()` and `$file()` are string functions, i.e. they return the value of the attribute to then be compared with an operator below, `$batchContains()` is a boolean function and returns true or false. `$batchContains()` can be combined with boolean operators such as and and or.
+
+
+        ## System Attributes
+
+        System attribute names are not case sensitive. For example: `batchPublishedDate` is the same as `batchpublisheddate`.
+
+        The service supports queries on the following system attributes:
+
+        * `businessUnit` - Matches a string, e.g. `$filter=businessUnit eq 'ADDS'`. Partial matches are supported using the string operators below. e.g. `$filter=startswith(businessUnit,'Test')`.
+        * `batchPublishedDate` - The date the batch was published (committed) (not the individual files, or the initial batch created date). Only matches against a date literal or expression. Dates must be specified in full date-time notation as defined by RFC 3339, section 5.6, for example, 2017-07-21T17:32:28Z. The system supports the comparison operators listed below e.g. `$filter=batchPublishedDate gt 2020-12-23T17:45:12Z`.
+        * `expiryDate` - Only matches against a date literal or expression. Dates must be specified in full date-time notation as defined by RFC 3339, section 5.6, for example, 2017-07-21T17:32:28Z. The system supports the comparison operators listed below. e.g. `$filter=expiryDate lt 2020-01-05T19:56:48Z`.
+        * `filename` - Matches a string which is the filename of any of the files within a batch, e.g. `$filter=filename eq 'AUL37137.004'`. This will also support partial filename matches using the string operators below. e.g. `$filter=endswith(filename,'.iso')`.
+        * `filesize` - Matches an integer that is the the file size in bytes of any of the files in the batch. The match can be made using `eq` and `ne` operator as well as the comparison operators listed below. e.g. `$filter=fileSize gt 1000000` finds any batch that contains one or more files that is bigger than 1000000 bytes (1MB).
+        * `mimetype` - Matches a string that is the MIME Type of any of the files in the batch.  Partial matches can be made with the string operators listed below. e.g. `$filter=startswith(mimeType, 'text')` would match `text/json` and `text/plain` but not `application/json`.
+
+        The following system attributes have been considered and are **not** currently in scope:
+
+        * ~~`hash` - Search for this binary object?~~
+        * ~~`totalBatchSize` - Match against the sum of all the file sizes of the files in the batch? Much harder to translate to a SQL query, but possibly more useful to the users?~~
+
+        **Note**: System Attribute values can only be compared with a literal value. It is not possible to compare one System Attribute value with another System Attribute value. e.g. `$filter=batchedPublishedDate gt expiryDate` is an invalid filter and will return HTTP Status Code 400 - Bad Request.
+
+        ## Supported Operators
+
+        Comparison between two values of different types will fail (e.g. you can't compare a string value and a date, the query will return status code 400 (Bad Request)).
+
+        * And (`and`) - This binary operator can be used between two expressions and will return true if both the left and right expression are true.
+        * Or (`or`) - This binary operator can be used between two expressions and will return true if either the left expression or the right expression is true.
+        * Not (`not`) - The `not` operator returns true if the operand returns false, otherwise it returns false.  e.g. `$filter=not endswith($batch(Product),'ilk') or not endswith($file(Product),'ilk').
+        * Equals (`eq`) - Comparison of two values to see if they are the same. For string values, the comparison is case-insensitive, so `'Bob' eq 'BOB'` will return true. For Date-Time values, the comparison is exact so `2017-07-21T17:32:28Z eq 2017-07-21T17:32:29Z` will return false.
+        * Not Equals (`ne`) - Comparison of two values to see if they are different. For string values, the comparison is case-insensitive, so `'Bob' ne 'BOB'` will return false. For Date-Time values, the comparison is exact so `2017-07-21T17:32:28Z ne 2017-07-21T17:32:29Z` will return true.
+        * Comparison operators (only applies to numeric system attributes (i.e. `filesize`) or date system attributes (i.e. `batchPublishedDate` and `expiryDate`)).
+          * Greater Than (`gt`) e.g. `fileSize gt 1000000` or `batchPublishedDate gt 2020-12-23T17:45:12Z`.
+          * Greater Than or Equals (`ge`) e.g. `fileSize ge 1000000` or `batchPublishedDate ge 2020-12-23T17:45:12Z`.
+          * Less Than (`lt`) e.g. `fileSize lt 1000000` or `batchPublishedDate lt 2020-12-23T17:45:12Z`.
+          * Less Than or Equals (`le`) e.g. `fileSize le 1000000` or `batchPublishedDate le 2020-12-23T17:45:12Z`.
+        * String operators:
+          * Contains (`contains()`).
+          * Starts With (`startswith()`).
+          * Ends With (`endswith()`) - This operator returns true if the value of the attribute is a string and ends with the provided literal. e.g. `endswith(filename,'.iso')`.
+          
+
+
+        **Note**: the system does not support any other Functions or Arithmetic Operators.
+
+
+        ## Literal values
+
+        The system supports the following literal values:
+
+        * Null (`null`).
+        * True (`true`).
+        * False (`false`).
+        * Integer values (e.g. `-128`).
+        * String values (e.g. `'Say Hello,then go'`).
+        * String values with single quote (e.g. `'Rob O'Neil'`) - Replace 1 single quote with 2 single quotes to search a value having single quote. e.g. `'Rob O''Neil'`
+        * DateTimeOffset values (e.g. `2012-12-03T07:16:23Z`). Dates must be specified in the RFC 3339 format. They can contain a date-time offset, but will be converted to UTC before comparison.
+
+
+        ## Operator Precedence
+
+        Operators are listed by category in order of precedence from highest to lowest. Operators in the same category have equal precedence:
+
+          | Group           | Operator | Description           |
+          |-----------------|----------|-----------------------|
+          | Grouping        | ( )      | Precedence grouping   |
+          | Primary         | xxx( )   | Method Call           |
+          | Unary           | not      | Logical Negation      |
+          | Relational      | gt       | Greater Than          |
+          |                 | ge       | Greater Than or Equal |
+          |                 | lt       | Less Than             |
+          |                 | le       | Less Than or Equal    |
+          | Equality        | eq       | Equal                 |
+          |                 | ne       | Not Equal             |
+          | Conditional AND | and      | Logical And           |
+          | Conditional OR  | or       | Logical Or            |
+
+        The Grouping operator (open and close parenthesis `( )`) controls the evaluation order of an expression. The Grouping operator returns the expression grouped inside the parenthesis, e.g.:
+
+        ```
+          $filter=($batch(Product Type) eq 'AVCS') and ($batch(Week Number) eq '12' or $batch(Week Number) eq '13')
+        ```
+
+        ## Examples:
+
+          `$filter=$batch(Product Type) eq 'AVCS' and $batch(Week Number) eq '12' and batchPublishedDate gt 2020-10-21T00:00:00Z` - All AVCS files for Week Number 2020/12 created after 21 Oct 2020.
+
+          `$filter=batchPublishedDate gt 2020-10-21T00:00:00Z` - All files created after midnight on 21 Oct 2020.
+          
+          `$filter=expiryDate lt 2020-12-21T00:00:00Z` - All files due to expire before 21 Dec 2020.
+
+          `$filter=`$batchContains('AVCS')`
+
+      in: query
+      required: false
+      schema:
+        type: string
+    batchAttributeValueMaxCount:
+      name: maxAttributeValueCount
+      description: Optional. Specify the maximum number of batch attribute values to be returned in the result. If specified, must be greater than or equal to 1. If less than 1, the service will return status code 400 (Bad Request).
+      in: query
+      required: false
+      schema:
+        type: integer
+
+    range:
+      name: Range
+      in: header
+      description: |
+        Optional. Return file data only for the specified byte range.
+
+        ### Format 1: `bytes=startByte-`
+
+        This range will return bytes from the offset startByte through to the end of the file. For example, to specify a range encompassing all bytes after the first 256 bytes of a file, you can pass in the following header:
+
+        ```
+          Range: bytes=255-
+        ```
+
+        The `Content-Length` header in the response is equal to the number of bytes from the offset until the end of the file. Using the example range above for a file of 1,024 bytes in length, `Content-Length` would be 769.
+
+        If the offset is valid and does not exceed the file’s total length, the request will return status code 206 (Partial Content). If the offset is invalid and exceeds the file’s total length, the request will return status code 416 (Range Not Satisfiable).
+
+        ### Format 2: `bytes=startByte-endByte`
+
+        This range will return bytes from the offset startByte through to the endByte. For example, to specify a range encompassing the first 512 bytes of a file, you would pass in the following header:
+
+        ```
+          Range: bytes=0-511
+        ```
+
+        The `Content-Length` header in the response is equal to the number of bytes between each offset. Using the example range above for a file of 1,024 bytes in length, `Content-Length` would be 512.
+
+        If the offset is valid and does not exceed the file’s total length, the request will return status code 206 (Partial Content). If the offset is invalid and exceeds the file’s total length, the request will return status code 416 (Range Not Satisfiable).
+
+        See Microsoft documentation for more details on specifying the range header: <https://docs.microsoft.com/en-us/rest/api/storageservices/specifying-the-range-header-for-file-service-operations>, the HTTP Range Requests specification: <https://tools.ietf.org/html/rfc7233> or Byte serving information <https://en.wikipedia.org/wiki/Byte_serving>.
+      required: false
+      schema:
+        type: string
+        format: bytes=startByte-endByte or bytes=startByte-
+
+  responses:
+    unauthorised:
+      description: Unauthorised - either you have not provided any credentials, or your credentials are not recognised.
+
+    forbidden:
+      description: Forbidden - you have been authorised, but you are not allowed to access this resource.
+
+    batchGone:
+      description: Gone - the specified batch has expired and is no longer available.
+
+    tooManyRequests:
+      description: You have sent too many requests in a given amount of time. Please back-off for the time in the Retry-After header (in seconds) and try again.
+      headers:
+        Retry-After:
+          schema:
+            type: integer
+          description: Specifies the time you should wait in seconds before retrying.
+
+    partialContent:
+      description: Partial Content - The response is a partial content because a Range was specified for a part of the file.
+      headers:
+        Accept-Ranges:
+          description: The `Accept-Ranges` header indicates the that the service supports range requests for the target resource. This response will include `Accept-Ranges:bytes` to indicate that a partial range request is supported.
+          schema:
+            type: string
+        Content-Disposition:
+          description: The `Content-Disposition` header indicates that the response should be downloaded and saved, along with the suggested filename. e.g. `Content-Disposition:attachment; filename="filename.jpg"`.
+          schema:
+            type: string
+        Content-Range:
+          description: |
+            Describes the part of the file that is actually returned.
+
+            ### Syntax
+
+            ```
+              Content-Range: <unit> <range-start>-<range-end>/<size>
+              Content-Range: <unit> <range-start>-<range-end>/*
+              Content-Range: <unit> */<size>
+            ```
+
+            `<unit>` The unit in which ranges are specified. This will be `bytes`.
+
+            `<range-start>` An integer in bytes indicating the beginning of the request range.
+
+            `<range-end>` An integer in bytes indicating the end of the requested range.
+
+            `<size>` The total size of the file.
+
+            Example:
+
+            ```
+              Content-Range: bytes 200-1000/67589
+            ```
+          schema:
+            type: string
+        Content-Length:
+          description: The size of the content returned in bytes. This will be less than the full file size.
+          schema:
+            type: integer
+        Last-Modified:
+          description: Returns the date and time the file was last modified. The date is in RFC 1123 format.
+          schema:
+            type: string
+            format: date-time
+        Content-Type:
+          description: The content type specified for the file. If no content type was specified, the default content type is `application/octet-stream`.
+          schema:
+            type: string
+            format: MIME
+      content:
+        "*/*":
+          schema:
+            type: string
+            format: binary
+    redirect:
+      description: |
+        Temporary Redirect - the file should be downloaded from the URL provided in the `Location` header.
+
+        For reasons of download performance, when downloading a large file the client will be redirected to a direct/accelerated URL. The URL may include a temporary access token. The request to the URL should be a `GET` request with the full URL including any query parameters. No additional headers (including authorize headers) will be required.
+
+        Note - the redirect URL is likely to have a time and/or IP address limited access token attached to it, so should not be stored.
+      headers:
+        Location:
+          description: The absolute URL the file should be downloaded from, including any access tokens required.
+          schema:
+            type: string
+            format: URL
+
+  schemas:
+    errorDescription:
+      type: object
+      properties:
+        correlationId:
+          type: string
+        errors:
+          type: array
+          items:
+            $ref: "#/components/schemas/fieldError"
+
+    fieldError:
+      type: object
+      properties:
+        source:
+          type: string
+        description:
+          type: string
+
+    href:
+      type: string
+      format: uri
+    link:
+      type: object
+      properties:
+        href:
+          $ref: "#/components/schemas/href"
+
+    _links:
+      description: Links, usually describing links to next and previous pages in a paged result.
+      type: object
+      properties:
+        self:
+          description: Link to this page of the results.
+          $ref: "#/components/schemas/link"
+        first:
+          description: Link to the first page of the results. Will be the same as self if this is the first page.
+          $ref: "#/components/schemas/link"
+        previous:
+          description: Link to the previous page of results if there are any.
+          $ref: "#/components/schemas/link"
+        next:
+          description: Link to the next page of results if there are any.
+          $ref: "#/components/schemas/link"
+        last:
+          description: Link to the last page of results if there are any.
+          $ref: "#/components/schemas/link"
+
+    batchDetails:
+      description: Object representing the details of a batch.
+      type: object
+      properties:
+        batchId:
+          type: string
+          format: GUID
+        status:
+          type: string
+          enum: [Incomplete, CommitInProgress, Committed, Rolledback, Failed]
+        allFilesZipSize:
+          type: integer
+        attributes:
+          type: array
+          items:
+            type: object
+            properties:
+              key:
+                type: string
+              value:
+                type: string
+        businessUnit:
+          type: string
+        batchPublishedDate:
+          type: string
+          format: date-time
+        expiryDate:
+          type: string
+          format: date-time
+        isAllFilesZipAvailable:
+          description: Indicates if the zip of all files in the batch is available. See "#/paths/batch/{batchId}/files"
+          type: boolean
+        files:
+          type: array
+          items:
+            type: object
+            properties:
+              filename:
+                type: string
+              fileSize:
+                type: integer
+              mimeType:
+                type: string
+                description: The MIME content type of the file.
+              hash:
+                type: string
+                format: Base64
+                description: MD5 hash of the file content.
+              attributes:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    key:
+                      type: string
+                    value:
+                      type: string
+              links:
+                type: object
+                description: Contains links to the relevant APIs for this file.
+                properties:
+                  get:
+                    $ref: "#/components/schemas/link"
+
+  securitySchemes:
+    jwtBearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT

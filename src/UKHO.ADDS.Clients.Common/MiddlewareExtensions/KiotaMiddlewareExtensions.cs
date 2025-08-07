@@ -45,13 +45,33 @@ namespace UKHO.ADDS.Clients.Common.MiddlewareExtensions
         }
 
         /// <summary>
+        /// Registers a Kiota client in the service collection, including its configured HTTP client and factory.
+        /// </summary>
+        /// <typeparam name="TClient">The Kiota client type to register.</typeparam>
+        /// <param name="services">The service collection to register the client with.</param>
+        /// <param name="endpointConfigKey">The configuration key for the endpoint URL.</param>
+        /// <param name="headers">Optional default headers to add to the HTTP client.</param>
+        public static void RegisterKiotaClient<TClient>(
+            this IServiceCollection services,
+            Func<IServiceProvider, Uri> uriFunc,
+            IDictionary<string, string>? headers = null)
+            where TClient : class
+        {
+            // Ensure Inspection Handler is configured to inspect response headers
+            var headersOption = new HeadersInspectionHandlerOption { InspectResponseHeaders = true };
+            services.AddSingleton(headersOption);
+            services.AddConfiguredHttpClient<TClient>(uriFunc, headers);
+            services.AddSingleton(sp => sp.GetRequiredService<ClientFactory>().GetClient<TClient>());
+        }
+
+        /// <summary>
         /// Attaches all registered Kiota middleware handlers to the HTTP client builder.
         /// </summary>
         /// <param name="builder">The HTTP client builder to attach handlers to.</param>
         /// <returns>The updated HTTP client builder.</returns>
         private static IHttpClientBuilder AttachKiotaHandlers(this IHttpClientBuilder builder)
         {
-            var kiotaHandlers = KiotaClientFactory.CreateDefaultHandlers([new HeadersInspectionHandlerOption() { InspectResponseHeaders = true}]);
+            var kiotaHandlers = KiotaClientFactory.CreateDefaultHandlers([new HeadersInspectionHandlerOption() { InspectResponseHeaders = true }]);
             foreach (var handler in kiotaHandlers)
             {
                 builder.AddHttpMessageHandler(() => handler);
@@ -90,6 +110,38 @@ namespace UKHO.ADDS.Clients.Common.MiddlewareExtensions
                 }
                 var logger = provider.GetRequiredService<ILogger<TClient>>();
                 logger.LogInformation("Configured HTTP client for " + typeof(TClient).Name + " with base address: " + endpoint);
+            }).AttachKiotaHandlers();
+        }
+
+        /// <summary>
+        /// Registers and configures an HTTP client for a specific Kiota client type using a configuration key for the endpoint.
+        /// </summary>
+        /// <typeparam name="TClient">The Kiota client type to register.</typeparam>
+        /// <param name="services">The service collection to register the HTTP client with.</param>
+        /// <param name="uri">The service URI</param>
+        /// <param name="headers">Optional default headers to add to the HTTP client.</param>
+        /// <returns>The HTTP client builder for further configuration.</returns>
+        public static IHttpClientBuilder AddConfiguredHttpClient<TClient>(
+            this IServiceCollection services,
+            Func<IServiceProvider, Uri> uriFunc,
+            IDictionary<string, string>? headers = null)
+            where TClient : class
+        {
+            return services.AddHttpClient<TClient>((provider, client) =>
+            {
+                var uri = uriFunc(provider);
+
+                client.BaseAddress = uri;
+
+                if (headers != null)
+                {
+                    foreach (var header in headers)
+                    {
+                        client.DefaultRequestHeaders.Add(header.Key, header.Value);
+                    }
+                }
+                var logger = provider.GetRequiredService<ILogger<TClient>>();
+                logger.LogInformation("Configured HTTP client for " + typeof(TClient).Name + " with base address: " + uri.AbsoluteUri);
             }).AttachKiotaHandlers();
         }
     }

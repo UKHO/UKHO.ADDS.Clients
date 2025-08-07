@@ -17,8 +17,8 @@ parameters:
     type: string
 
 steps:
-  - checkout: ${{parameters.openApiRepo}}
-    path: s/openapi
+  # - checkout: ${{parameters.openApiRepo}}
+  #   path: s/openapi
 
   - task: UseDotNet@2
     displayName: 'Install .NET SDK for Kiota'
@@ -35,7 +35,7 @@ steps:
 
   - powershell: |
       & "deployment\RunKiota.ps1" `
-        -OpenApiSpecPath "openapi\${{ parameters.openApiSpecPath }}" `
+        -OpenApiSpecPath "deployment\${{ parameters.openApiSpecPath }}" `
         -OutputDirectory "${{parameters.outputDirectory}}" `
         -Language "${{parameters.language}}" `
         -GeneratedApiClassName "${{parameters.GeneratedApiClassName}}" `

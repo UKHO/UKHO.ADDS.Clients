@@ -35,6 +35,8 @@ variables:
   value: "NautilusBuild"
 - name: SdkVersion
   value: "8.x"
+- name: SdkVersionKiota
+  value: "8.x"
 
 resources:
   repositories:

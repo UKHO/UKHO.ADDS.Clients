@@ -1,4 +1,13 @@
 steps:
+  - task: UseDotNet@2
+    displayName: Use .NET SDK $(SdkVersion) (Kiota)
+    inputs:
+      packageType: sdk
+      version: $(SdkVersionKiota)
+
+  - script: dotnet tool install --global Microsoft.OpenApi.Kiota
+    displayName: Install Kiota CLI
+
   - template: KiotaGenerateClients.yml
     parameters:
       openApiRepo: 'openApiSpecSalesCatalogueServiceSharedAssets'

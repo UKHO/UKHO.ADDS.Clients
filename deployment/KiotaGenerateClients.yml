@@ -20,17 +20,8 @@ steps:
   # - checkout: ${{parameters.openApiRepo}}
   #   path: s/openapi
 
-  - task: UseDotNet@2
-    displayName: 'Install .NET SDK for Kiota'
-    inputs:
-      packageType: sdk
-      version: '8.0.x'
-
-  - script: dotnet tool install --global Microsoft.OpenApi.Kiota
-    displayName: 'Install Kiota CLI'
-
   - powershell: |
-      & "deployment\CheckForKiotaDependency.ps1" -OutputDirectory $OutputDirectory
+      & "deployment\CheckForKiotaDependency.ps1" -OutputDirectory ${{parameters.outputDirectory}}
     displayName: 'Ensure Kiota is installed'
 
   - powershell: |

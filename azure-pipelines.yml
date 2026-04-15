@@ -1,25 +1,40 @@
 name: $(BuildDefinitionName)_$(SourceBranchName)_$(Date:yyyyMMdd).$(BuildCounter)
 
+parameters:
+- name: PreReleaseVersion
+  displayName: "Pre-release version (use n/a for normal release)"
+  type: string
+  values:
+    - 'alpha'
+    - 'beta'
+    - 'rc'
+    - 'n/a'
+  default: 'rc'
+- name: SkipUnitTests
+  displayName: "Skip unit tests"
+  type: boolean
+  default: false
+
 trigger:
 - main
 
-pool: NautilusBuild
+pool: $(WindowPool)
 
 variables:
 - name: BuildConfiguration
   value: "Release"
-- name: BuildPlatform
-  value: "any cpu"
 - name: BuildCounter
   value: $[counter(format('{0:yyyyMMdd}', pipeline.startTime), 1)]
 - name: UKHOAssemblyCompany
   value: "UK Hydrographic Office"
 - name: UKHOAssemblyVersionPrefix
-  value: "0.0."
+  value: "1.0."
 - name: UKHOAssemblyProduct
   value: "ADDS Shared Clients"
+- name: WindowPool
+  value: "NautilusBuild"
 - name: SdkVersion
-  value: "8.0.x"
+  value: "8.x"
 
 resources:
   repositories:
@@ -46,7 +61,7 @@ stages:
     displayName: Build, unit test and package
     steps:
     - checkout: self
-      path: s
+      clean: true
 
     - task: PowerShell@2
       displayName: Output environment variables
@@ -72,15 +87,16 @@ stages:
           -UKHOAssemblyVersionPrefix "$env:UKHOAssemblyVersionPrefix"
           -UKHOAssemblyProduct "$env:UKHOAssemblyProduct"
           -SourceRevisionId "$(Build.SourceVersion)"
+          -PreReleaseVersion ${{ parameters.PreReleaseVersion }}
 
     - task: UseDotNet@2
-      displayName: Use .NET $(SdkVersion) sdk
+      displayName: Use .NET SDK $(SdkVersion)
       inputs:
         packageType: sdk
         version: $(SdkVersion)
 
     - task: DotNetCoreCLI@2
-      displayName: Package restore
+      displayName: .NET - NuGet restore
       inputs:
         command: restore
         projects: |
@@ -88,17 +104,17 @@ stages:
         feedsToUse: config
         noCache: true
         nugetConfigPath: '$(Build.SourcesDirectory)\BuildNuget.config'
-        workingDirectory: '$(Build.SourcesDirectory)'
-        packagesDirectory: '$(Build.SourcesDirectory)\packages'
 
-    - task: DotNetCoreCLI@2
-      displayName: Unit tests
-      inputs:
-        command: test
-        projects: |
-          **/*.Tests.csproj
-        testRunTitle: UnitTests
-        workingDirectory: '$(Build.SourcesDirectory)'
+    - ${{ if ne(parameters.SkipUnitTests, true) }}:
+      - task: DotNetCoreCLI@2
+        displayName: Unit tests
+        inputs:
+          command: test
+          projects: |
+            **/*.Tests.csproj
+          publishTestResults: true
+          testRunTitle: UnitTests
+          arguments: '--configuration $(BuildConfiguration) --settings "$(Build.SourcesDirectory)\test.runsettings" /p:CollectCoverage=true /p:CoverletOutputFormat=cobertura --no-restore'
 
     - template: deployment/KiotaClientGeneration.yml
     
@@ -199,7 +215,7 @@ stages:
 
 
 - stage: ProGet
-  condition: and(succeeded(), eq(variables['Build.SourceBranch'], 'refs/heads/main'))
+  condition: and(succeeded(), ne(variables['Build.Reason'], 'PullRequest'), or(eq(variables['Build.SourceBranch'], 'refs/heads/main'), ${{ ne(parameters.PreReleaseVersion, 'n/a') }}))
   variables:
   - group: nuget-deployment-vars
   jobs:
@@ -229,7 +245,7 @@ stages:
             displayName: Publish Package
 
 - stage: NuGet
-  condition: and(succeeded(), eq(variables['Build.SourceBranch'], 'refs/heads/main'))
+  condition: and(succeeded(), ne(variables['Build.Reason'], 'PullRequest'), or(eq(variables['Build.SourceBranch'], 'refs/heads/main'), ${{ ne(parameters.PreReleaseVersion, 'n/a') }}))
   variables:
   - group: nuget-deployment-vars
   jobs:

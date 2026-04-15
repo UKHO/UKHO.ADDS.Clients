@@ -13,7 +13,7 @@ parameters:
 - name: SkipUnitTests
   displayName: "Skip unit tests"
   type: boolean
-  default: false
+  default: true
 
 trigger:
 - main

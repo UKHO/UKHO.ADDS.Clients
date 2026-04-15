@@ -49,7 +49,7 @@ namespace UKHO.ADDS.Clients.Common.MiddlewareExtensions
         /// </summary>
         /// <typeparam name="TClient">The Kiota client type to register.</typeparam>
         /// <param name="services">The service collection to register the client with.</param>
-        /// <param name="endpointConfigKey">The configuration key for the endpoint URL.</param>
+        /// <param name="uriFunc">A callback to retrieve the service URL.</param>
         /// <param name="headers">Optional default headers to add to the HTTP client.</param>
         public static void RegisterKiotaClient<TClient>(
             this IServiceCollection services,
@@ -62,6 +62,40 @@ namespace UKHO.ADDS.Clients.Common.MiddlewareExtensions
             services.AddSingleton(headersOption);
             services.AddConfiguredHttpClient<TClient>(uriFunc, headers);
             services.AddSingleton(sp => sp.GetRequiredService<ClientFactory>().GetClient<TClient>());
+        }
+
+        /// <summary>
+        /// Registers a Kiota client in the service collection, including its configured HTTP client and factory.
+        /// </summary>
+        /// <typeparam name="TClient">The Kiota client type to register.</typeparam>
+        /// <param name="services">The service collection to register the client with.</param>
+        /// <param name="endpointFunc">A callback to retrieve the service URL and auth provider.</param>
+        /// <param name="headers">Optional default headers to add to the HTTP client.</param>
+        public static void RegisterKiotaClient<TClient>(
+            this IServiceCollection services,
+            Func<IServiceProvider, (Uri Uri, IAuthenticationProvider AuthenticationProvider)> endpointFunc,
+            IDictionary<string, string>? headers = null)
+            where TClient : class
+        {
+            var headersOption = new HeadersInspectionHandlerOption { InspectResponseHeaders = true };
+            services.AddSingleton(headersOption);
+
+            // Reuse existing HttpClient setup by projecting to the Uri
+            services.AddConfiguredHttpClient<TClient>(sp => endpointFunc(sp).Uri, headers);
+
+            // Create the Kiota client per resolution with its own auth provider + base URL
+            services.AddTransient<TClient>(sp =>
+            {
+                var (baseUri, authProvider) = endpointFunc(sp);
+
+                var adapter = new HttpClientRequestAdapter(authProvider)
+                {
+                    BaseUrl = baseUri.AbsoluteUri.TrimEnd('/')
+                };
+
+                // Let DI satisfy any other ctor dependencies, pass IRequestAdapter explicitly.
+                return ActivatorUtilities.CreateInstance<TClient>(sp, adapter);
+            });
         }
 
         /// <summary>
@@ -121,7 +155,7 @@ namespace UKHO.ADDS.Clients.Common.MiddlewareExtensions
         /// <param name="uri">The service URI</param>
         /// <param name="headers">Optional default headers to add to the HTTP client.</param>
         /// <returns>The HTTP client builder for further configuration.</returns>
-        public static IHttpClientBuilder AddConfiguredHttpClient<TClient>(
+        private static IHttpClientBuilder AddConfiguredHttpClient<TClient>(
             this IServiceCollection services,
             Func<IServiceProvider, Uri> uriFunc,
             IDictionary<string, string>? headers = null)

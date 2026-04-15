@@ -15,7 +15,7 @@
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>
     <PackageReference Include="NUnit3TestAdapter" Version="6.2.0" />
-    <PackageReference Include="UKHO.ADDS.Infrastructure.Serialization" Version="0.0.50327-alpha.2" />
+    <PackageReference Include="UKHO.ADDS.Infrastructure.Serialization" Version="0.0.60217-alpha.1" />
   </ItemGroup>
 
   <ItemGroup>

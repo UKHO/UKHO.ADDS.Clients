@@ -15,13 +15,15 @@ parameters:
     type: string
   - name: Namespace
     type: string
+  - name: ClientName
+    type: string
 
 steps:
   # - checkout: ${{parameters.openApiRepo}}
   #   path: s/openapi
 
   - powershell: |
-      & "deployment\CheckForKiotaDependency.ps1" -OutputDirectory ${{parameters.outputDirectory}}
+      & "deployment\CheckForKiotaDependency.ps1" -OutputDirectory ${{parameters.ClientName}}
     displayName: 'Ensure Kiota is installed'
 
   - powershell: |

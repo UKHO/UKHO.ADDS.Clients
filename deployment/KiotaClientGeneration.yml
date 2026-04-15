@@ -16,6 +16,7 @@ steps:
       language: 'csharp'
       GeneratedApiClassName: 'KiotaSalesCatalogueService'
       Namespace: 'UKHO.ADDS.Clients.Kiota.SalesCatalogueService'
+      ClientName: UKHO.ADDS.Clients.SalesCatalogueService
 
   - template: KiotaGenerateClients.yml
     parameters:
@@ -25,6 +26,7 @@ steps:
       language: 'csharp'
       GeneratedApiClassName: 'KiotaFileShareServiceReadOnly'
       Namespace: 'UKHO.ADDS.Clients.Kiota.FileShareService.ReadOnly'
+      ClientName: UKHO.ADDS.Clients.FileShareService.ReadOnly
 
   - template: KiotaGenerateClients.yml
     parameters:
@@ -34,3 +36,4 @@ steps:
       language: 'csharp'
       GeneratedApiClassName: 'KiotaFileShareServiceReadWrite'
       Namespace: 'UKHO.ADDS.Clients.Kiota.FileShareService.ReadWrite'
+      ClientName: UKHO.ADDS.Clients.FileShareService.ReadWrite

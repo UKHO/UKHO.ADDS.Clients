@@ -131,7 +131,7 @@ stages:
           **/UKHO.ADDS.Clients.PermitService.csproj;
           **/UKHO.ADDS.Clients.SalesCatalogueService.csproj
         packDirectory: $(Build.ArtifactStagingDirectory)/packages
-        arguments:  '--configuration $(BuildConfiguration)'
+        arguments:  '--configuration $(BuildConfiguration) --no-restore --verbosity normal'
 
     - powershell: Get-ChildItem "$(Build.ArtifactStagingDirectory)/packages" -Recurse
       displayName: List packed NuGet packages

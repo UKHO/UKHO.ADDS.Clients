@@ -126,7 +126,7 @@ stages:
       inputs:
         command: custom
         custom: pack
-        arguments: $(Build.SourcesDirectory)\src\UKHO.ADDS.Clients\UKHO.ADDS.Clients.Common.csproj --configuration $(BuildConfiguration) --no-restore --output $(Build.ArtifactStagingDirectory)\packages --verbosity normal
+        arguments: $(Build.SourcesDirectory)\src\UKHO.ADDS.Clients.Common\UKHO.ADDS.Clients.Common.csproj --configuration $(BuildConfiguration) --no-restore --output $(Build.ArtifactStagingDirectory)\packages --verbosity normal
 
     - task: PowerShell@2
       displayName: Add common package reference

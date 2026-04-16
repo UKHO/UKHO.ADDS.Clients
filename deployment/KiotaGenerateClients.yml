@@ -22,9 +22,9 @@ steps:
   # - checkout: ${{parameters.openApiRepo}}
   #   path: s/openapi
 
-  - powershell: |
-      & "deployment\CheckForKiotaDependency.ps1" -OutputDirectory ${{parameters.ClientName}}
-    displayName: 'Ensure Kiota is installed'
+  # - powershell: |
+  #     & "deployment\CheckForKiotaDependency.ps1" -OutputDirectory ${{parameters.ClientName}}
+  #   displayName: 'Ensure Kiota is installed'
 
   - powershell: |
       & "deployment\RunKiota.ps1" `

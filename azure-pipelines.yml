@@ -106,6 +106,7 @@ stages:
         feedsToUse: config
         noCache: true
         nugetConfigPath: '$(Build.SourcesDirectory)\BuildNuget.config'
+        restoreDirectory: '$(Build.SourcesDirectory)\packages'
 
     - ${{ if ne(parameters.SkipUnitTests, true) }}:
       - task: DotNetCoreCLI@2
@@ -119,13 +120,30 @@ stages:
           arguments: '--configuration $(BuildConfiguration) --settings "$(Build.SourcesDirectory)\test.runsettings" /p:CollectCoverage=true /p:CoverletOutputFormat=cobertura --no-restore'
 
     - template: deployment/KiotaClientGeneration.yml
+
+    - task: DotNetCoreCLI@2
+      displayName: Pack UKHO.ADDS.Clients.Common
+      inputs:
+        command: custom
+        custom: pack
+        arguments: $(Build.SourcesDirectory)\src\UKHO.ADDS.Clients\UKHO.ADDS.Clients.Common.csproj --configuration $(BuildConfiguration) --no-restore --output $(Build.ArtifactStagingDirectory)\packages --verbosity normal
+
+    - task: PowerShell@2
+      displayName: Add common package reference
+      inputs:
+        targetType: filePath
+        filePath: '$(Build.SourcesDirectory)\deployment\AddProjectReferences.ps1'
+        arguments: >
+          -CsProjPath "$(Build.SourcesDirectory)\src\UKHO.ADDS.Clients.SalesCatalogueService\UKHO.ADDS.Clients.SalesCatalogueService.csproj"
+          -NuGetVersion "$(SetAssemblyVersion.NuGetVersion)"
+          -PackageSource "$(Build.ArtifactStagingDirectory)\packages"
+          -PackageName "UKHO.ADDS.Clients.Common"
     
     - task: DotNetCoreCLI@2
       displayName: Pack libraries
       inputs:
         command: pack
         packagesToPack: >
-          **/UKHO.ADDS.Clients.Common.csproj;
           **/UKHO.ADDS.Clients.FileShareService.ReadOnly.csproj;
           **/UKHO.ADDS.Clients.FileShareService.ReadWrite.csproj;
           **/UKHO.ADDS.Clients.PermitService.csproj;
@@ -142,39 +160,39 @@ stages:
         path: $(Build.ArtifactStagingDirectory)/packages
         artifact: NuGetPackages
 
-    - template: /deployment/integration-test-build.yml
-      parameters:
-        ProjectPartialName: FileShareService.ReadOnly
+    # - template: /deployment/integration-test-build.yml
+    #   parameters:
+    #     ProjectPartialName: FileShareService.ReadOnly
 
-    - template: /deployment/integration-test-build.yml
-      parameters:
-        ProjectPartialName: FileShareService.ReadWrite
+    # - template: /deployment/integration-test-build.yml
+    #   parameters:
+    #     ProjectPartialName: FileShareService.ReadWrite
 
-    - template: /deployment/integration-test-build.yml
-      parameters:
-        ProjectPartialName: PermitService
+    # - template: /deployment/integration-test-build.yml
+    #   parameters:
+    #     ProjectPartialName: PermitService
 
-    - template: /deployment/integration-test-build.yml
-      parameters:
-        ProjectPartialName: SalesCatalogueService
+    # - template: /deployment/integration-test-build.yml
+    #   parameters:
+    #     ProjectPartialName: SalesCatalogueService
 
-    - task: PublishPipelineArtifact@1
-      displayName: Publish integration tests artifact
-      inputs:
-        path: $(Build.BinariesDirectory)\IntegrationTests
-        artifact: IntegrationTests
+    # - task: PublishPipelineArtifact@1
+    #   displayName: Publish integration tests artifact
+    #   inputs:
+    #     path: $(Build.BinariesDirectory)\IntegrationTests
+    #     artifact: IntegrationTests
 
-  - job:
-    dependsOn: MainBuild
-    displayName: Integration tests
+  # - job:
+  #   dependsOn: MainBuild
+  #   displayName: Integration tests
     # variables:
     # - group: clients-integration-tests
-    steps:
-    - checkout: none
+    # steps:
+    # - checkout: none
   
-    - download: current
-      displayName: Download integration tests
-      artifact: IntegrationTests
+    # - download: current
+    #   displayName: Download integration tests
+    #   artifact: IntegrationTests
 
     # - task: FileTransform@2
     #   displayName: File transform - FileShareService.ReadOnly

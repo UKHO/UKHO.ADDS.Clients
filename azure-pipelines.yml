@@ -119,49 +119,29 @@ stages:
         testRunTitle: UnitTests
         arguments: '--configuration $(BuildConfiguration) --settings "$(Build.SourcesDirectory)\test.runsettings" /p:CollectCoverage=true /p:CoverletOutputFormat=cobertura --no-restore'
 
-    # - template: deployment/KiotaClientGeneration.yml
-
-    # - task: DotNetCoreCLI@2
-    #   displayName: Pack UKHO.ADDS.Clients.Common
-    #   inputs:
-    #     command: custom
-    #     custom: pack
-    #     arguments: $(Build.SourcesDirectory)\src\UKHO.ADDS.Clients.Common\UKHO.ADDS.Clients.Common.csproj --configuration $(BuildConfiguration) --no-restore --output $(Build.ArtifactStagingDirectory)\packages --verbosity normal
-
-    # - task: PowerShell@2
-    #   displayName: Add common package reference
-    #   inputs:
-    #     targetType: filePath
-    #     filePath: '$(Build.SourcesDirectory)\deployment\AddProjectReferences.ps1'
-    #     arguments: >
-    #       -CsProjPath "$(Build.SourcesDirectory)\src\UKHO.ADDS.Clients.SalesCatalogueService\UKHO.ADDS.Clients.SalesCatalogueService.csproj"
-    #       -NuGetVersion "$(SetAssemblyVersion.NuGetVersion)"
-    #       -PackageSource "$(Build.ArtifactStagingDirectory)\packages"
-    #       -PackageName "UKHO.ADDS.Clients.Common"
-
     - task: DotNetCoreCLI@2
-      displayName: Pack UKHO.ADDS.Clients.FileShareService.ReadOnly
+      displayName: Pack FileShareService.ReadOnly
       inputs:
         command: custom
         custom: pack
         arguments: $(Build.SourcesDirectory)\src\UKHO.ADDS.Clients.FileShareService.ReadOnly\UKHO.ADDS.Clients.FileShareService.ReadOnly.csproj --configuration $(BuildConfiguration) --no-restore --output $(Build.ArtifactStagingDirectory)\packages --verbosity normal
 
     - task: DotNetCoreCLI@2
-      displayName: Pack UKHO.ADDS.Clients.FileShareService.ReadWrite
+      displayName: Pack FileShareService.ReadWrite
       inputs:
         command: custom
         custom: pack
         arguments: $(Build.SourcesDirectory)\src\UKHO.ADDS.Clients.FileShareService.ReadWrite\UKHO.ADDS.Clients.FileShareService.ReadWrite.csproj --configuration $(BuildConfiguration) --no-restore --output $(Build.ArtifactStagingDirectory)\packages --verbosity normal
 
     - task: DotNetCoreCLI@2
-      displayName: Pack UKHO.ADDS.Clients.PermitService
+      displayName: Pack PermitService
       inputs:
         command: custom
         custom: pack
         arguments: $(Build.SourcesDirectory)\src\UKHO.ADDS.Clients.PermitService\UKHO.ADDS.Clients.PermitService.csproj --configuration $(BuildConfiguration) --no-restore --output $(Build.ArtifactStagingDirectory)\packages --verbosity normal
 
     - task: DotNetCoreCLI@2
-      displayName: Pack UKHO.ADDS.Clients.SalesCatalogueService
+      displayName: Pack SalesCatalogueService
       inputs:
         command: custom
         custom: pack

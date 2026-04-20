@@ -18,7 +18,7 @@ parameters:
 trigger:
 - main
 
-pool: $(WindowPool)
+pool: $(WindowsPool)
 
 variables:
 - name: BuildConfiguration
@@ -31,11 +31,9 @@ variables:
   value: "1.0."
 - name: UKHOAssemblyProduct
   value: "ADDS Shared Clients"
-- name: WindowPool
+- name: WindowsPool
   value: "NautilusBuild"
 - name: SdkVersion
-  value: "8.x"
-- name: SdkVersionKiota
   value: "8.x"
 
 resources:

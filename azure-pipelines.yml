@@ -138,18 +138,34 @@ stages:
     #       -NuGetVersion "$(SetAssemblyVersion.NuGetVersion)"
     #       -PackageSource "$(Build.ArtifactStagingDirectory)\packages"
     #       -PackageName "UKHO.ADDS.Clients.Common"
-    
+
     - task: DotNetCoreCLI@2
-      displayName: Pack libraries
+      displayName: Pack UKHO.ADDS.Clients.FileShareService.ReadOnly
       inputs:
-        command: pack
-        packagesToPack: >
-          **/UKHO.ADDS.Clients.FileShareService.ReadOnly.csproj;
-          **/UKHO.ADDS.Clients.FileShareService.ReadWrite.csproj;
-          **/UKHO.ADDS.Clients.PermitService.csproj;
-          **/UKHO.ADDS.Clients.SalesCatalogueService.csproj
-        packDirectory: $(Build.ArtifactStagingDirectory)/packages
-        arguments:  '--configuration $(BuildConfiguration) --no-restore --verbosity normal'
+        command: custom
+        custom: pack
+        arguments: $(Build.SourcesDirectory)\src\UKHO.ADDS.Clients.FileShareService.ReadOnly\UKHO.ADDS.Clients.FileShareService.ReadOnly.csproj --configuration $(BuildConfiguration) --no-restore --output $(Build.ArtifactStagingDirectory)\packages --verbosity normal
+
+    - task: DotNetCoreCLI@2
+      displayName: Pack UKHO.ADDS.Clients.FileShareService.ReadWrite
+      inputs:
+        command: custom
+        custom: pack
+        arguments: $(Build.SourcesDirectory)\src\UKHO.ADDS.Clients.FileShareService.ReadWrite\UKHO.ADDS.Clients.FileShareService.ReadWrite.csproj --configuration $(BuildConfiguration) --no-restore --output $(Build.ArtifactStagingDirectory)\packages --verbosity normal
+
+    - task: DotNetCoreCLI@2
+      displayName: Pack UKHO.ADDS.Clients.PermitService
+      inputs:
+        command: custom
+        custom: pack
+        arguments: $(Build.SourcesDirectory)\src\UKHO.ADDS.Clients.PermitService\UKHO.ADDS.Clients.PermitService.csproj --configuration $(BuildConfiguration) --no-restore --output $(Build.ArtifactStagingDirectory)\packages --verbosity normal
+
+    - task: DotNetCoreCLI@2
+      displayName: Pack UKHO.ADDS.Clients.SalesCatalogueService
+      inputs:
+        command: custom
+        custom: pack
+        arguments: $(Build.SourcesDirectory)\src\UKHO.ADDS.Clients.SalesCatalogueService\UKHO.ADDS.Clients.SalesCatalogueService.csproj --configuration $(BuildConfiguration) --no-restore --output $(Build.ArtifactStagingDirectory)\packages --verbosity normal
 
     - powershell: Get-ChildItem "$(Build.ArtifactStagingDirectory)/packages" -Recurse
       displayName: List packed NuGet packages

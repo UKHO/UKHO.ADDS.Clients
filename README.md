@@ -26,7 +26,7 @@ Kiota is a http client generation tool developed by Microsoft which we have used
 
 
 1. **Consuming the client**
-The Kiota Client can be easily consumed by registering the client using the helper methods found in the KiotaMiddlewareExtensions.cs
+The Kiota Client can be easily consumed by registering the client using the helper methods found in the KiotaServiceCollectionExtensions.cs
 
 # Kiota Middleware & Client Registration Helpers
 

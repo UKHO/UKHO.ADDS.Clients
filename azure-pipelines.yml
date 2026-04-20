@@ -108,36 +108,36 @@ stages:
         nugetConfigPath: '$(Build.SourcesDirectory)\BuildNuget.config'
         restoreDirectory: '$(Build.SourcesDirectory)\packages'
 
-    - ${{ if ne(parameters.SkipUnitTests, true) }}:
-      - task: DotNetCoreCLI@2
-        displayName: Unit tests
-        inputs:
-          command: test
-          projects: |
-            **/*.Tests.csproj
-          publishTestResults: true
-          testRunTitle: UnitTests
-          arguments: '--configuration $(BuildConfiguration) --settings "$(Build.SourcesDirectory)\test.runsettings" /p:CollectCoverage=true /p:CoverletOutputFormat=cobertura --no-restore'
-
-    - template: deployment/KiotaClientGeneration.yml
-
     - task: DotNetCoreCLI@2
-      displayName: Pack UKHO.ADDS.Clients.Common
+      displayName: Unit tests
+      condition: and(succeeded(), ne(parameters.SkipUnitTests, true))
       inputs:
-        command: custom
-        custom: pack
-        arguments: $(Build.SourcesDirectory)\src\UKHO.ADDS.Clients.Common\UKHO.ADDS.Clients.Common.csproj --configuration $(BuildConfiguration) --no-restore --output $(Build.ArtifactStagingDirectory)\packages --verbosity normal
+        command: test
+        projects: |
+          **/*.Tests.csproj
+        publishTestResults: true
+        testRunTitle: UnitTests
+        arguments: '--configuration $(BuildConfiguration) --settings "$(Build.SourcesDirectory)\test.runsettings" /p:CollectCoverage=true /p:CoverletOutputFormat=cobertura --no-restore'
 
-    - task: PowerShell@2
-      displayName: Add common package reference
-      inputs:
-        targetType: filePath
-        filePath: '$(Build.SourcesDirectory)\deployment\AddProjectReferences.ps1'
-        arguments: >
-          -CsProjPath "$(Build.SourcesDirectory)\src\UKHO.ADDS.Clients.SalesCatalogueService\UKHO.ADDS.Clients.SalesCatalogueService.csproj"
-          -NuGetVersion "$(SetAssemblyVersion.NuGetVersion)"
-          -PackageSource "$(Build.ArtifactStagingDirectory)\packages"
-          -PackageName "UKHO.ADDS.Clients.Common"
+    # - template: deployment/KiotaClientGeneration.yml
+
+    # - task: DotNetCoreCLI@2
+    #   displayName: Pack UKHO.ADDS.Clients.Common
+    #   inputs:
+    #     command: custom
+    #     custom: pack
+    #     arguments: $(Build.SourcesDirectory)\src\UKHO.ADDS.Clients.Common\UKHO.ADDS.Clients.Common.csproj --configuration $(BuildConfiguration) --no-restore --output $(Build.ArtifactStagingDirectory)\packages --verbosity normal
+
+    # - task: PowerShell@2
+    #   displayName: Add common package reference
+    #   inputs:
+    #     targetType: filePath
+    #     filePath: '$(Build.SourcesDirectory)\deployment\AddProjectReferences.ps1'
+    #     arguments: >
+    #       -CsProjPath "$(Build.SourcesDirectory)\src\UKHO.ADDS.Clients.SalesCatalogueService\UKHO.ADDS.Clients.SalesCatalogueService.csproj"
+    #       -NuGetVersion "$(SetAssemblyVersion.NuGetVersion)"
+    #       -PackageSource "$(Build.ArtifactStagingDirectory)\packages"
+    #       -PackageName "UKHO.ADDS.Clients.Common"
     
     - task: DotNetCoreCLI@2
       displayName: Pack libraries
@@ -149,7 +149,7 @@ stages:
           **/UKHO.ADDS.Clients.PermitService.csproj;
           **/UKHO.ADDS.Clients.SalesCatalogueService.csproj
         packDirectory: $(Build.ArtifactStagingDirectory)/packages
-        arguments:  '--configuration $(BuildConfiguration) --no-restore --verbosity normal'
+        arguments:  '--configuration $(BuildConfiguration) --no-restore --packages "$(Build.SourcesDirectory)\packages" --verbosity normal'
 
     - powershell: Get-ChildItem "$(Build.ArtifactStagingDirectory)/packages" -Recurse
       displayName: List packed NuGet packages

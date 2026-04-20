@@ -35,7 +35,6 @@ if ($itemGroup -is [array]) {
         throw "Expected 2 ItemGroup elements in project file, found $($itemGroup.Count)"
     }
 
-    $xmlContent.Project.RemoveChild($itemGroup[1]) | Out-Null
 } else {
     throw "Expected 2 ItemGroup elements in project file"
 }

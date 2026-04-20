@@ -110,7 +110,7 @@ stages:
 
     - task: DotNetCoreCLI@2
       displayName: Unit tests
-      condition: and(succeeded(), ne(${parameters.SkipUnitTests}, true))
+      condition: and(succeeded(), ${{ ne(parameters.SkipUnitTests, true) }})
       inputs:
         command: test
         projects: |

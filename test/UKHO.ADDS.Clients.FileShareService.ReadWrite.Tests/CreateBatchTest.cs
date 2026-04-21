@@ -5,7 +5,6 @@ using UKHO.ADDS.Clients.Common.Authentication;
 using UKHO.ADDS.Clients.Common.Constants;
 using UKHO.ADDS.Clients.FileShareService.ReadWrite.Models;
 using UKHO.ADDS.Clients.FileShareService.ReadWrite.Tests.Helpers;
-using UKHO.ADDS.Infrastructure.Serialization.Json;
 
 namespace UKHO.ADDS.Clients.FileShareService.ReadWrite.Tests
 {
@@ -42,13 +41,13 @@ namespace UKHO.ADDS.Clients.FileShareService.ReadWrite.Tests
                 BusinessUnit = "TestUnit",
                 Acl = new Acl { ReadUsers = new[] { "user1" } },
                 Attributes = new List<KeyValuePair<string, string>> { new("key", "value") },
-                ExpiryDate = DateTime.UtcNow.AddDays(1)
+                ExpiryDate = DateTime.UtcNow.AddDays(1).ToString()
             };
 
             _nextResponseStatusCode = HttpStatusCode.OK;
             _fileShareReadWriteClient = new FileShareReadWriteClient(_fakeFssHttpClientFactory, $@"{BaseAddress}/basePath/", DummyAccessToken);
         }
-        
+
         [Test]
         public void WhenHttpClientFactoryIsNull_ThenThrowsArgumentNullException()
         {

@@ -5,7 +5,8 @@ param (
     [Parameter(Mandatory = $true)] [string] $UKHOAssemblyCopyright,
     [Parameter(Mandatory = $true)] [string] $UKHOAssemblyVersionPrefix,
     [Parameter(Mandatory = $true)] [string] $UKHOAssemblyProduct,
-    [Parameter(Mandatory = $true)] [string] $SourceRevisionId
+    [Parameter(Mandatory = $true)] [string] $SourceRevisionId,
+    [Parameter(Mandatory = $true)] [string] $PreReleaseVersion
 )
 
 # Example build number: UKHO.UKHO.ADDS.Clients_main_20250303.10
@@ -15,16 +16,23 @@ $buildNumberRegex = "(.+)_202([0-9]{3,5})\.([0-9]{1,2})"
 $validBuildNumber = $buildNumber -match $buildNumberRegex
 
 if ($validBuildNumber -eq $false) {
-    $errorMessage = "Build number passed in must be in the following format: (BuildDefinitionName)_.(date:yyyyMMdd)(rev:.r)"
-    Write-Error $errorMessage
+    $errorMessage = "Build number must be in the following format: (BuildDefinitionName)_.(date:202yMMdd)(rev:.r)"
+    Write-Host $errorMessage
+    Write-Host "  The date in buildNumberRegex must be incremented at the start of a new decade, along with the minor version number in UKHOAssemblyVersionPrefix"
+    Write-Host "  This is to ensure we don't create packages with lower version numbers than those already published"
+    Write-Host "  For example, using UKHOAssemblyVersionPrefix = '1.2.' would give 1.2.91231.1 on 31/12/2029 and 1.2.00101.1 on 01/01/2030"
+    Write-Host ""
     throw $errorMessage
 }
 
 # Magic var $Matches comes from the above regex match statement: $buildNumber -match $buildNumberRegex
 $versionPrefix = $UKHOAssemblyVersionPrefix + $Matches.2
-$versionSuffix = "alpha." + $Matches.3
-#$versionSuffix = "beta." + $Matches.3
-#$versionSuffix = $Matches.3
+$versionSuffix = $Matches.3
+
+if ($PreReleaseVersion -ne "n/a") {
+    $versionSuffix = $PreReleaseVersion + "." + $versionSuffix
+}
+
 $assemblyVersion = $versionPrefix + "." + $Matches.3
 $versionFull = $versionPrefix + "." + $versionSuffix
 Write-Host "##vso[task.setvariable variable=NuGetVersion;isOutput=true]$($versionFull)"

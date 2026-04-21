@@ -1,4 +1,4 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
     <TargetFramework>net8.0</TargetFramework>
@@ -11,17 +11,15 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\UKHO.ADDS.Clients.Common\UKHO.ADDS.Clients.Common.csproj" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <PackageReference Include="CsvHelper" Version="33.1.0" />
-    <PackageReference Include="UKHO.ADDS.Infrastructure.Results" Version="0.0.50312-alpha.7" />
-    <PackageReference Include="UKHO.ADDS.Infrastructure.Serialization" Version="0.0.50327-alpha.2" />
+    <PackageReference Include="microsoft.kiota.bundle" Version="1.22.1" />
   </ItemGroup>
 
   <ItemGroup>
     <None Include="..\..\README.md" Pack="true" PackagePath="\" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\UKHO.ADDS.Clients.Common\UKHO.ADDS.Clients.Common.csproj" />
   </ItemGroup>
 
 </Project>

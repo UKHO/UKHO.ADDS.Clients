@@ -7,41 +7,34 @@ using System.IO;
 using System;
 namespace UKHO.ADDS.Clients.Kiota.SalesCatalogueService.Models
 {
+    /// <summary>
+    /// The details of the cancellation, if one exists
+    /// </summary>
     [global::System.CodeDom.Compiler.GeneratedCode("Kiota", "1.0.0")]
-    #pragma warning disable CS1591
-    public partial class ProductVersions : IAdditionalDataHolder, IParsable
-    #pragma warning restore CS1591
+    public partial class UpdatesSince_cancellation : IAdditionalDataHolder, IParsable
     {
         /// <summary>Stores additional data not described in the OpenAPI description found when deserializing. Can be used for serialization as well.</summary>
         public IDictionary<string, object> AdditionalData { get; set; }
-        /// <summary>The edition number</summary>
+        /// <summary>The edition number of the cancellation.</summary>
         public int? EditionNumber { get; set; }
-        /// <summary>The unique product identifiers</summary>
-#if NETSTANDARD2_1_OR_GREATER || NETCOREAPP3_1_OR_GREATER
-#nullable enable
-        public string? ProductName { get; set; }
-#nullable restore
-#else
-        public string ProductName { get; set; }
-#endif
-        /// <summary>The update number</summary>
+        /// <summary>The cancellation update number</summary>
         public int? UpdateNumber { get; set; }
         /// <summary>
-        /// Instantiates a new <see cref="global::UKHO.ADDS.Clients.Kiota.SalesCatalogueService.Models.ProductVersions"/> and sets the default values.
+        /// Instantiates a new <see cref="global::UKHO.ADDS.Clients.Kiota.SalesCatalogueService.Models.UpdatesSince_cancellation"/> and sets the default values.
         /// </summary>
-        public ProductVersions()
+        public UpdatesSince_cancellation()
         {
             AdditionalData = new Dictionary<string, object>();
         }
         /// <summary>
         /// Creates a new instance of the appropriate class based on discriminator value
         /// </summary>
-        /// <returns>A <see cref="global::UKHO.ADDS.Clients.Kiota.SalesCatalogueService.Models.ProductVersions"/></returns>
+        /// <returns>A <see cref="global::UKHO.ADDS.Clients.Kiota.SalesCatalogueService.Models.UpdatesSince_cancellation"/></returns>
         /// <param name="parseNode">The parse node to use to read the discriminator value and create the object</param>
-        public static global::UKHO.ADDS.Clients.Kiota.SalesCatalogueService.Models.ProductVersions CreateFromDiscriminatorValue(IParseNode parseNode)
+        public static global::UKHO.ADDS.Clients.Kiota.SalesCatalogueService.Models.UpdatesSince_cancellation CreateFromDiscriminatorValue(IParseNode parseNode)
         {
             if(ReferenceEquals(parseNode, null)) throw new ArgumentNullException(nameof(parseNode));
-            return new global::UKHO.ADDS.Clients.Kiota.SalesCatalogueService.Models.ProductVersions();
+            return new global::UKHO.ADDS.Clients.Kiota.SalesCatalogueService.Models.UpdatesSince_cancellation();
         }
         /// <summary>
         /// The deserialization information for the current model
@@ -52,7 +45,6 @@ namespace UKHO.ADDS.Clients.Kiota.SalesCatalogueService.Models
             return new Dictionary<string, Action<IParseNode>>
             {
                 { "editionNumber", n => { EditionNumber = n.GetIntValue(); } },
-                { "productName", n => { ProductName = n.GetStringValue(); } },
                 { "updateNumber", n => { UpdateNumber = n.GetIntValue(); } },
             };
         }
@@ -64,7 +56,6 @@ namespace UKHO.ADDS.Clients.Kiota.SalesCatalogueService.Models
         {
             if(ReferenceEquals(writer, null)) throw new ArgumentNullException(nameof(writer));
             writer.WriteIntValue("editionNumber", EditionNumber);
-            writer.WriteStringValue("productName", ProductName);
             writer.WriteIntValue("updateNumber", UpdateNumber);
             writer.WriteAdditionalData(AdditionalData);
         }

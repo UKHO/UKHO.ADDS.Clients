@@ -25,10 +25,10 @@ namespace UKHO.ADDS.Clients.Kiota.SalesCatalogueService.Models
         /// <summary>The products property</summary>
 #if NETSTANDARD2_1_OR_GREATER || NETCOREAPP3_1_OR_GREATER
 #nullable enable
-        public List<global::UKHO.ADDS.Clients.Kiota.SalesCatalogueService.Models.ProductVersions>? Products { get; set; }
+        public List<global::UKHO.ADDS.Clients.Kiota.SalesCatalogueService.Models.UpdatesSince>? Products { get; set; }
 #nullable restore
 #else
-        public List<global::UKHO.ADDS.Clients.Kiota.SalesCatalogueService.Models.ProductVersions> Products { get; set; }
+        public List<global::UKHO.ADDS.Clients.Kiota.SalesCatalogueService.Models.UpdatesSince> Products { get; set; }
 #endif
         /// <summary>
         /// Instantiates a new <see cref="global::UKHO.ADDS.Clients.Kiota.SalesCatalogueService.Models.S100ProductResponse"/> and sets the default values.
@@ -56,7 +56,7 @@ namespace UKHO.ADDS.Clients.Kiota.SalesCatalogueService.Models
             return new Dictionary<string, Action<IParseNode>>
             {
                 { "productCounts", n => { ProductCounts = n.GetObjectValue<global::UKHO.ADDS.Clients.Kiota.SalesCatalogueService.Models.S100ProductCounts>(global::UKHO.ADDS.Clients.Kiota.SalesCatalogueService.Models.S100ProductCounts.CreateFromDiscriminatorValue); } },
-                { "products", n => { Products = n.GetCollectionOfObjectValues<global::UKHO.ADDS.Clients.Kiota.SalesCatalogueService.Models.ProductVersions>(global::UKHO.ADDS.Clients.Kiota.SalesCatalogueService.Models.ProductVersions.CreateFromDiscriminatorValue)?.AsList(); } },
+                { "products", n => { Products = n.GetCollectionOfObjectValues<global::UKHO.ADDS.Clients.Kiota.SalesCatalogueService.Models.UpdatesSince>(global::UKHO.ADDS.Clients.Kiota.SalesCatalogueService.Models.UpdatesSince.CreateFromDiscriminatorValue)?.AsList(); } },
             };
         }
         /// <summary>
@@ -67,7 +67,7 @@ namespace UKHO.ADDS.Clients.Kiota.SalesCatalogueService.Models
         {
             if(ReferenceEquals(writer, null)) throw new ArgumentNullException(nameof(writer));
             writer.WriteObjectValue<global::UKHO.ADDS.Clients.Kiota.SalesCatalogueService.Models.S100ProductCounts>("productCounts", ProductCounts);
-            writer.WriteCollectionOfObjectValues<global::UKHO.ADDS.Clients.Kiota.SalesCatalogueService.Models.ProductVersions>("products", Products);
+            writer.WriteCollectionOfObjectValues<global::UKHO.ADDS.Clients.Kiota.SalesCatalogueService.Models.UpdatesSince>("products", Products);
             writer.WriteAdditionalData(AdditionalData);
         }
     }

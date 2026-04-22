@@ -7,41 +7,36 @@ using System.IO;
 using System;
 namespace UKHO.ADDS.Clients.Kiota.SalesCatalogueService.Models
 {
+    /// <summary>
+    /// An array of objects representing the issue and update dates for a product. Each entry corresponds to a specific update number.
+    /// </summary>
     [global::System.CodeDom.Compiler.GeneratedCode("Kiota", "1.0.0")]
-    #pragma warning disable CS1591
-    public partial class ProductVersions : IAdditionalDataHolder, IParsable
-    #pragma warning restore CS1591
+    public partial class ProductNames_dates : IAdditionalDataHolder, IParsable
     {
         /// <summary>Stores additional data not described in the OpenAPI description found when deserializing. Can be used for serialization as well.</summary>
         public IDictionary<string, object> AdditionalData { get; set; }
-        /// <summary>The edition number</summary>
-        public int? EditionNumber { get; set; }
-        /// <summary>The unique product identifiers</summary>
-#if NETSTANDARD2_1_OR_GREATER || NETCOREAPP3_1_OR_GREATER
-#nullable enable
-        public string? ProductName { get; set; }
-#nullable restore
-#else
-        public string ProductName { get; set; }
-#endif
+        /// <summary>The issue date for the catalog.031 ISDT data field</summary>
+        public DateTimeOffset? IssueDate { get; set; }
+        /// <summary>The update application date for the catalog, corresponding to the 031 UADT data field.- Represents the base cell issue date or, for re-issues, the issue date of the previous update.- This field is optional and will only be returned displayed only when the status is &quot;newEdition,&quot; &quot;newDataset,&quot; or &quot;reissue&quot;.</summary>
+        public DateTimeOffset? UpdateApplicationDate { get; set; }
         /// <summary>The update number</summary>
         public int? UpdateNumber { get; set; }
         /// <summary>
-        /// Instantiates a new <see cref="global::UKHO.ADDS.Clients.Kiota.SalesCatalogueService.Models.ProductVersions"/> and sets the default values.
+        /// Instantiates a new <see cref="global::UKHO.ADDS.Clients.Kiota.SalesCatalogueService.Models.ProductNames_dates"/> and sets the default values.
         /// </summary>
-        public ProductVersions()
+        public ProductNames_dates()
         {
             AdditionalData = new Dictionary<string, object>();
         }
         /// <summary>
         /// Creates a new instance of the appropriate class based on discriminator value
         /// </summary>
-        /// <returns>A <see cref="global::UKHO.ADDS.Clients.Kiota.SalesCatalogueService.Models.ProductVersions"/></returns>
+        /// <returns>A <see cref="global::UKHO.ADDS.Clients.Kiota.SalesCatalogueService.Models.ProductNames_dates"/></returns>
         /// <param name="parseNode">The parse node to use to read the discriminator value and create the object</param>
-        public static global::UKHO.ADDS.Clients.Kiota.SalesCatalogueService.Models.ProductVersions CreateFromDiscriminatorValue(IParseNode parseNode)
+        public static global::UKHO.ADDS.Clients.Kiota.SalesCatalogueService.Models.ProductNames_dates CreateFromDiscriminatorValue(IParseNode parseNode)
         {
             if(ReferenceEquals(parseNode, null)) throw new ArgumentNullException(nameof(parseNode));
-            return new global::UKHO.ADDS.Clients.Kiota.SalesCatalogueService.Models.ProductVersions();
+            return new global::UKHO.ADDS.Clients.Kiota.SalesCatalogueService.Models.ProductNames_dates();
         }
         /// <summary>
         /// The deserialization information for the current model
@@ -51,8 +46,8 @@ namespace UKHO.ADDS.Clients.Kiota.SalesCatalogueService.Models
         {
             return new Dictionary<string, Action<IParseNode>>
             {
-                { "editionNumber", n => { EditionNumber = n.GetIntValue(); } },
-                { "productName", n => { ProductName = n.GetStringValue(); } },
+                { "issueDate", n => { IssueDate = n.GetDateTimeOffsetValue(); } },
+                { "updateApplicationDate", n => { UpdateApplicationDate = n.GetDateTimeOffsetValue(); } },
                 { "updateNumber", n => { UpdateNumber = n.GetIntValue(); } },
             };
         }
@@ -63,8 +58,8 @@ namespace UKHO.ADDS.Clients.Kiota.SalesCatalogueService.Models
         public virtual void Serialize(ISerializationWriter writer)
         {
             if(ReferenceEquals(writer, null)) throw new ArgumentNullException(nameof(writer));
-            writer.WriteIntValue("editionNumber", EditionNumber);
-            writer.WriteStringValue("productName", ProductName);
+            writer.WriteDateTimeOffsetValue("issueDate", IssueDate);
+            writer.WriteDateTimeOffsetValue("updateApplicationDate", UpdateApplicationDate);
             writer.WriteIntValue("updateNumber", UpdateNumber);
             writer.WriteAdditionalData(AdditionalData);
         }

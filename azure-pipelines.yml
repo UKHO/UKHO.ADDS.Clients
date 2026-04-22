@@ -118,6 +118,13 @@ stages:
         arguments: '--configuration $(BuildConfiguration) --settings "$(Build.SourcesDirectory)\test.runsettings" /p:CollectCoverage=true /p:CoverletOutputFormat=cobertura --no-restore'
 
     - task: DotNetCoreCLI@2
+      displayName: Pack Common
+      inputs:
+        command: custom
+        custom: pack
+        arguments: $(Build.SourcesDirectory)\src\UKHO.ADDS.Clients.Common\UKHO.ADDS.Clients.Common.csproj --configuration $(BuildConfiguration) --no-restore --output $(Build.ArtifactStagingDirectory)\packages --verbosity normal
+
+    - task: DotNetCoreCLI@2
       displayName: Pack FileShareService.ReadOnly
       inputs:
         command: custom

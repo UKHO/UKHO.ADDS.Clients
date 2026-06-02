@@ -11,7 +11,7 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="microsoft.kiota.bundle" Version="1.22.1" />
+    <PackageReference Include="microsoft.kiota.bundle" Version="1.22.2" />
   </ItemGroup>
 
   <ItemGroup>

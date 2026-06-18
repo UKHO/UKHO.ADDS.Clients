@@ -1,5 +1,4 @@
 ﻿using System.Net;
-using NUnit.Framework;
 using UKHO.ADDS.Clients.FileShareService.ReadOnly.Models;
 using UKHO.ADDS.Clients.FileShareService.ReadOnly.Tests.Helpers;
 using UKHO.ADDS.Infrastructure.Results;
@@ -12,7 +11,7 @@ namespace UKHO.ADDS.Clients.FileShareService.ReadOnly.Tests
         private const string DUMMY_ACCESS_TOKEN = "ACarefullyEncodedSecretAccessToken";
         private FakeFssHttpClientFactory _fakeFssHttpClientFactory;
         private FileShareReadOnlyClient _fileShareApiClient;
-        private Uri _lastRequestUri;
+        private Uri? _lastRequestUri;
         private object _nextResponse;
         private HttpStatusCode _nextResponseStatusCode;
 
@@ -46,11 +45,11 @@ namespace UKHO.ADDS.Clients.FileShareService.ReadOnly.Tests
 
             var response = await _fileShareApiClient.BatchAttributeSearchAsync("", CancellationToken.None);
 
-            Assert.Multiple(() =>
+            using (Assert.EnterMultipleScope())
             {
                 Assert.That(_lastRequestUri?.AbsolutePath, Is.EqualTo("/basePath/attributes/search"));
                 Assert.That(_lastRequestUri?.Query, Is.EqualTo(""), "Should be no query string for an empty search");
-            });
+            }
 
             CheckResponseMatchesExpectedResponse(expectedResponse, response);
         }
@@ -68,11 +67,11 @@ namespace UKHO.ADDS.Clients.FileShareService.ReadOnly.Tests
 
             var response = await _fileShareApiClient.BatchAttributeSearchAsync("$batch(key) eq 'value'", CancellationToken.None);
 
-            Assert.Multiple(() =>
+            using (Assert.EnterMultipleScope())
             {
                 Assert.That(_lastRequestUri?.AbsolutePath, Is.EqualTo("/basePath/attributes/search"));
                 Assert.That(_lastRequestUri?.Query, Is.EqualTo("?$filter=$batch(key)%20eq%20%27value%27"));
-            });
+            }
 
             CheckResponseMatchesExpectedResponse(expectedResponse, response);
         }
@@ -85,11 +84,11 @@ namespace UKHO.ADDS.Clients.FileShareService.ReadOnly.Tests
 
             var response = await _fileShareApiClient.BatchAttributeSearchAsync("$batch(key) eq 'value'", CancellationToken.None);
 
-            Assert.Multiple(() =>
+            using (Assert.EnterMultipleScope())
             {
                 Assert.That(_lastRequestUri?.AbsolutePath, Is.EqualTo("/basePath/attributes/search"));
                 Assert.That(_lastRequestUri?.Query, Is.EqualTo("?$filter=$batch(key)%20eq%20%27value%27"));
-            });
+            }
 
             CheckResponseMatchesExpectedResponse(expectedResponse, response);
         }
@@ -102,11 +101,11 @@ namespace UKHO.ADDS.Clients.FileShareService.ReadOnly.Tests
             await _fileShareApiClient.BatchAttributeSearchAsync("", CancellationToken.None);
 
             Assert.That(_fakeFssHttpClientFactory.HttpClient.DefaultRequestHeaders.Authorization, Is.Not.Null);
-            Assert.Multiple(() =>
+            using (Assert.EnterMultipleScope())
             {
                 Assert.That(_fakeFssHttpClientFactory.HttpClient.DefaultRequestHeaders.Authorization.Scheme, Is.EqualTo("bearer"));
                 Assert.That(_fakeFssHttpClientFactory.HttpClient.DefaultRequestHeaders.Authorization.Parameter, Is.EqualTo(DUMMY_ACCESS_TOKEN));
-            });
+            }
         }
 
         [Test]
@@ -119,13 +118,13 @@ namespace UKHO.ADDS.Clients.FileShareService.ReadOnly.Tests
             var isFailed = response.IsFailure(out var responseError);
             var error = responseError as HttpError;
 
-            Assert.Multiple(() =>
+            using (Assert.EnterMultipleScope())
             {
                 Assert.That(_lastRequestUri?.AbsolutePath, Is.EqualTo("/basePath/attributes/search"));
                 Assert.That(_lastRequestUri?.Query, Is.EqualTo("?$filter=$batch(key)%20eq%20%27value%27"));
-                Assert.That(error.StatusCode, Is.EqualTo(_nextResponseStatusCode));
+                Assert.That(error?.StatusCode, Is.EqualTo(_nextResponseStatusCode));
                 Assert.That(isFailed, Is.True);
-            });
+            }
         }
 
         [Test]
@@ -138,13 +137,13 @@ namespace UKHO.ADDS.Clients.FileShareService.ReadOnly.Tests
             var isFailed = response.IsFailure(out var responseError);
             var error = responseError as HttpError;
 
-            Assert.Multiple(() =>
+            using (Assert.EnterMultipleScope())
             {
                 Assert.That(_lastRequestUri?.AbsolutePath, Is.EqualTo("/basePath/attributes/search"));
                 Assert.That(_lastRequestUri?.Query, Is.EqualTo("?$filter=$batch(key)%20eq%20%27value%27"));
-                Assert.That(error.StatusCode, Is.EqualTo(_nextResponseStatusCode));
+                Assert.That(error?.StatusCode, Is.EqualTo(_nextResponseStatusCode));
                 Assert.That(isFailed, Is.True);
-            });
+            }
         }
 
         [Test]
@@ -188,12 +187,12 @@ namespace UKHO.ADDS.Clients.FileShareService.ReadOnly.Tests
         {
             var response = await _fileShareApiClient.BatchAttributeSearchAsync("$batch(key) eq 'value'", maxAttributeValueCount, CancellationToken.None);
 
-            Assert.Multiple(() =>
+            using (Assert.EnterMultipleScope())
             {
                 Assert.That(_lastRequestUri?.AbsolutePath, Is.EqualTo("/basePath/attributes/search"));
                 Assert.That(_lastRequestUri?.Query, Is.EqualTo("?$filter=$batch(key)%20eq%20%27value%27&maxAttributeValueCount=" + maxAttributeValueCount));
-                Assert.That(response.IsSuccess, Is.True);
-            });
+                Assert.That(response.IsSuccess(), Is.True);
+            }
         }
 
         [Test]
@@ -207,13 +206,13 @@ namespace UKHO.ADDS.Clients.FileShareService.ReadOnly.Tests
             var isFailed = response.IsFailure(out var responseError);
             var error = responseError as HttpError;
 
-            Assert.Multiple(() =>
+            using (Assert.EnterMultipleScope())
             {
                 Assert.That(_lastRequestUri?.AbsolutePath, Is.EqualTo("/basePath/attributes/search"));
                 Assert.That(_lastRequestUri?.Query, Is.EqualTo("?$filter=$batch(key)%20eq%20%27value%27&maxAttributeValueCount=0"));
-                Assert.That(error.StatusCode, Is.EqualTo(_nextResponseStatusCode));
+                Assert.That(error?.StatusCode, Is.EqualTo(_nextResponseStatusCode));
                 Assert.That(isFailed, Is.True);
-            });
+            }
         }
     }
 }

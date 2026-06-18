@@ -1,6 +1,5 @@
 ﻿using System.Net;
 using FakeItEasy;
-using NUnit.Framework;
 using UKHO.ADDS.Clients.FileShareService.ReadWrite.Models;
 using UKHO.ADDS.Infrastructure.Serialization.Json;
 using FakeFssHttpClientFactory = UKHO.ADDS.Clients.FileShareService.ReadWrite.Tests.Helpers.FakeFssHttpClientFactory;
@@ -12,7 +11,7 @@ namespace UKHO.ADDS.Clients.FileShareService.ReadWrite.Tests
         private object _nextResponse;
         private FileShareReadWriteClient _fileShareReadWriteClient;
         private HttpStatusCode _nextResponseStatusCode;
-        private List<(HttpMethod HttpMethod, Uri Uri)> _lastRequestUris;
+        private List<(HttpMethod? HttpMethod, Uri? Uri)> _lastRequestUris;
         private List<string> _lastRequestBodies;
         private const int MaxBlockSize = 32;
         private FakeFssHttpClientFactory _fakeFssHttpClientFactory;
@@ -35,7 +34,7 @@ namespace UKHO.ADDS.Clients.FileShareService.ReadWrite.Tests
                 }
                 else
                 {
-                    _lastRequestBodies.Add(null);
+                    _lastRequestBodies.Add(string.Empty);
                 }
 
                 return (_nextResponseStatusCode, _nextResponse);
@@ -43,8 +42,8 @@ namespace UKHO.ADDS.Clients.FileShareService.ReadWrite.Tests
 
             _nextResponse = new object();
             _nextResponseStatusCode = HttpStatusCode.Created;
-            _lastRequestUris = new List<(HttpMethod HttpMethod, Uri Uri)>();
-            _lastRequestBodies = new List<string>();
+            _lastRequestUris = [];
+            _lastRequestBodies = [];
             _fileShareReadWriteClient = new FileShareReadWriteClient(_fakeFssHttpClientFactory, @"https://fss-tests.net", DummyAccessToken, MaxBlockSize);
         }
 
@@ -68,7 +67,7 @@ namespace UKHO.ADDS.Clients.FileShareService.ReadWrite.Tests
             }
             catch (ArgumentException ex)
             {
-                Assert.Multiple(() =>
+                using (Assert.EnterMultipleScope())
                 {
                     Assert.That(ex.ParamName, Is.EqualTo("stream"));
 #if NET48
@@ -78,7 +77,7 @@ namespace UKHO.ADDS.Clients.FileShareService.ReadWrite.Tests
 #else
                    Assert.Fail("Framework not catered for.");  
 #endif
-                });
+                }
             }
         }
 
@@ -102,7 +101,7 @@ namespace UKHO.ADDS.Clients.FileShareService.ReadWrite.Tests
             }
             catch (ArgumentException ex)
             {
-                Assert.Multiple(() =>
+                using (Assert.EnterMultipleScope())
                 {
                     Assert.That(ex.ParamName, Is.EqualTo("stream"));
 #if NET48
@@ -112,7 +111,7 @@ namespace UKHO.ADDS.Clients.FileShareService.ReadWrite.Tests
 #else
                             Assert.Fail("Framework not catered for.");                    
 #endif
-                });
+                }
             }
         }
 
@@ -143,12 +142,12 @@ namespace UKHO.ADDS.Clients.FileShareService.ReadWrite.Tests
                         $"PUT:/batch/{expectedBatchId}/files/{FileName2}"
                     };
             var actualRequests = _lastRequestUris.Select(x => $"{x.HttpMethod}:{x.Uri?.AbsolutePath}");
-            Assert.Multiple(() =>
+            using (Assert.EnterMultipleScope())
             {
                 Assert.That(actualRequests, Is.EqualTo(expectedRequests));
                 Assert.That(stream1.CanSeek, Is.True);
                 Assert.That(stream2.CanSeek, Is.True);
-            });
+            }
         }
 
         [Test]
@@ -178,12 +177,12 @@ namespace UKHO.ADDS.Clients.FileShareService.ReadWrite.Tests
                 $"PUT:/batch/{expectedBatchId}/files/{FileName2}"
             };
             var actualRequests = _lastRequestUris.Select(x => $"{x.HttpMethod}:{x.Uri?.AbsolutePath}");
-            Assert.Multiple(() =>
+            using (Assert.EnterMultipleScope())
             {
                 Assert.That(actualRequests, Is.EqualTo(expectedRequests));
                 Assert.That(stream1.CanSeek, Is.True);
                 Assert.That(stream2.CanSeek, Is.True);
-            });
+            }
         }
 
         [Test]
@@ -216,16 +215,16 @@ namespace UKHO.ADDS.Clients.FileShareService.ReadWrite.Tests
             var addFile1Request = _lastRequestBodies[1];
             var addFile2Request = _lastRequestBodies[4];
 
-            Assert.Multiple(() =>
+            using (Assert.EnterMultipleScope())
             {
                 Assert.That(actualRequests, Is.EqualTo(expectedRequests));
-                Assert.That(addFile1Request.Replace("\r", "").Replace("\n", "").Replace(" ", ""),
+                Assert.That(addFile1Request?.Replace("\r", "").Replace("\n", "").Replace(" ", ""),
                     Is.EqualTo("{\"attributes\":[{\"key\":\"fileAttributeKey1\",\"value\":\"fileAttributeValue1\"}]}"));
-                Assert.That(addFile2Request.Replace("\r", "").Replace("\n", "").Replace(" ", ""),
+                Assert.That(addFile2Request?.Replace("\r", "").Replace("\n", "").Replace(" ", ""),
                     Is.EqualTo("{\"attributes\":[{\"key\":\"fileAttributeKey2\",\"value\":\"fileAttributeValue2\"}]}"));
                 Assert.That(stream1.CanSeek, Is.True);
                 Assert.That(stream2.CanSeek, Is.True);
-            });
+            }
         }
 
         [Test]
@@ -257,16 +256,16 @@ namespace UKHO.ADDS.Clients.FileShareService.ReadWrite.Tests
             var actualRequests = _lastRequestUris.Select(x => $"{x.HttpMethod}:{x.Uri?.AbsolutePath}");
             var addFile1Request = _lastRequestBodies[1];
             var addFile2Request = _lastRequestBodies[4];
-            Assert.Multiple(() =>
+            using (Assert.EnterMultipleScope())
             {
                 Assert.That(actualRequests, Is.EqualTo(expectedRequests));
-                Assert.That(addFile1Request.Replace("\r", "").Replace("\n", "").Replace(" ", ""),
+                Assert.That(addFile1Request?.Replace("\r", "").Replace("\n", "").Replace(" ", ""),
                     Is.EqualTo("{\"attributes\":[{\"key\":\"fileAttributeKey1\",\"value\":\"fileAttributeValue1\"}]}"));
-                Assert.That(addFile2Request.Replace("\r", "").Replace("\n", "").Replace(" ", ""),
+                Assert.That(addFile2Request?.Replace("\r", "").Replace("\n", "").Replace(" ", ""),
                     Is.EqualTo("{\"attributes\":[{\"key\":\"fileAttributeKey2\",\"value\":\"fileAttributeValue2\"}]}"));
                 Assert.That(stream1.CanSeek, Is.True);
                 Assert.That(stream2.CanSeek, Is.True);
-            });
+            }
         }
 
         [Test]
@@ -280,7 +279,7 @@ namespace UKHO.ADDS.Clients.FileShareService.ReadWrite.Tests
             Stream stream1 = new MemoryStream(new byte[MaxBlockSize * 3]);
             var correlationId = Guid.NewGuid().ToString();
 
-            await _fileShareReadWriteClient.AddFileToBatchAsync(batchHandle, stream1, FileName1, MimeType1, correlationId);
+            await _fileShareReadWriteClient.AddFileToBatchAsync(batchHandle!, stream1, FileName1, MimeType1, correlationId);
 
             var expectedRequests = new[]
             {
@@ -294,12 +293,12 @@ namespace UKHO.ADDS.Clients.FileShareService.ReadWrite.Tests
             var actualRequests = _lastRequestUris.Select(x => $"{x.HttpMethod}:{x.Uri?.AbsolutePath}");
             var writeBlockFileModel = JsonCodec.Decode<WriteBlockFileModel>(_lastRequestBodies.Last());
             var expectedBlockIds = new[] { "00001", "00002", "00003" };
-            Assert.Multiple(() =>
+            using (Assert.EnterMultipleScope())
             {
                 Assert.That(actualRequests, Is.EqualTo(expectedRequests));
                 Assert.That(writeBlockFileModel?.BlockIds, Is.EqualTo(expectedBlockIds));
                 Assert.That(stream1.CanSeek, Is.True);
-            });
+            }
         }
 
         [Test]
@@ -328,12 +327,12 @@ namespace UKHO.ADDS.Clients.FileShareService.ReadWrite.Tests
             var actualRequests = _lastRequestUris.Select(x => $"{x.HttpMethod}:{x.Uri?.AbsolutePath}");
             var writeBlockFileModel = JsonCodec.Decode<WriteBlockFileModel>(_lastRequestBodies.Last());
             var expectedBlockIds = new[] { "00001", "00002", "00003" };
-            Assert.Multiple(() =>
+            using (Assert.EnterMultipleScope())
             {
                 Assert.That(actualRequests, Is.EqualTo(expectedRequests));
                 Assert.That(writeBlockFileModel?.BlockIds, Is.EqualTo(expectedBlockIds));
                 Assert.That(stream1.CanSeek, Is.True);
-            });
+            }
         }
 
         [Test]
@@ -351,13 +350,13 @@ namespace UKHO.ADDS.Clients.FileShareService.ReadWrite.Tests
 
             var expectedBlocksComplete = new[] { 0, 1, 2, 3 };
             var expectedTotalBlockCount = new[] { 3, 3, 3, 3 };
-            Assert.Multiple(() =>
+            using (Assert.EnterMultipleScope())
             {
                 Assert.That(progressReports, Has.Count.EqualTo(4));
                 Assert.That(progressReports.Select(r => r.blocksComplete), Is.EqualTo(expectedBlocksComplete));
                 Assert.That(progressReports.Select(r => r.totalBlockCount), Is.EqualTo(expectedTotalBlockCount));
                 Assert.That(stream1.CanSeek, Is.True);
-            });
+            }
         }
 
         [Test]
@@ -377,13 +376,13 @@ namespace UKHO.ADDS.Clients.FileShareService.ReadWrite.Tests
 
             var expectedBlocksComplete = new[] { 0, 1, 2, 3 };
             var expectedTotalBlockCount = new[] { 3, 3, 3, 3 };
-            Assert.Multiple(() =>
+            using (Assert.EnterMultipleScope())
             {
                 Assert.That(progressReports, Has.Count.EqualTo(4));
                 Assert.That(progressReports.Select(r => r.blocksComplete), Is.EqualTo(expectedBlocksComplete));
                 Assert.That(progressReports.Select(r => r.totalBlockCount), Is.EqualTo(expectedTotalBlockCount));
                 Assert.That(stream1.CanSeek, Is.True);
-            });
+            }
         }
 
         [Test]
@@ -399,12 +398,12 @@ namespace UKHO.ADDS.Clients.FileShareService.ReadWrite.Tests
             await _fileShareReadWriteClient.AddFileToBatchAsync(batchHandle, stream1, FileName1, MimeType1, correlationId, CancellationToken.None);
 
             Assert.That(_fakeFssHttpClientFactory.HttpClient.DefaultRequestHeaders.Authorization, Is.Not.Null);
-            Assert.Multiple(() =>
+            using (Assert.EnterMultipleScope())
             {
                 Assert.That(_fakeFssHttpClientFactory.HttpClient.DefaultRequestHeaders.Authorization.Scheme, Is.EqualTo("bearer"));
                 Assert.That(_fakeFssHttpClientFactory.HttpClient.DefaultRequestHeaders.Authorization.Parameter, Is.EqualTo(DummyAccessToken));
                 Assert.That(stream1.CanSeek, Is.True);
-            });
+            }
         }
 
         [TearDown]

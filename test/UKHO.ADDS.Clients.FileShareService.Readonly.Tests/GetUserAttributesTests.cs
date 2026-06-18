@@ -1,5 +1,4 @@
 ﻿using System.Net;
-using NUnit.Framework;
 using UKHO.ADDS.Clients.FileShareService.ReadOnly.Tests.Helpers;
 
 namespace UKHO.ADDS.Clients.FileShareService.ReadOnly.Tests
@@ -9,7 +8,7 @@ namespace UKHO.ADDS.Clients.FileShareService.ReadOnly.Tests
         private const string DUMMY_ACCESS_TOKEN = "ACarefullyEncodedSecretAccessToken";
         private FakeFssHttpClientFactory _fakeFssHttpClientFactory;
         private FileShareReadOnlyClient _fileShareApiClient;
-        private Uri _lastRequestUri;
+        private Uri? _lastRequestUri;
         private object _nextResponse;
         private HttpStatusCode _nextResponseStatusCode;
 
@@ -39,13 +38,13 @@ namespace UKHO.ADDS.Clients.FileShareService.ReadOnly.Tests
 
             var isSuccess = attributesResult.IsSuccess(out var attributes);
 
-            Assert.Multiple(() =>
+            using (Assert.EnterMultipleScope())
             {
                 Assert.That(isSuccess, Is.True);
                 Assert.That(_lastRequestUri?.AbsolutePath, Is.EqualTo("/basePath/attributes"));
                 Assert.That(_lastRequestUri?.Query, Is.EqualTo(""), "Should be no query query string for an empty search");
                 Assert.That(attributes, Is.EqualTo((List<string>)_nextResponse));
-            });
+            }
         }
 
         [Test]
@@ -57,12 +56,12 @@ namespace UKHO.ADDS.Clients.FileShareService.ReadOnly.Tests
 
             attributesResult.IsSuccess(out var attributes);
 
-            Assert.Multiple(() =>
+            using (Assert.EnterMultipleScope())
             {
                 Assert.That(_lastRequestUri?.AbsolutePath, Is.EqualTo("/basePath/attributes"));
                 Assert.That(_lastRequestUri?.Query, Is.EqualTo(""), "Should be no query query string for an empty search");
                 Assert.That(attributes, Is.EqualTo((List<string>)_nextResponse));
-            });
+            }
         }
 
         [Test]
@@ -72,12 +71,12 @@ namespace UKHO.ADDS.Clients.FileShareService.ReadOnly.Tests
 
             var result = await _fileShareApiClient.GetUserAttributesAsync();
 
-            Assert.Multiple(() =>
+            using (Assert.EnterMultipleScope())
             {
                 Assert.That(_lastRequestUri?.AbsolutePath, Is.EqualTo("/basePath/attributes"));
                 Assert.That(_lastRequestUri?.Query, Is.EqualTo(""), "Should be no query query string for an empty search");
                 Assert.That(result.IsFailure());
-            });
+            }
         }
 
         [Test]
@@ -88,11 +87,11 @@ namespace UKHO.ADDS.Clients.FileShareService.ReadOnly.Tests
             await _fileShareApiClient.GetUserAttributesAsync();
 
             Assert.That(_fakeFssHttpClientFactory.HttpClient.DefaultRequestHeaders.Authorization, Is.Not.Null);
-            Assert.Multiple(() =>
+            using (Assert.EnterMultipleScope())
             {
                 Assert.That(_fakeFssHttpClientFactory.HttpClient.DefaultRequestHeaders.Authorization.Scheme, Is.EqualTo("bearer"));
                 Assert.That(_fakeFssHttpClientFactory.HttpClient.DefaultRequestHeaders.Authorization.Parameter, Is.EqualTo(DUMMY_ACCESS_TOKEN));
-            });
+            }
         }
     }
 }

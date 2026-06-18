@@ -1,5 +1,4 @@
 ﻿using System.Diagnostics.CodeAnalysis;
-using NUnit.Framework;
 using UKHO.ADDS.Clients.FileShareService.ReadOnly.Models;
 
 namespace UKHO.ADDS.Clients.FileShareService.ReadOnly.Tests.Models
@@ -15,7 +14,7 @@ namespace UKHO.ADDS.Clients.FileShareService.ReadOnly.Tests.Models
             var link1B = new Link("Link1");
             var link2 = new Link("Link2");
 
-            Assert.Multiple(() =>
+            using (Assert.EnterMultipleScope())
             {
                 Assert.That(emptyLink.Equals(emptyLink), Is.True);
                 Assert.That(emptyLink.Equals(link1), Is.False);
@@ -23,7 +22,7 @@ namespace UKHO.ADDS.Clients.FileShareService.ReadOnly.Tests.Models
 
                 Assert.That(link1.Equals(link1B), Is.True);
                 Assert.That(link1.Equals(link2), Is.False);
-            });
+            }
         }
 
         [Test]
@@ -34,17 +33,17 @@ namespace UKHO.ADDS.Clients.FileShareService.ReadOnly.Tests.Models
             var link1 = new Link("Link1");
             var link1B = new Link("Link1");
 
-            Assert.Multiple(() =>
+            using (Assert.EnterMultipleScope())
             {
                 Assert.That(emptyLink.GetHashCode(), Is.Not.Zero);
                 Assert.That(link1.GetHashCode(), Is.Not.Zero);
                 Assert.That(link1B.GetHashCode(), Is.Not.Zero);
-            });
-            Assert.Multiple(() =>
+            }
+            using (Assert.EnterMultipleScope())
             {
                 Assert.That(emptyLink.GetHashCode(), Is.EqualTo(emptyLink.GetHashCode()));
                 Assert.That(link1.GetHashCode(), Is.EqualTo(link1.GetHashCode()));
-            });
+            }
             Assert.That(link1.GetHashCode(), Is.EqualTo(link1B.GetHashCode()));
         }
     }

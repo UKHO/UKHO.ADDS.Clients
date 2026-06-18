@@ -1,5 +1,4 @@
 using System.Net;
-using NUnit.Framework;
 using UKHO.ADDS.Clients.FileShareService.ReadOnly.Models;
 using UKHO.ADDS.Clients.FileShareService.ReadOnly.Tests.Helpers;
 
@@ -10,7 +9,7 @@ namespace UKHO.ADDS.Clients.FileShareService.ReadOnly.Tests
         private const string DUMMY_ACCESS_TOKEN = "ACarefullyEncodedSecretAccessToken";
         private FakeFssHttpClientFactory _fakeFssHttpClientFactory;
         private FileShareReadOnlyClient _fileShareApiClient;
-        private Uri _lastRequestUri;
+        private Uri? _lastRequestUri;
         private object _nextResponse;
         private HttpStatusCode _nextResponseStatusCode;
 
@@ -42,12 +41,12 @@ namespace UKHO.ADDS.Clients.FileShareService.ReadOnly.Tests
 
             var isSuccess = batchStatusResponse.IsSuccess(out var batchResponseData);
 
-            Assert.Multiple(() =>
+            using (Assert.EnterMultipleScope())
             {
                 Assert.That(isSuccess, Is.True);
                 Assert.That(batchResponseData!.Status, Is.EqualTo(expectedBatchStatus));
                 Assert.That(_lastRequestUri?.AbsolutePath, Is.EqualTo($"/basePath/batch/{batchId}/status"));
-            });
+            }
         }
 
         [Test]
@@ -101,11 +100,11 @@ namespace UKHO.ADDS.Clients.FileShareService.ReadOnly.Tests
             await _fileShareApiClient.GetBatchStatusAsync(batchId);
 
             Assert.That(_fakeFssHttpClientFactory.HttpClient.DefaultRequestHeaders.Authorization, Is.Not.Null);
-            Assert.Multiple(() =>
+            using (Assert.EnterMultipleScope())
             {
                 Assert.That(_fakeFssHttpClientFactory.HttpClient.DefaultRequestHeaders.Authorization.Scheme, Is.EqualTo("bearer"));
                 Assert.That(_fakeFssHttpClientFactory.HttpClient.DefaultRequestHeaders.Authorization.Parameter, Is.EqualTo(DUMMY_ACCESS_TOKEN));
-            });
+            }
         }
     }
 }

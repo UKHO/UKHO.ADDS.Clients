@@ -65,7 +65,7 @@ public class KiotaServiceCollectionExtensionsTests
         var logger = A.Fake<ILogger<ClientFactory>>();
         var sut = new ClientFactory(authProvider, httpClientFactory, logger);
 
-        var exception = Assert.Throws<InvalidOperationException>(() => sut.GetClient<InvalidKiotaClient>());
+        var exception = Assert.Throws<InvalidOperationException>((Action)(() => sut.GetClient<InvalidKiotaClient>()));
 
         Assert.That(exception!.Message, Is.EqualTo("InvalidKiotaClient must have a constructor with IRequestAdapter parameter."));
     }

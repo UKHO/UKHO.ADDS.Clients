@@ -1,5 +1,4 @@
 ﻿using System.Diagnostics.CodeAnalysis;
-using NUnit.Framework;
 using UKHO.ADDS.Clients.FileShareService.ReadOnly.Models;
 
 namespace UKHO.ADDS.Clients.FileShareService.ReadOnly.Tests.Models
@@ -15,7 +14,7 @@ namespace UKHO.ADDS.Clients.FileShareService.ReadOnly.Tests.Models
             var batchDetails1B = new BatchDetails { BatchId = batchDetails1.BatchId, BusinessUnit = "BU1", Status = BatchDetails.StatusEnum.Incomplete };
             var link2 = new BatchDetails { BatchId = batchDetails1.BatchId, BusinessUnit = "BU2", Status = BatchDetails.StatusEnum.Rolledback };
 
-            Assert.Multiple(() =>
+            using (Assert.EnterMultipleScope())
             {
                 Assert.That(emptyBatchDetails.Equals(emptyBatchDetails), Is.True);
                 Assert.That(emptyBatchDetails.Equals(batchDetails1), Is.False);
@@ -23,7 +22,7 @@ namespace UKHO.ADDS.Clients.FileShareService.ReadOnly.Tests.Models
 
                 Assert.That(batchDetails1.Equals(batchDetails1B), Is.True);
                 Assert.That(batchDetails1.Equals(link2), Is.False);
-            });
+            }
         }
 
         [Test]
@@ -34,17 +33,17 @@ namespace UKHO.ADDS.Clients.FileShareService.ReadOnly.Tests.Models
             var batchDetails1 = new BatchDetails { BatchId = Guid.NewGuid().ToString(), BusinessUnit = "BU1", Status = BatchDetails.StatusEnum.Incomplete, Attributes = new List<BatchDetailsAttributes>() };
             var batchDetails1B = new BatchDetails { BatchId = batchDetails1.BatchId, BusinessUnit = "BU1", Status = BatchDetails.StatusEnum.Incomplete, Attributes = new List<BatchDetailsAttributes>() };
 
-            Assert.Multiple(() =>
+            using (Assert.EnterMultipleScope())
             {
                 Assert.That(emptyBatchDetails.GetHashCode(), Is.Not.Zero);
                 Assert.That(batchDetails1.GetHashCode(), Is.Not.Zero);
-            });
-            Assert.Multiple(() =>
+            }
+            using (Assert.EnterMultipleScope())
             {
                 Assert.That(emptyBatchDetails.GetHashCode(), Is.EqualTo(emptyBatchDetails.GetHashCode()));
                 Assert.That(batchDetails1.GetHashCode(), Is.EqualTo(batchDetails1.GetHashCode()));
                 Assert.That(batchDetails1.GetHashCode(), Is.EqualTo(batchDetails1B.GetHashCode()));
-            });
+            }
         }
 
         [Test]

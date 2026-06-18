@@ -1,5 +1,4 @@
 ﻿using System.Diagnostics.CodeAnalysis;
-using NUnit.Framework;
 using UKHO.ADDS.Clients.FileShareService.ReadOnly.Models;
 
 namespace UKHO.ADDS.Clients.FileShareService.ReadOnly.Tests.Models
@@ -16,7 +15,7 @@ namespace UKHO.ADDS.Clients.FileShareService.ReadOnly.Tests.Models
             var batchDetailsLinks2 = new BatchDetailsAttributes("key1", "value2");
             var batchDetailsLinks3 = new BatchDetailsAttributes("key2", "value1");
 
-            Assert.Multiple(() =>
+            using (Assert.EnterMultipleScope())
             {
                 Assert.That(emptyBatchDetailsLinks.Equals(emptyBatchDetailsLinks), Is.True);
                 Assert.That(emptyBatchDetailsLinks.Equals(batchDetailsLinks1), Is.False);
@@ -25,7 +24,7 @@ namespace UKHO.ADDS.Clients.FileShareService.ReadOnly.Tests.Models
                 Assert.That(batchDetailsLinks1.Equals(batchDetailsLinks1B), Is.True);
                 Assert.That(batchDetailsLinks1.Equals(batchDetailsLinks2), Is.False);
                 Assert.That(batchDetailsLinks1.Equals(batchDetailsLinks3), Is.False);
-            });
+            }
         }
 
         [Test]
@@ -36,17 +35,17 @@ namespace UKHO.ADDS.Clients.FileShareService.ReadOnly.Tests.Models
             var batchDetailsLinks1 = new BatchDetailsAttributes("key1", "value1");
             var batchDetailsLinks1B = new BatchDetailsAttributes("key1", "value1");
 
-            Assert.Multiple(() =>
+            using (Assert.EnterMultipleScope())
             {
                 Assert.That(emptyBatchDetailsLinks.GetHashCode(), Is.Not.Zero);
                 Assert.That(batchDetailsLinks1.GetHashCode(), Is.Not.Zero);
-            });
-            Assert.Multiple(() =>
+            }
+            using (Assert.EnterMultipleScope())
             {
                 Assert.That(emptyBatchDetailsLinks.GetHashCode(), Is.EqualTo(emptyBatchDetailsLinks.GetHashCode()));
                 Assert.That(batchDetailsLinks1.GetHashCode(), Is.EqualTo(batchDetailsLinks1.GetHashCode()));
                 Assert.That(batchDetailsLinks1.GetHashCode(), Is.EqualTo(batchDetailsLinks1B.GetHashCode()));
-            });
+            }
         }
 
         [Test]

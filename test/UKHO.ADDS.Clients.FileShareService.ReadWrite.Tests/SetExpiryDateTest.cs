@@ -1,11 +1,9 @@
 ﻿using System.Net;
 using FakeItEasy;
-using NUnit.Framework;
 using UKHO.ADDS.Clients.Common.Authentication;
 using UKHO.ADDS.Clients.Common.Constants;
 using UKHO.ADDS.Clients.FileShareService.ReadWrite.Models;
 using UKHO.ADDS.Clients.FileShareService.ReadWrite.Tests.Helpers;
-using UKHO.ADDS.Infrastructure.Serialization.Json;
 
 namespace UKHO.ADDS.Clients.FileShareService.ReadWrite.Tests
 {
@@ -52,13 +50,13 @@ namespace UKHO.ADDS.Clients.FileShareService.ReadWrite.Tests
         {
             var result = await _fileShareReadWriteClient.SetExpiryDateAsync(BatchId, _batchExpiry);
 
-            Assert.Multiple(() =>
+            using (Assert.EnterMultipleScope())
             {
                 Assert.That(result.IsSuccess(out var value, out _), Is.True);
-                Assert.That(value.IsExpiryDateSet, Is.True);
+                Assert.That(value!.IsExpiryDateSet, Is.True);
                 Assert.That(_fakeFssHttpClientFactory.HttpClient.DefaultRequestHeaders.Contains(ApiHeaderKeys.XCorrelationIdHeaderKey), Is.False);
                 Assert.That(_lastRequestUri?.AbsolutePath, Is.EqualTo($"/basePath/batch/validBatchId/expiry"));
-            });
+            }
         }
 
         [TestCase(HttpStatusCode.BadRequest, "Bad request")]
@@ -69,11 +67,11 @@ namespace UKHO.ADDS.Clients.FileShareService.ReadWrite.Tests
 
             var result = await _fileShareReadWriteClient.SetExpiryDateAsync(BatchId, _batchExpiry);
 
-            Assert.Multiple(() =>
+            using (Assert.EnterMultipleScope())
             {
                 Assert.That(result.IsSuccess(out var value, out var errors), Is.False);
                 Assert.That(errors?.Message, Is.EqualTo(errorMessage));
-            });
+            }
         }
 
         [Test]
@@ -81,13 +79,13 @@ namespace UKHO.ADDS.Clients.FileShareService.ReadWrite.Tests
         {
             var result = await _fileShareReadWriteClient.SetExpiryDateAsync(BatchId, _batchExpiry, DummyCorrelationId);
 
-            Assert.Multiple(() =>
+            using (Assert.EnterMultipleScope())
             {
                 Assert.That(result.IsSuccess(out var value, out _), Is.True);
-                Assert.That(value.IsExpiryDateSet, Is.True);
+                Assert.That(value!.IsExpiryDateSet, Is.True);
                 Assert.That(_fakeFssHttpClientFactory.HttpClient.DefaultRequestHeaders.Contains(ApiHeaderKeys.XCorrelationIdHeaderKey), Is.True);
                 Assert.That(_fakeFssHttpClientFactory.HttpClient.DefaultRequestHeaders.GetValues(ApiHeaderKeys.XCorrelationIdHeaderKey), Contains.Item(DummyCorrelationId));
-            });
+            }
         }
 
         [Test]
@@ -100,22 +98,22 @@ namespace UKHO.ADDS.Clients.FileShareService.ReadWrite.Tests
 
             var result = await _fileShareReadWriteClient.SetExpiryDateAsync(BatchId, _batchExpiry);
 
-            Assert.Multiple(() =>
+            using (Assert.EnterMultipleScope())
             {
-                Assert.That(result.IsSuccess, Is.False);
+                Assert.That(result.IsSuccess(), Is.False);
                 Assert.That(result.Errors.FirstOrDefault()?.Message, Is.EqualTo(exceptionMessage));
-            });
+            }
         }
 
         [Test]
         public void WhenFileShareReadWriteClientIsConstructedWithInvalidParameters_ThenThrowsArgumentException()
         {
-            Assert.Multiple(() =>
+            using (Assert.EnterMultipleScope())
             {
-                Assert.Throws<ArgumentNullException>(() => new FileShareReadWriteClient(null, "https://valid-base-address.com", A.Fake<IAuthenticationTokenProvider>()));
-                Assert.Throws<UriFormatException>(() => new FileShareReadWriteClient(A.Fake<IHttpClientFactory>(), string.Empty, A.Fake<IAuthenticationTokenProvider>()));
-                Assert.Throws<UriFormatException>(() => new FileShareReadWriteClient(A.Fake<IHttpClientFactory>(), "invalid-uri", A.Fake<IAuthenticationTokenProvider>()));
-            });
+                Assert.Throws<ArgumentNullException>((Action)(() => new FileShareReadWriteClient(null!, "https://valid-base-address.com", A.Fake<IAuthenticationTokenProvider>())));
+                Assert.Throws<UriFormatException>((Action)(() => new FileShareReadWriteClient(A.Fake<IHttpClientFactory>(), string.Empty, A.Fake<IAuthenticationTokenProvider>())));
+                Assert.Throws<UriFormatException>((Action)(() => new FileShareReadWriteClient(A.Fake<IHttpClientFactory>(), "invalid-uri", A.Fake<IAuthenticationTokenProvider>())));
+            }
         }
 
         [TearDown]

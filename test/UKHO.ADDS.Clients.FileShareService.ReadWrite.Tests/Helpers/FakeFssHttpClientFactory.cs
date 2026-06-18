@@ -7,7 +7,7 @@ namespace UKHO.ADDS.Clients.FileShareService.ReadWrite.Tests.Helpers
     public class FakeFssHttpClientFactory : DelegatingHandler, IHttpClientFactory
     {
         private readonly Func<HttpRequestMessage, (HttpStatusCode, object)> _httpMessageHandler;
-        private HttpClient _httpClient;
+        private HttpClient _httpClient = null!  ;
 
         public FakeFssHttpClientFactory(Func<HttpRequestMessage, (HttpStatusCode, object)> httpMessageHandler) => _httpMessageHandler = httpMessageHandler;
 

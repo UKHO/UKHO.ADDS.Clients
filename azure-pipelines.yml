@@ -34,21 +34,21 @@ variables:
 - name: WindowsPool
   value: "NautilusBuild"
 - name: SdkVersion
-  value: "8.x"
+  value: "9.x"
 
 resources:
-  repositories:
-  - repository: openApiSpecSalesCatalogueServiceSharedAssets
-    type: github
-    name: UKHO/Sales-Catalogue-Service-Shared-Assets
-    ref: refs/heads/main
-    endpoint: UKHO
+  # repositories:
+  # - repository: openApiSpecSalesCatalogueServiceSharedAssets
+  #   type: github
+  #   name: UKHO/Sales-Catalogue-Service-Shared-Assets
+  #   ref: refs/heads/main
+  #   endpoint: UKHO
 
-  - repository: openApiSpecFileShareService
-    type: github
-    name: UKHO/file-share-service
-    ref: refs/heads/main
-    endpoint: UKHO
+  # - repository: openApiSpecFileShareService
+  #   type: github
+  #   name: UKHO/file-share-service
+  #   ref: refs/heads/main
+  #   endpoint: UKHO
 
 stages:
 - stage: BuildTestPublish

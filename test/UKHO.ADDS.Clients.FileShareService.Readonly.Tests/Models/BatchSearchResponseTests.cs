@@ -1,5 +1,4 @@
 ﻿using System.Diagnostics.CodeAnalysis;
-using NUnit.Framework;
 using UKHO.ADDS.Clients.FileShareService.ReadOnly.Models;
 
 namespace UKHO.ADDS.Clients.FileShareService.ReadOnly.Tests.Models
@@ -19,7 +18,7 @@ namespace UKHO.ADDS.Clients.FileShareService.ReadOnly.Tests.Models
 
             var batchSearchResponse3 = new BatchSearchResponse { Count = 2, Entries = new List<BatchDetails> { new("batch3"), new("batch2") }, Links = new Links(new Link("selfLink1")), Total = 2 };
 
-            Assert.Multiple(() =>
+            using (Assert.EnterMultipleScope())
             {
                 Assert.That(emptyBatchSearchResponse.Equals(emptyBatchSearchResponse), Is.True);
                 Assert.That(emptyBatchSearchResponse.Equals(batchSearchResponse1), Is.False);
@@ -30,7 +29,7 @@ namespace UKHO.ADDS.Clients.FileShareService.ReadOnly.Tests.Models
                 Assert.That(batchSearchResponse1.Equals(emptyBatchSearchResponse), Is.False);
                 Assert.That(batchSearchResponse1.Equals(batchSearchResponse2), Is.False);
                 Assert.That(batchSearchResponse1.Equals(batchSearchResponse3), Is.False);
-            });
+            }
         }
 
         [Test]
@@ -40,16 +39,16 @@ namespace UKHO.ADDS.Clients.FileShareService.ReadOnly.Tests.Models
             var emptyBatchSearchResponse = new BatchSearchResponse();
             var batchSearchResponse1 = new BatchSearchResponse { Count = 2, Entries = new List<BatchDetails> { new("batch1"), new("batch2") }, Links = new Links(new Link("selfLink1")), Total = 2 };
 
-            Assert.Multiple(() =>
+            using (Assert.EnterMultipleScope())
             {
                 Assert.That(emptyBatchSearchResponse.GetHashCode(), Is.Not.Zero);
                 Assert.That(batchSearchResponse1.GetHashCode(), Is.Not.Zero);
-            });
-            Assert.Multiple(() =>
+            }
+            using (Assert.EnterMultipleScope())
             {
                 Assert.That(emptyBatchSearchResponse.GetHashCode(), Is.EqualTo(emptyBatchSearchResponse.GetHashCode()));
                 Assert.That(batchSearchResponse1.GetHashCode(), Is.EqualTo(batchSearchResponse1.GetHashCode()));
-            });
+            }
         }
 
         [Test]

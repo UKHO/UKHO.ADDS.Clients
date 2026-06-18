@@ -1,13 +1,10 @@
 ﻿using System.Net;
-using System.Text;
 using FakeItEasy;
-using NUnit.Framework;
 using UKHO.ADDS.Clients.Common.Authentication;
 using UKHO.ADDS.Clients.Common.Constants;
 using UKHO.ADDS.Clients.FileShareService.ReadWrite.Models;
 using UKHO.ADDS.Clients.FileShareService.ReadWrite.Models.Response;
 using UKHO.ADDS.Clients.FileShareService.ReadWrite.Tests.Helpers;
-using UKHO.ADDS.Infrastructure.Serialization.Json;
 
 namespace UKHO.ADDS.Clients.FileShareService.ReadWrite.Tests
 {
@@ -21,8 +18,8 @@ namespace UKHO.ADDS.Clients.FileShareService.ReadWrite.Tests
 
         private FakeFssHttpClientFactory _fakeFssHttpClientFactory;
         private IBatchHandle _batchHandle;
-        private Uri _lastRequestUri;
-        private object _nextResponse;
+        private Uri? _lastRequestUri;
+        private object _nextResponse = null!;
         private HttpStatusCode _nextResponseStatusCode;
         private IAuthenticationTokenProvider _fakeAuthTokenProvider;
         private FileShareReadWriteClient _fileShareReadWriteClient;
@@ -48,50 +45,50 @@ namespace UKHO.ADDS.Clients.FileShareService.ReadWrite.Tests
         [Test]
         public void WhenHttpClientFactoryIsNull_ThenThrowsArgumentNullException()
         {
-            var exception = Assert.Throws<ArgumentNullException>(() => new FileShareReadWriteClient(null!, BaseAddress, DummyAccessToken));
+            var exception = Assert.Throws<ArgumentNullException>((Action)(() => new FileShareReadWriteClient(null!, BaseAddress, DummyAccessToken)));
 
-            Assert.Multiple(() =>
+            using (Assert.EnterMultipleScope())
             {
                 Assert.That(exception, Is.Not.Null);
                 Assert.That(exception.Message, Does.Contain("Value cannot be null. (Parameter 'httpClientFactory"));
                 Assert.That(exception.ParamName, Is.EqualTo("httpClientFactory"));
-            });
+            }
         }
 
         [Test]
         public void WhenBaseAddressIsEmpty_ThenThrowsUriFormatException()
         {
-            var exception = Assert.Throws<UriFormatException>(() => new FileShareReadWriteClient(_fakeFssHttpClientFactory, string.Empty, DummyAccessToken));
+            var exception = Assert.Throws<UriFormatException>((Action)(() => new FileShareReadWriteClient(_fakeFssHttpClientFactory, string.Empty, DummyAccessToken)));
 
-            Assert.Multiple(() =>
+            using (Assert.EnterMultipleScope())
             {
                 Assert.That(exception, Is.Not.Null);
                 Assert.That(exception.Message, Is.EqualTo("Invalid URI: The URI is empty."));
-            });
+            }
         }
 
         [Test]
         public void WhenBaseAddressIsInvalidUri_ThenThrowsUriFormatException()
         {
-            var exception = Assert.Throws<UriFormatException>(() => new FileShareReadWriteClient(_fakeFssHttpClientFactory, "invalid_uri", DummyAccessToken));
+            var exception = Assert.Throws<UriFormatException>((Action)(() => new FileShareReadWriteClient(_fakeFssHttpClientFactory, "invalid_uri", DummyAccessToken)));
 
-            Assert.Multiple(() =>
+            using (Assert.EnterMultipleScope())
             {
                 Assert.That(exception, Is.Not.Null);
                 Assert.That(exception.Message, Is.EqualTo("Invalid URI: The format of the URI could not be determined."));
-            });
+            }
         }
 
         [Test]
         public void WhenAuthTokenProviderIsNull_ThenThrowsArgumentNullException()
         {
-            var exception = Assert.Throws<ArgumentNullException>(() => new FileShareReadWriteClient(_fakeFssHttpClientFactory, BaseAddress, (IAuthenticationTokenProvider)null));
+            var exception = Assert.Throws<ArgumentNullException>((Action)(() => new FileShareReadWriteClient(_fakeFssHttpClientFactory, BaseAddress, (IAuthenticationTokenProvider)null!)));
 
-            Assert.Multiple(() =>
+            using (Assert.EnterMultipleScope())
             {
                 Assert.That(exception, Is.Not.Null);
                 Assert.That(exception.ParamName, Is.EqualTo("authTokenProvider"));
-            });
+            }
         }
 
         [Test]
@@ -107,7 +104,7 @@ namespace UKHO.ADDS.Clients.FileShareService.ReadWrite.Tests
 
             var result = await _fileShareReadWriteClient.CommitBatchAsync(_batchHandle, DummyCorrelationId, CancellationToken.None);
 
-            Assert.Multiple(() =>
+            using (Assert.EnterMultipleScope())
             {
                 Assert.That(result.IsSuccess(out var value, out _), Is.True);
                 Assert.That(value, Is.Not.Null);
@@ -116,7 +113,7 @@ namespace UKHO.ADDS.Clients.FileShareService.ReadWrite.Tests
                 Assert.That(_fakeFssHttpClientFactory.HttpClient.DefaultRequestHeaders.Contains(ApiHeaderKeys.XCorrelationIdHeaderKey), Is.True);
                 Assert.That(_fakeFssHttpClientFactory.HttpClient.DefaultRequestHeaders.GetValues(ApiHeaderKeys.XCorrelationIdHeaderKey), Contains.Item(DummyCorrelationId));
                 Assert.That(_lastRequestUri?.AbsolutePath, Is.EqualTo($"/basePath/batch/{DummyBatchId}"));
-            });
+            }
         }
 
         [Test]
@@ -132,14 +129,14 @@ namespace UKHO.ADDS.Clients.FileShareService.ReadWrite.Tests
 
             var result = await _fileShareReadWriteClient.CommitBatchAsync(_batchHandle);
 
-            Assert.Multiple(() =>
+            using (Assert.EnterMultipleScope())
             {
                 Assert.That(result.IsSuccess(out var value, out _), Is.True);
                 Assert.That(value, Is.Not.Null);
                 Assert.That(value!.Status, Is.Not.Null);
                 Assert.That(value.Status.Uri, Is.EqualTo(DummyBatchId));
                 Assert.That(_lastRequestUri?.AbsolutePath, Is.EqualTo($"/basePath/batch/{DummyBatchId}"));
-            });
+            }
         }
 
         [Test]
@@ -149,14 +146,14 @@ namespace UKHO.ADDS.Clients.FileShareService.ReadWrite.Tests
 
             var result = await _fileShareReadWriteClient.CommitBatchAsync(_batchHandle, DummyCorrelationId, CancellationToken.None);
 
-            Assert.Multiple(() =>
+            using (Assert.EnterMultipleScope())
             {
                 Assert.That(result.IsFailure);
                 Assert.That(result.Errors.FirstOrDefault()?.Message, Is.EqualTo("Bad request"));
                 Assert.That(_fakeFssHttpClientFactory.HttpClient.DefaultRequestHeaders.Contains(ApiHeaderKeys.XCorrelationIdHeaderKey), Is.True);
                 Assert.That(_fakeFssHttpClientFactory.HttpClient.DefaultRequestHeaders.GetValues(ApiHeaderKeys.XCorrelationIdHeaderKey), Contains.Item(DummyCorrelationId));
                 Assert.That(_lastRequestUri?.AbsolutePath, Is.EqualTo($"/basePath/batch/{DummyBatchId}"));
-            });
+            }
         }
 
         [Test]
@@ -166,13 +163,13 @@ namespace UKHO.ADDS.Clients.FileShareService.ReadWrite.Tests
 
             var result = await _fileShareReadWriteClient.CommitBatchAsync(_batchHandle);
 
-            Assert.Multiple(() =>
+            using (Assert.EnterMultipleScope())
             {
                 Assert.That(result.IsFailure);
                 Assert.That(result.Errors.FirstOrDefault()?.Message, Is.EqualTo("Bad request"));
                 Assert.That(_fakeFssHttpClientFactory.HttpClient.DefaultRequestHeaders.Contains(ApiHeaderKeys.XCorrelationIdHeaderKey), Is.False);
                 Assert.That(_lastRequestUri?.AbsolutePath, Is.EqualTo($"/basePath/batch/{DummyBatchId}"));
-            });
+            }
         }
 
         [Test]
@@ -184,11 +181,11 @@ namespace UKHO.ADDS.Clients.FileShareService.ReadWrite.Tests
 
             var result = await _fileShareReadWriteClient.CommitBatchAsync(_batchHandle, DummyCorrelationId, CancellationToken.None);
 
-            Assert.Multiple(() =>
+            using (Assert.EnterMultipleScope())
             {
-                Assert.That(result.IsSuccess, Is.False);
+                Assert.That(result.IsSuccess(), Is.False);
                 Assert.That(result.Errors.FirstOrDefault()?.Message, Is.EqualTo(exceptionMessage));
-            });
+            }
         }
 
         [Test]
@@ -200,11 +197,11 @@ namespace UKHO.ADDS.Clients.FileShareService.ReadWrite.Tests
 
             var result = await _fileShareReadWriteClient.CommitBatchAsync(_batchHandle);
 
-            Assert.Multiple(() =>
+            using (Assert.EnterMultipleScope())
             {
-                Assert.That(result.IsSuccess, Is.False);
+                Assert.That(result.IsSuccess(), Is.False);
                 Assert.That(result.Errors.FirstOrDefault()?.Message, Is.EqualTo(exceptionMessage));
-            });
+            }
         }
 
         [TearDown]

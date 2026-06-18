@@ -1,5 +1,4 @@
 ﻿using System.Diagnostics.CodeAnalysis;
-using NUnit.Framework;
 using UKHO.ADDS.Clients.FileShareService.ReadOnly.Models;
 
 namespace UKHO.ADDS.Clients.FileShareService.ReadOnly.Tests.Models
@@ -75,7 +74,7 @@ namespace UKHO.ADDS.Clients.FileShareService.ReadOnly.Tests.Models
                 FileSize = 123456,
                 Hash = "6EsVGA3neuA4B3aR9AWUZw=="
             };
-            Assert.Multiple(() =>
+            using (Assert.EnterMultipleScope())
             {
                 Assert.That(emptyBatchDetailsFiles.Equals(emptyBatchDetailsFiles), Is.True);
                 Assert.That(emptyBatchDetailsFiles.Equals(batchDetailsFiles1), Is.False);
@@ -89,7 +88,7 @@ namespace UKHO.ADDS.Clients.FileShareService.ReadOnly.Tests.Models
                 Assert.That(batchDetailsFiles1.Equals(batchDetailsFiles4), Is.False);
                 Assert.That(batchDetailsFiles1.Equals(batchDetailsFiles5), Is.False);
                 Assert.That(batchDetailsFiles1.Equals(batchDetailsFiles6), Is.False);
-            });
+            }
         }
 
         [Test]
@@ -114,18 +113,18 @@ namespace UKHO.ADDS.Clients.FileShareService.ReadOnly.Tests.Models
                 Hash = "XEsVGA3neuA4B3aR9AWUZw=="
             };
 
-            Assert.Multiple(() =>
+            using (Assert.EnterMultipleScope())
             {
                 Assert.That(emptyBatchDetailsFiles.GetHashCode(), Is.Not.Zero);
                 Assert.That(batchDetailsFiles1.GetHashCode(), Is.Not.Zero);
-            });
-            Assert.Multiple(() =>
+            }
+            using (Assert.EnterMultipleScope())
             {
                 Assert.That(emptyBatchDetailsFiles.GetHashCode(), Is.EqualTo(emptyBatchDetailsFiles.GetHashCode()));
                 Assert.That(batchDetailsFiles1.GetHashCode(), Is.EqualTo(batchDetailsFiles1.GetHashCode()));
                 Assert.That(batchDetailsFiles1, Is.EqualTo(batchDetailsFiles1A));
                 Assert.That(batchDetailsFiles1.GetHashCode(), Is.EqualTo(batchDetailsFiles1A.GetHashCode()));
-            });
+            }
         }
 
         [Test]

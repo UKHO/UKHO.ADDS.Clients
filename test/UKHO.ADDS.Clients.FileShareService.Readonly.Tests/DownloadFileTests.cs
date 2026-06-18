@@ -2,7 +2,6 @@ using System.Collections.Concurrent;
 using System.Net;
 using System.Text;
 using FakeItEasy;
-using NUnit.Framework;
 using UKHO.ADDS.Clients.Common.Authentication;
 using UKHO.ADDS.Clients.FileShareService.ReadOnly.Tests.Helpers;
 
@@ -13,14 +12,14 @@ namespace UKHO.ADDS.Clients.FileShareService.ReadOnly.Tests
         private const string DummyAccessToken = "ACarefullyEncodedSecretAccessToken";
         private FakeFssHttpClientFactory _fakeFssHttpClientFactory;
         private FileShareReadOnlyClient _fileShareApiClient;
-        private Uri _lastRequestUri;
+        private Uri? _lastRequestUri;
         private ConcurrentQueue<object> _nextResponses;
         private HttpStatusCode _nextResponseStatusCode;
-        private IAuthenticationTokenProvider fakeAuthProvider;
+        private IAuthenticationTokenProvider _fakeAuthProvider;
         private string _batchId;
         private byte[] _expectedBytes;
         private MemoryStream _destStream;
-        private string _fileName = "TestFile.txt";
+        private readonly string _fileName = "TestFile.txt";
 
         [OneTimeSetUp]
         public void OneTimeSetup()
@@ -35,7 +34,7 @@ namespace UKHO.ADDS.Clients.FileShareService.ReadOnly.Tests
         {
             _nextResponses = new ConcurrentQueue<object>();
             _nextResponseStatusCode = HttpStatusCode.OK;
-            fakeAuthProvider = A.Fake<IAuthenticationTokenProvider>();
+            _fakeAuthProvider = A.Fake<IAuthenticationTokenProvider>();
             _fakeFssHttpClientFactory = new FakeFssHttpClientFactory(request =>
             {
                 _lastRequestUri = request.RequestUri;
@@ -67,13 +66,14 @@ namespace UKHO.ADDS.Clients.FileShareService.ReadOnly.Tests
 
             var isSuccess = result.IsSuccess(out var batchStatusResponse);
 
-            Assert.Multiple(() =>
+            using (Assert.EnterMultipleScope())
             {
                 Assert.That(isSuccess, Is.True);
-                Assert.That(((MemoryStream)batchStatusResponse).ToArray(), Is.EqualTo(_expectedBytes));
+                Assert.That(batchStatusResponse, Is.Not.Null);
+                Assert.That(((MemoryStream)batchStatusResponse!).ToArray(), Is.EqualTo(_expectedBytes));
                 Assert.That(_lastRequestUri?.AbsolutePath,
                     Is.EqualTo($"/basePath/batch/{_batchId}/files/AFilename.txt"));
-            });
+            }
         }
 
         [Test]
@@ -141,13 +141,13 @@ namespace UKHO.ADDS.Clients.FileShareService.ReadOnly.Tests
             await _fileShareApiClient.DownloadFileAsync(_batchId, "AFilename.txt");
 
             Assert.That(_fakeFssHttpClientFactory.HttpClient.DefaultRequestHeaders.Authorization, Is.Not.Null);
-            Assert.Multiple(() =>
+            using (Assert.EnterMultipleScope())
             {
                 Assert.That(_fakeFssHttpClientFactory.HttpClient.DefaultRequestHeaders.Authorization.Scheme,
                     Is.EqualTo("bearer"));
                 Assert.That(_fakeFssHttpClientFactory.HttpClient.DefaultRequestHeaders.Authorization.Parameter,
                     Is.EqualTo(DummyAccessToken));
-            });
+            }
         }
 
         [Test]
@@ -159,12 +159,12 @@ namespace UKHO.ADDS.Clients.FileShareService.ReadOnly.Tests
             var result = await _fileShareApiClient.DownloadFileAsync(_batchId, "AFilename.txt", _destStream, correlationId,
                 _expectedBytes.Length, CancellationToken.None);
 
-            Assert.Multiple(() =>
+            using (Assert.EnterMultipleScope())
             {
-                Assert.That(result.IsSuccess, Is.True);
+                Assert.That(result.IsSuccess(), Is.True);
                 Assert.That(_lastRequestUri?.AbsolutePath,
                     Is.EqualTo($"/basePath/batch/{_batchId}/files/AFilename.txt"));
-            });
+            }
         }
 
         [Test]
@@ -176,13 +176,13 @@ namespace UKHO.ADDS.Clients.FileShareService.ReadOnly.Tests
                 _expectedBytes.Length, CancellationToken.None);
 
             Assert.That(_fakeFssHttpClientFactory.HttpClient.DefaultRequestHeaders.Authorization, Is.Not.Null);
-            Assert.Multiple(() =>
+            using (Assert.EnterMultipleScope())
             {
                 Assert.That(_fakeFssHttpClientFactory.HttpClient.DefaultRequestHeaders.Authorization.Scheme,
                     Is.EqualTo("bearer"));
                 Assert.That(_fakeFssHttpClientFactory.HttpClient.DefaultRequestHeaders.Authorization.Parameter,
                     Is.EqualTo(DummyAccessToken));
-            });
+            }
         }
 
         [Test]
@@ -193,11 +193,11 @@ namespace UKHO.ADDS.Clients.FileShareService.ReadOnly.Tests
             var result = await _fileShareApiClient.DownloadFileAsync(_batchId, "AFilename.txt", _destStream,
                 _expectedBytes.Length, CancellationToken.None);
 
-            Assert.Multiple(() =>
+            using (Assert.EnterMultipleScope())
             {
                 Assert.That(_lastRequestUri?.AbsolutePath,
                     Is.EqualTo($"/basePath/batch/{_batchId}/files/AFilename.txt"));
-            });
+            }
         }
 
         [Test]
@@ -216,12 +216,12 @@ namespace UKHO.ADDS.Clients.FileShareService.ReadOnly.Tests
 
             var result = await _fileShareApiClient.DownloadFileAsync(_batchId, "AFilename.txt", destinationStream, correlationId, totalLength, CancellationToken.None);
 
-            Assert.Multiple(() =>
+            using (Assert.EnterMultipleScope())
             {
                 Assert.That(result.IsSuccess(out var value, out _), Is.True);
                 Assert.That(destinationStream.Length, Is.EqualTo(totalLength));
                 Assert.That(_lastRequestUri?.AbsolutePath, Is.EqualTo($"/basePath/batch/{_batchId}/files/AFilename.txt"));
-            });
+            }
         }
 
         [Test]
@@ -235,12 +235,12 @@ namespace UKHO.ADDS.Clients.FileShareService.ReadOnly.Tests
             var result = await _fileShareApiClient.DownloadFileAsync(_batchId, _fileName, destStream,
                 correlationId, _expectedBytes.Length, CancellationToken.None);
 
-            Assert.Multiple(() =>
+            using (Assert.EnterMultipleScope())
             {
                 Assert.That(result.IsSuccess(out var value, out _), Is.True);
                 Assert.That(destStream.ToArray(), Is.EqualTo(_expectedBytes));
                 Assert.That(_lastRequestUri?.AbsolutePath, Is.EqualTo($"/basePath/batch/{_batchId}/files/{_fileName}"));
-            });
+            }
         }
 
         [Test]
@@ -253,11 +253,11 @@ namespace UKHO.ADDS.Clients.FileShareService.ReadOnly.Tests
             var result = await _fileShareApiClient.DownloadFileAsync(_batchId, "AFilename.txt", destStream, correlationId,
                 _expectedBytes.Length, CancellationToken.None);
 
-            Assert.Multiple(() =>
+            using (Assert.EnterMultipleScope())
             {
                 Assert.That(result.IsSuccess(out var value, out _), Is.True);
                 Assert.That(destStream.ToArray(), Is.EqualTo(_expectedBytes));
-            });
+            }
         }
 
         [Test]
@@ -265,31 +265,31 @@ namespace UKHO.ADDS.Clients.FileShareService.ReadOnly.Tests
         {
             _nextResponseStatusCode = HttpStatusCode.BadRequest;
             var client = new FileShareReadOnlyClient(_fakeFssHttpClientFactory, "https://fss-tests.net/basePath/",
-                fakeAuthProvider);
+                _fakeAuthProvider);
 
             var result =
                 await client.DownloadFileAsync(_batchId, _fileName, _destStream, 100, CancellationToken.None);
 
-            Assert.Multiple(() =>
+            using (Assert.EnterMultipleScope())
             {
                 Assert.That(result.IsSuccess(out var value, out var errors), Is.False);
                 Assert.That(errors?.Message, Is.Not.Null);
-            });
+            }
         }
 
         [Test]
         public async Task WhenExceptionIsThrownDuringDownloadFileAsync_ThenReturnsFailureResult()
         {
             _fakeFssHttpClientFactory = new FakeFssHttpClientFactory(_ => throw new HttpRequestException("Simulated exception"));
-            _fileShareApiClient = new FileShareReadOnlyClient(_fakeFssHttpClientFactory, "https://fss-tests.net/basePath/", fakeAuthProvider);
+            _fileShareApiClient = new FileShareReadOnlyClient(_fakeFssHttpClientFactory, "https://fss-tests.net/basePath/", _fakeAuthProvider);
 
             var result = await _fileShareApiClient.DownloadFileAsync(_batchId, _fileName);
 
-            Assert.Multiple(() =>
+            using (Assert.EnterMultipleScope())
             {
                 Assert.That(result.IsSuccess(out var value, out var errors), Is.False, "The result should indicate failure.");
                 Assert.That(errors?.Message, Is.EqualTo("Simulated exception"), "The error message should match the simulated exception.");
-            });
+            }
         }
 
         [Test]
@@ -302,11 +302,11 @@ namespace UKHO.ADDS.Clients.FileShareService.ReadOnly.Tests
 
             await Task.Yield();
 
-            Assert.Multiple(() =>
+            using (Assert.EnterMultipleScope())
             {
                 Assert.That(endByteLess, Is.EqualTo(fileSizeLessThanMax - 1));
                 Assert.That(endByteGreater, Is.EqualTo(maxDownloadBytes - 1));
-            });
+            }
         }
 
         [Test]
@@ -320,11 +320,11 @@ namespace UKHO.ADDS.Clients.FileShareService.ReadOnly.Tests
             _fileShareApiClient = new FileShareReadOnlyClient(_fakeFssHttpClientFactory, @"https://fss-tests.net/basePath/", DummyAccessToken);
             var result = await _fileShareApiClient.DownloadFileAsync(_batchId, _fileName, _destStream, correlationId, 100, CancellationToken.None);
 
-            Assert.Multiple(() =>
+            using (Assert.EnterMultipleScope())
             {
-                Assert.That(result.IsSuccess, Is.False);
+                Assert.That(result.IsSuccess(), Is.False);
                 Assert.That(result.Errors.FirstOrDefault()?.Message, Is.EqualTo(exceptionMessage));
-            });
+            }
         }
 
         [Test]
@@ -337,12 +337,12 @@ namespace UKHO.ADDS.Clients.FileShareService.ReadOnly.Tests
 
             var isSuccess = response.IsSuccess(out var responseData);
 
-            Assert.Multiple(() =>
+            using (Assert.EnterMultipleScope())
             {
                 Assert.That(responseData, Is.EqualTo(expectedBytes));
-                Assert.That(response.IsSuccess, Is.True);
+                Assert.That(response.IsSuccess(), Is.True);
                 Assert.That(_lastRequestUri?.AbsolutePath, Is.EqualTo($"/basePath/batch/{_batchId}/files"));
-            });
+            }
         }
 
         [Test]
@@ -352,11 +352,11 @@ namespace UKHO.ADDS.Clients.FileShareService.ReadOnly.Tests
 
             var response = await _fileShareApiClient.DownloadZipFileAsync(_batchId, CancellationToken.None);
 
-            Assert.Multiple(() =>
+            using (Assert.EnterMultipleScope())
             {
-                Assert.That(response.IsSuccess, Is.False);
+                Assert.That(response.IsSuccess(), Is.False);
                 Assert.That(_lastRequestUri?.AbsolutePath, Is.EqualTo($"/basePath/batch/{_batchId}/files"));
-            });
+            }
         }
 
         [Test]
@@ -366,11 +366,11 @@ namespace UKHO.ADDS.Clients.FileShareService.ReadOnly.Tests
 
             var response = await _fileShareApiClient.DownloadZipFileAsync(_batchId, CancellationToken.None);
 
-            Assert.Multiple(() =>
+            using (Assert.EnterMultipleScope())
             {
-                Assert.That(response.IsSuccess, Is.False);
+                Assert.That(response.IsSuccess(), Is.False);
                 Assert.That(_lastRequestUri?.AbsolutePath, Is.EqualTo($"/basePath/batch/{_batchId}/files"));
-            });
+            }
         }
 
         [Test]
@@ -380,11 +380,11 @@ namespace UKHO.ADDS.Clients.FileShareService.ReadOnly.Tests
 
             var response = await _fileShareApiClient.DownloadZipFileAsync(_batchId, CancellationToken.None);
 
-            Assert.Multiple(() =>
+            using (Assert.EnterMultipleScope())
             {
-                Assert.That(response.IsSuccess, Is.False);
+                Assert.That(response.IsSuccess(), Is.False);
                 Assert.That(_lastRequestUri?.AbsolutePath, Is.EqualTo($"/basePath/batch/{_batchId}/files"));
-            });
+            }
         }
 
         [Test]
@@ -395,13 +395,13 @@ namespace UKHO.ADDS.Clients.FileShareService.ReadOnly.Tests
             await _fileShareApiClient.DownloadZipFileAsync(_batchId, CancellationToken.None);
 
             Assert.That(_fakeFssHttpClientFactory.HttpClient.DefaultRequestHeaders.Authorization, Is.Not.Null);
-            Assert.Multiple(() =>
+            using (Assert.EnterMultipleScope())
             {
                 Assert.That(_fakeFssHttpClientFactory.HttpClient.DefaultRequestHeaders.Authorization.Scheme,
                     Is.EqualTo("bearer"));
                 Assert.That(_fakeFssHttpClientFactory.HttpClient.DefaultRequestHeaders.Authorization.Parameter,
                     Is.EqualTo(DummyAccessToken));
-            });
+            }
         }
 
         [Test]
@@ -414,11 +414,11 @@ namespace UKHO.ADDS.Clients.FileShareService.ReadOnly.Tests
             var result = await _fileShareApiClient.DownloadFileAsync(_batchId, "TestFile.txt", _destStream, correlationId,
                 _expectedBytes.Length, CancellationToken.None);
 
-            Assert.Multiple(() =>
+            using (Assert.EnterMultipleScope())
             {
-                Assert.That(result.IsSuccess, Is.True);
+                Assert.That(result.IsSuccess(), Is.True);
                 Assert.That(_destStream.ToArray(), Is.EqualTo(_expectedBytes));
-            });
+            }
         }
 
         [TearDown]

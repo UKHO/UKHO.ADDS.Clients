@@ -6,7 +6,7 @@ namespace UKHO.ADDS.Clients.PermitService.Tests.Helpers
 {
     public class FakePermitHttpClientFactory(Func<HttpRequestMessage, (HttpStatusCode, object)> httpMessageHandler) : DelegatingHandler, IHttpClientFactory
     {
-        private HttpClient _httpClient;
+        private HttpClient _httpClient = null!;
 
         public HttpClient HttpClient
         {

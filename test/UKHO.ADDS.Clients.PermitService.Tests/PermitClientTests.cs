@@ -1,7 +1,6 @@
 ﻿using System.Collections.Concurrent;
 using System.Net;
 using System.Text;
-using NUnit.Framework;
 using UKHO.ADDS.Clients.PermitService.Models;
 using UKHO.ADDS.Clients.PermitService.Tests.Helpers;
 
@@ -83,12 +82,12 @@ namespace UKHO.ADDS.Clients.PermitService.Tests
 
             var isSuccess = result.IsSuccess(out var permitResponse);
 
-            Assert.Multiple(() =>
+            using (Assert.EnterMultipleScope())
             {
                 Assert.That(isSuccess, Is.True);
                 Assert.That(permitResponse, Is.Not.Null);
                 Assert.That(permitResponse, Is.EqualTo(expectedStream));                
-            });
+            }
         }
 
         [Test]
@@ -132,12 +131,12 @@ namespace UKHO.ADDS.Clients.PermitService.Tests
             var result = await _permitApiClient.GetPermitAsync(apiVersion, productType, permitRequest, correlationId);
 
             var isSuccess = result.IsSuccess(out var value, out var error);
-            Assert.Multiple(() =>
+            using (Assert.EnterMultipleScope())
             {
                 Assert.That(isSuccess, Is.False);
                 Assert.That(value, Is.Null);
                 Assert.That(error, Is.Not.Null);
-            });
+            }
         }
 
         [Test]
@@ -180,12 +179,12 @@ namespace UKHO.ADDS.Clients.PermitService.Tests
             var result = await _permitApiClient.GetPermitAsync(apiVersion, productType, permitRequest, correlationId);
 
             Assert.That(_fakePermitHttpClientFactory.HttpClient.DefaultRequestHeaders.Authorization, Is.Not.Null);
-            Assert.Multiple(() =>
+            using (Assert.EnterMultipleScope())
             {
                 Assert.That(_fakePermitHttpClientFactory.HttpClient.DefaultRequestHeaders.Authorization.Scheme, Is.EqualTo("bearer"));
                 Assert.That(_fakePermitHttpClientFactory.HttpClient.DefaultRequestHeaders.Authorization.Parameter, Is.EqualTo(DUMMY_ACCESS_TOKEN));
                 Assert.That(_fakePermitHttpClientFactory.HttpClient.DefaultRequestHeaders.GetValues(XCorrelationIdHeaderKey).FirstOrDefault(), Is.EqualTo(correlationId));
-            });
+            }
         }
         private static string GetExpectedXmlString()
         {

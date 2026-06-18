@@ -1,5 +1,4 @@
 ﻿using System.Net;
-using NUnit.Framework;
 using UKHO.ADDS.Clients.Common.Authentication;
 using UKHO.ADDS.Clients.FileShareService.ReadOnly.Models;
 using UKHO.ADDS.Clients.FileShareService.ReadOnly.Tests.Helpers;
@@ -15,7 +14,7 @@ namespace UKHO.ADDS.Clients.FileShareService.ReadOnly.Tests
 
         private FakeFssHttpClientFactory _fakeFssHttpClientFactory;
         private FileShareReadOnlyClient _fileShareApiClient;
-        private Uri _lastRequestUri;
+        private Uri? _lastRequestUri;
         private object _nextResponse;
         private HttpStatusCode _nextResponseStatusCode;
 
@@ -39,53 +38,53 @@ namespace UKHO.ADDS.Clients.FileShareService.ReadOnly.Tests
         [Test]
         public void WhenHttpClientFactoryIsNull_ThenThrowsArgumentNullException()
         {
-            var exception = Assert.Throws<ArgumentNullException>(() =>
-                new FileShareReadOnlyClient(null, BaseAddress, DummyAccessToken));
+            var exception = Assert.Throws<ArgumentNullException>((Action)(() =>
+                new FileShareReadOnlyClient(null!, BaseAddress, DummyAccessToken)));
 
-            Assert.Multiple(() =>
+            using (Assert.EnterMultipleScope())
             {
                 Assert.That(exception, Is.Not.Null);
                 Assert.That(exception.ParamName, Is.EqualTo("httpClientFactory"));
-            });
+            }
         }
 
         [Test]
         public void WhenBaseAddressIsEmpty_ThenThrowsUriFormatException()
         {
-            var exception = Assert.Throws<UriFormatException>(() =>
-                new FileShareReadOnlyClient(_fakeFssHttpClientFactory, string.Empty, DummyAccessToken));
+            var exception = Assert.Throws<UriFormatException>((Action)(() =>
+                new FileShareReadOnlyClient(_fakeFssHttpClientFactory, string.Empty, DummyAccessToken)));
 
-            Assert.Multiple(() =>
+            using (Assert.EnterMultipleScope())
             {
                 Assert.That(exception, Is.Not.Null);
                 Assert.That(exception.Message, Is.EqualTo("Invalid URI: The URI is empty."));
-            });
+            }
         }
 
         [Test]
         public void WhenBaseAddressIsInvalidUri_ThenThrowsUriFormatException()
         {
-            var exception = Assert.Throws<UriFormatException>(() =>
-                new FileShareReadOnlyClient(_fakeFssHttpClientFactory, "invalid_uri", DummyAccessToken));
+            var exception = Assert.Throws<UriFormatException>((Action)(() =>
+                new FileShareReadOnlyClient(_fakeFssHttpClientFactory, "invalid_uri", DummyAccessToken)));
 
-            Assert.Multiple(() =>
+            using (Assert.EnterMultipleScope())
             {
                 Assert.That(exception, Is.Not.Null);
                 Assert.That(exception.Message, Is.EqualTo("Invalid URI: The format of the URI could not be determined."));
-            });
+            }
         }
 
         [Test]
         public void WhenAuthTokenProviderIsNull_ThenThrowsArgumentNullException()
         {
-            var exception = Assert.Throws<ArgumentNullException>(() =>
-                new FileShareReadOnlyClient(_fakeFssHttpClientFactory, BaseAddress, (IAuthenticationTokenProvider)null));
+            var exception = Assert.Throws<ArgumentNullException>((Action)(() =>
+                new FileShareReadOnlyClient(_fakeFssHttpClientFactory, BaseAddress, (IAuthenticationTokenProvider)null!)));
 
-            Assert.Multiple(() =>
+            using (Assert.EnterMultipleScope())
             {
                 Assert.That(exception, Is.Not.Null);
                 Assert.That(exception.ParamName, Is.EqualTo("authTokenProvider"));
-            });
+            }
         }
 
         [Test]
@@ -96,11 +95,11 @@ namespace UKHO.ADDS.Clients.FileShareService.ReadOnly.Tests
 
             var response = await _fileShareApiClient.SearchAsync("", DummyCorrelationId);
 
-            Assert.Multiple(() =>
+            using (Assert.EnterMultipleScope())
             {
                 Assert.That(_lastRequestUri?.AbsolutePath, Is.EqualTo("/basePath/batch"));
                 Assert.That(_lastRequestUri?.Query, Is.EqualTo(""), "Should be no query query string for an empty search");
-            });
+            }
 
             CheckResponseMatchesExpectedResponse(expectedResponse, response);
         }
@@ -113,11 +112,11 @@ namespace UKHO.ADDS.Clients.FileShareService.ReadOnly.Tests
 
             var response = await _fileShareApiClient.SearchAsync("$batch(key) eq 'value'", DummyCorrelationId);
 
-            Assert.Multiple(() =>
+            using (Assert.EnterMultipleScope())
             {
                 Assert.That(_lastRequestUri?.AbsolutePath, Is.EqualTo("/basePath/batch"));
                 Assert.That(_lastRequestUri?.Query, Is.EqualTo("?$filter=$batch(key)%20eq%20%27value%27"));
-            });
+            }
 
             CheckResponseMatchesExpectedResponse(expectedResponse, response);
         }
@@ -130,11 +129,11 @@ namespace UKHO.ADDS.Clients.FileShareService.ReadOnly.Tests
 
             var response = await _fileShareApiClient.SearchAsync("$batch(key) eq 'value'", 50, DummyCorrelationId);
 
-            Assert.Multiple(() =>
+            using (Assert.EnterMultipleScope())
             {
                 Assert.That(_lastRequestUri?.AbsolutePath, Is.EqualTo("/basePath/batch"));
                 Assert.That(_lastRequestUri?.Query, Is.EqualTo("?$filter=$batch(key)%20eq%20%27value%27&limit=50"));
-            });
+            }
 
             CheckResponseMatchesExpectedResponse(expectedResponse, response);
         }
@@ -147,11 +146,11 @@ namespace UKHO.ADDS.Clients.FileShareService.ReadOnly.Tests
 
             var response = await _fileShareApiClient.SearchAsync("$batch(key) eq 'value'", null, 20, DummyCorrelationId);
 
-            Assert.Multiple(() =>
+            using (Assert.EnterMultipleScope())
             {
                 Assert.That(_lastRequestUri?.AbsolutePath, Is.EqualTo("/basePath/batch"));
                 Assert.That(_lastRequestUri?.Query, Is.EqualTo("?$filter=$batch(key)%20eq%20%27value%27&start=20"));
-            });
+            }
 
             CheckResponseMatchesExpectedResponse(expectedResponse, response);
         }
@@ -164,11 +163,11 @@ namespace UKHO.ADDS.Clients.FileShareService.ReadOnly.Tests
 
             var response = await _fileShareApiClient.SearchAsync("$batch(key) eq 'value'", 10, 20, DummyCorrelationId);
 
-            Assert.Multiple(() =>
+            using (Assert.EnterMultipleScope())
             {
                 Assert.That(_lastRequestUri?.AbsolutePath, Is.EqualTo("/basePath/batch"));
                 Assert.That(_lastRequestUri?.Query, Is.EqualTo("?$filter=$batch(key)%20eq%20%27value%27&limit=10&start=20"));
-            });
+            }
 
             CheckResponseMatchesExpectedResponse(expectedResponse, response);
         }
@@ -177,7 +176,7 @@ namespace UKHO.ADDS.Clients.FileShareService.ReadOnly.Tests
         [TestCase(0)]
         public void WhenSearchWithInvalidPageSize_ThenThrowsArgumentException(int pageSize)
         {
-            var exception = Assert.ThrowsAsync<ArgumentException>(async () => await _fileShareApiClient.SearchAsync("$batch(key) eq 'value'", pageSize, 20, DummyCorrelationId));
+            var exception = Assert.ThrowsAsync<ArgumentException>((Func<Task>)(async () => await _fileShareApiClient.SearchAsync("$batch(key) eq 'value'", pageSize, 20, DummyCorrelationId)));
 
             Assert.That(exception.Message, Is.EqualTo("Page size must be greater than zero. (Parameter 'pageSize')"));
             Assert.That(exception.ParamName, Is.EqualTo("pageSize"));
@@ -187,7 +186,7 @@ namespace UKHO.ADDS.Clients.FileShareService.ReadOnly.Tests
         [TestCase(-10)]
         public void WhenSearchWithInvalidPageStart_ThenThrowsArgumentException(int start)
         {
-            var exception = Assert.ThrowsAsync<ArgumentException>(async () => await _fileShareApiClient.SearchAsync("$batch(key) eq 'value'", 10, start, DummyCorrelationId));
+            var exception = Assert.ThrowsAsync<ArgumentException>((Func<Task>)(async () => await _fileShareApiClient.SearchAsync("$batch(key) eq 'value'", 10, start, DummyCorrelationId)));
 
             Assert.That(exception.ParamName, Is.EqualTo("start"));
             Assert.That(exception.Message, Is.EqualTo("Start cannot be less than zero. (Parameter 'start')"));
@@ -201,11 +200,11 @@ namespace UKHO.ADDS.Clients.FileShareService.ReadOnly.Tests
 
             var response = await _fileShareApiClient.SearchAsync("$batch(key) eq 'value'", DummyCorrelationId);
 
-            Assert.Multiple(() =>
+            using (Assert.EnterMultipleScope())
             {
                 Assert.That(_lastRequestUri?.AbsolutePath, Is.EqualTo("/basePath/batch"));
                 Assert.That(_lastRequestUri?.Query, Is.EqualTo("?$filter=$batch(key)%20eq%20%27value%27"));
-            });
+            }
 
             CheckResponseMatchesExpectedResponse(expectedResponse, response);
         }
@@ -218,13 +217,13 @@ namespace UKHO.ADDS.Clients.FileShareService.ReadOnly.Tests
             await _fileShareApiClient.SearchAsync("", DummyCorrelationId);
 
             Assert.That(_fakeFssHttpClientFactory.HttpClient.DefaultRequestHeaders.Authorization, Is.Not.Null);
-            Assert.Multiple(() =>
+            using (Assert.EnterMultipleScope())
             {
                 Assert.That(_fakeFssHttpClientFactory.HttpClient.DefaultRequestHeaders.Authorization.Scheme, Is.EqualTo("bearer"));
                 Assert.That(_fakeFssHttpClientFactory.HttpClient.DefaultRequestHeaders.Authorization.Parameter, Is.EqualTo(DummyAccessToken));
                 Assert.That(_fakeFssHttpClientFactory.HttpClient.DefaultRequestHeaders.Contains("X-Correlation-ID"), Is.True);
                 Assert.That(_fakeFssHttpClientFactory.HttpClient.DefaultRequestHeaders.GetValues("X-Correlation-ID"), Contains.Item(DummyCorrelationId));
-            });
+            }
         }
 
         [Test]
@@ -235,12 +234,12 @@ namespace UKHO.ADDS.Clients.FileShareService.ReadOnly.Tests
 
             var response = await _fileShareApiClient.SearchAsync("", null, null, DummyCorrelationId, CancellationToken.None);
 
-            Assert.Multiple(() =>
+            using (Assert.EnterMultipleScope())
             {
                 Assert.That(_lastRequestUri?.AbsolutePath, Is.EqualTo("/basePath/batch"));
                 Assert.That(_lastRequestUri?.Query, Is.EqualTo(""), "Should be no query query string for an empty search");
-                Assert.That(response.IsSuccess, Is.True);
-            });
+                Assert.That(response.IsSuccess(), Is.True);
+            }
 
             CheckResponseMatchesExpectedResponse(expectedResponse, response);
         }
@@ -253,12 +252,12 @@ namespace UKHO.ADDS.Clients.FileShareService.ReadOnly.Tests
 
             var response = await _fileShareApiClient.SearchAsync("$batch(key) eq 'value'", null, null, DummyCorrelationId, CancellationToken.None);
 
-            Assert.Multiple(() =>
+            using (Assert.EnterMultipleScope())
             {
                 Assert.That(_lastRequestUri?.AbsolutePath, Is.EqualTo("/basePath/batch"));
                 Assert.That(_lastRequestUri?.Query, Is.EqualTo("?$filter=$batch(key)%20eq%20%27value%27"));
-                Assert.That(response.IsSuccess, Is.True);
-            });
+                Assert.That(response.IsSuccess(), Is.True);
+            }
 
             CheckResponseMatchesExpectedResponse(expectedResponse, response);
         }
@@ -271,12 +270,12 @@ namespace UKHO.ADDS.Clients.FileShareService.ReadOnly.Tests
 
             var response = await _fileShareApiClient.SearchAsync("$batch(key) eq 'value'", 50, null, DummyCorrelationId, CancellationToken.None);
 
-            Assert.Multiple(() =>
+            using (Assert.EnterMultipleScope())
             {
                 Assert.That(_lastRequestUri?.AbsolutePath, Is.EqualTo("/basePath/batch"));
                 Assert.That(_lastRequestUri?.Query, Is.EqualTo("?$filter=$batch(key)%20eq%20%27value%27&limit=50"));
-                Assert.That(response.IsSuccess, Is.True);
-            });
+                Assert.That(response.IsSuccess(), Is.True);
+            }
 
             CheckResponseMatchesExpectedResponse(expectedResponse, response);
         }
@@ -289,12 +288,12 @@ namespace UKHO.ADDS.Clients.FileShareService.ReadOnly.Tests
 
             var response = await _fileShareApiClient.SearchAsync("$batch(key) eq 'value'", null, 20, DummyCorrelationId, CancellationToken.None);
 
-            Assert.Multiple(() =>
+            using (Assert.EnterMultipleScope())
             {
                 Assert.That(_lastRequestUri?.AbsolutePath, Is.EqualTo("/basePath/batch"));
                 Assert.That(_lastRequestUri?.Query, Is.EqualTo("?$filter=$batch(key)%20eq%20%27value%27&start=20"));
-                Assert.That(response.IsSuccess, Is.True);
-            });
+                Assert.That(response.IsSuccess(), Is.True);
+            }
 
             CheckResponseMatchesExpectedResponse(expectedResponse, response);
         }
@@ -303,7 +302,7 @@ namespace UKHO.ADDS.Clients.FileShareService.ReadOnly.Tests
         [TestCase(0)]
         public void WhenSearchWithInvalidPageSize_ThenThrowsArgumentExceptionAndCancellation(int pageSize)
         {
-            var exception = Assert.ThrowsAsync<ArgumentException>(async () => await _fileShareApiClient.SearchAsync("$batch(key) eq 'value'", pageSize, 20, DummyCorrelationId, CancellationToken.None));
+            var exception = Assert.ThrowsAsync<ArgumentException>((Func<Task>)(async () => await _fileShareApiClient.SearchAsync("$batch(key) eq 'value'", pageSize, 20, DummyCorrelationId, CancellationToken.None)));
 
             Assert.That(exception.Message, Is.EqualTo("Page size must be greater than zero. (Parameter 'pageSize')"));
             Assert.That(exception.ParamName, Is.EqualTo("pageSize"));
@@ -312,7 +311,7 @@ namespace UKHO.ADDS.Clients.FileShareService.ReadOnly.Tests
         [Test]
         public void WhenSearchWithInvalidPageStart_ThenThrowsArgumentExceptionAndCancellation()
         {
-            var exception = Assert.ThrowsAsync<ArgumentException>(async () => await _fileShareApiClient.SearchAsync("$batch(key) eq 'value'", -10, 20, DummyCorrelationId, CancellationToken.None));
+            var exception = Assert.ThrowsAsync<ArgumentException>((Func<Task>)(async () => await _fileShareApiClient.SearchAsync("$batch(key) eq 'value'", -10, 20, DummyCorrelationId, CancellationToken.None)));
 
             Assert.That(exception.Message, Is.EqualTo("Page size must be greater than zero. (Parameter 'pageSize')"));
             Assert.That(exception.ParamName, Is.EqualTo("pageSize"));
@@ -326,12 +325,12 @@ namespace UKHO.ADDS.Clients.FileShareService.ReadOnly.Tests
 
             var response = await _fileShareApiClient.SearchAsync("$batch(key) eq 'value'", null, null, DummyCorrelationId, CancellationToken.None);
 
-            Assert.Multiple(() =>
+            using (Assert.EnterMultipleScope())
             {
                 Assert.That(_lastRequestUri?.AbsolutePath, Is.EqualTo("/basePath/batch"));
                 Assert.That(_lastRequestUri?.Query, Is.EqualTo("?$filter=$batch(key)%20eq%20%27value%27"));
-                Assert.That(response.IsSuccess, Is.True);
-            });
+                Assert.That(response.IsSuccess(), Is.True);
+            }
 
             CheckResponseMatchesExpectedResponse(expectedResponse, response);
         }
@@ -344,11 +343,11 @@ namespace UKHO.ADDS.Clients.FileShareService.ReadOnly.Tests
             await _fileShareApiClient.SearchAsync("", null, null, DummyCorrelationId, CancellationToken.None);
 
             Assert.That(_fakeFssHttpClientFactory.HttpClient.DefaultRequestHeaders.Authorization, Is.Not.Null);
-            Assert.Multiple(() =>
+            using (Assert.EnterMultipleScope())
             {
                 Assert.That(_fakeFssHttpClientFactory.HttpClient.DefaultRequestHeaders.Authorization.Scheme, Is.EqualTo("bearer"));
                 Assert.That(_fakeFssHttpClientFactory.HttpClient.DefaultRequestHeaders.Authorization.Parameter, Is.EqualTo(DummyAccessToken));
-            });
+            }
         }
 
         [Test]
@@ -358,12 +357,12 @@ namespace UKHO.ADDS.Clients.FileShareService.ReadOnly.Tests
 
             var response = await _fileShareApiClient.SearchAsync("$batch(key) eq 'value'", null, null, DummyCorrelationId, CancellationToken.None);
 
-            Assert.Multiple(() =>
+            using (Assert.EnterMultipleScope())
             {
                 Assert.That(_lastRequestUri?.AbsolutePath, Is.EqualTo("/basePath/batch"));
                 Assert.That(_lastRequestUri?.Query, Is.EqualTo("?$filter=$batch(key)%20eq%20%27value%27"));
-                Assert.That(response.IsSuccess, Is.False);
-            });
+                Assert.That(response.IsSuccess(), Is.False);
+            }
         }
 
         [Test]
@@ -373,12 +372,12 @@ namespace UKHO.ADDS.Clients.FileShareService.ReadOnly.Tests
 
             var response = await _fileShareApiClient.SearchAsync("$batch(key) eq 'value'", null, null, DummyCorrelationId, CancellationToken.None);
 
-            Assert.Multiple(() =>
+            using (Assert.EnterMultipleScope())
             {
                 Assert.That(_lastRequestUri?.AbsolutePath, Is.EqualTo("/basePath/batch"));
                 Assert.That(_lastRequestUri?.Query, Is.EqualTo("?$filter=$batch(key)%20eq%20%27value%27"));
-                Assert.That(response.IsSuccess, Is.False);
-            });
+                Assert.That(response.IsSuccess(), Is.False);
+            }
         }
 
         [Test]
@@ -389,12 +388,12 @@ namespace UKHO.ADDS.Clients.FileShareService.ReadOnly.Tests
 
             var response = await _fileShareApiClient.SearchAsync("$batch(key) eq 'value'", null, null, CancellationToken.None);
 
-            Assert.Multiple(() =>
+            using (Assert.EnterMultipleScope())
             {
                 Assert.That(_lastRequestUri?.AbsolutePath, Is.EqualTo("/basePath/batch"));
                 Assert.That(_lastRequestUri?.Query, Is.EqualTo("?$filter=$batch(key)%20eq%20%27value%27"));
-                Assert.That(response.IsSuccess, Is.True);
-            });
+                Assert.That(response.IsSuccess(), Is.True);
+            }
 
             CheckResponseMatchesExpectedResponse(expectedResponse, response);
         }
@@ -405,13 +404,12 @@ namespace UKHO.ADDS.Clients.FileShareService.ReadOnly.Tests
             var isSuccess = response.IsSuccess(out var responseValue);
 
             Assert.That(responseValue?.Count, Is.EqualTo(expectedResponse.Count));
-            Assert.Multiple(() =>
+            using (Assert.EnterMultipleScope())
             {
                 Assert.That(responseValue.Total, Is.EqualTo(expectedResponse.Total));
                 Assert.That(responseValue.Links, Is.EqualTo(expectedResponse.Links));
                 Assert.That(responseValue.Entries, Is.EqualTo(expectedResponse.Entries));
-            });
+            }
         }
-
     }
 }

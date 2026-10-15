@@ -28,13 +28,13 @@ variables:
 - name: UKHOAssemblyCompany
   value: "UK Hydrographic Office"
 - name: UKHOAssemblyVersionPrefix
-  value: "1.0."
+  value: "1.1."
 - name: UKHOAssemblyProduct
   value: "ADDS Shared Clients"
 - name: WindowsPool
   value: "NautilusBuild"
 - name: SdkVersion
-  value: "8.x"
+  value: "10.x"
 
 resources:
   repositories:
